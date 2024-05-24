@@ -12,6 +12,7 @@ import torch.utils
 import torch.nn.functional as F
 import torchvision.datasets as dset
 import torch.backends.cudnn as cudnn
+import wandb
 
 from torch.autograd import Variable
 from darts.model_search import Network
@@ -72,6 +73,16 @@ fh = logging.FileHandler(os.path.join(args.save, 'log.txt'))
 fh.setFormatter(logging.Formatter(log_format))
 logging.getLogger().addHandler(fh)
 
+wandb.init(
+    # team name
+    #entity='ai-tech-lab',
+    # set the wandb project where this run will be logged
+    project=f"FlatDARTS-{args.dataset}-nasbench{args.nasbench}",
+    name=f"SAM-{args.sam}_B-{args.betadecay}_UNROLL-{args.unrolled}",
+    # track hyperparameters and run metadata
+    config={**vars(args)},
+)
+
 #CIFAR_CLASSES = 10
 if args.dataset == 'cifar100':
     n_classes = 100
@@ -91,7 +102,7 @@ def main():
   torch.cuda.manual_seed(args.seed)
   logging.info('gpu device = %d' % args.gpu)
   logging.info("args = %s", args)
-
+  
   criterion = nn.CrossEntropyLoss()
   criterion = criterion.cuda()
 
@@ -168,6 +179,12 @@ def main():
     # validation
     valid_acc, valid_obj = infer(valid_queue, model, criterion)
     logging.info('valid_acc %f, val_loss %f', valid_acc, valid_obj)
+
+    wandb.log({"metrics/train_acc": train_acc, 
+               "metrics/val_acc": valid_acc,
+               "metrics/train_loss": train_obj,
+               "metrics/val_loss": valid_obj})
+
     scheduler.step()
 
     if valid_obj < best_loss:
