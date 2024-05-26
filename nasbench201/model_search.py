@@ -35,9 +35,9 @@ class NASBench201Cell(nn.Module):
         for i in range(self.NUM_NODES):
             for j in range(i):
                 if j==0:
-                    op = MixedOp(C_in, C_out, stride, bn_affine, track_running_stats)
-                else:
                     op = MixedOp(C_in, C_out, 1, bn_affine, track_running_stats)
+                else:
+                    op = MixedOp(C_in, C_out, stride, bn_affine, track_running_stats)
                 self._ops.append(op)
 
     def forward(self, input, weights): 

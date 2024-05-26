@@ -1,5 +1,6 @@
 import argparse
-from nasbenchnet import NASBenchNet
+from nasbench201.model import NASBenchNet
+from nasbench201.nasbench201 import NASBench201
 import torch
 
 import sys
@@ -104,7 +105,9 @@ if __name__ == "__main__":
     logging.info("Model: %s", args.model)
 
     cell_encode = load_array_from_file(os.path.join(args.output_path,'best_genotype.txt'))
-    print("Cell encode: ", cell_encode)
+    #bench = NASBench201('cifar10')
+    #cell_encode = bench.encode({'arch': '|nor_conv_3x3~0|+|nor_conv_3x3~0|nor_conv_3x3~1|+|skip_connect~0|nor_conv_3x3~1|nor_conv_1x1~2|'})
+    #print("Cell encode: ", cell_encode)
     model = NASBenchNet(cell_encode=cell_encode, C=16, num_classes=10, stages=3, cells=5, steps=4)
     res=32
 

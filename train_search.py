@@ -138,10 +138,12 @@ def main():
 
   architect = Architect(model, args)
 
+  '''
   best_loss= float('inf')
   best_epoch=0
   best_acc=0
   best_genotype=None
+  '''
 
   for epoch in range(args.epochs):
     #lr = scheduler.get_lr()[0]
@@ -170,21 +172,25 @@ def main():
     logging.info('valid_acc %f, val_loss %f', valid_acc, valid_obj)
     scheduler.step()
 
+    '''
     if valid_obj < best_loss:
       logging.info('Best model found at epoch %d', epoch)
       best_loss = valid_obj
       best_epoch = epoch
       best_acc = valid_acc
       best_genotype = genotype
-      utils.save(model, os.path.join(args.save, 'weights.pt'))
+    '''
+      
+      
+  utils.save(model, os.path.join(args.save, 'weights.pt'))
   
   # Info about best searched model
 
-  logging.info('Best model found at epoch %d', best_epoch) 
-  logging.info('Best genotype: %s', best_genotype)
-  logging.info('Best validation loss: %f', best_loss)
-  logging.info('Best validation accuracy: %f', best_acc)
-  cell_encode = translate_genotype_to_encode(best_genotype)
+  logging.info('Best model found at epoch %d', epoch) 
+  logging.info('Best genotype: %s', genotype)
+  logging.info('Best validation loss: %f', valid_obj)
+  logging.info('Best validation accuracy: %f', valid_acc)
+  cell_encode = translate_genotype_to_encode(genotype)
   write_array_to_file(cell_encode, os.path.join(args.save, 'best_genotype.txt'))
 
 

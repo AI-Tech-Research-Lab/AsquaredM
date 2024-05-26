@@ -107,7 +107,7 @@ class Architect(object):
 
         # Compute expression (7) from paper
         for g, ig in zip(dalpha, implicit_grads):
-            g.data.sub_(eta, ig.data)
+            g.data.sub_(ig.data, alpha=eta)
 
         for v, g in zip(self.model.arch_parameters(), dalpha):
             if v.grad is None:
@@ -133,17 +133,17 @@ class Architect(object):
     def _hessian_vector_product(self, vector, input, target, r=1e-2):
         R = r / _concat(vector).norm()
         for p, v in zip(self.model.parameters(), vector):
-            p.data.add_(R, v)
+            p.data.add_(v, alpha=R)
         loss = self._train_loss(self.model, input=input, target=target)
         grads_p = torch.autograd.grad(loss, self.model.arch_parameters())
 
         for p, v in zip(self.model.parameters(), vector):
-            p.data.sub_(2 * R, v)
+            p.data.sub_(v, alpha=2*R)
         loss = self._train_loss(self.model, input=input, target=target)
         grads_n = torch.autograd.grad(loss, self.model.arch_parameters())
 
         for p, v in zip(self.model.parameters(), vector):
-            p.data.add_(R, v)
+            p.data.add_(v,alpha=R)
 
         return [(x - y).div_(2 * R) for x, y in zip(grads_p, grads_n)]
     

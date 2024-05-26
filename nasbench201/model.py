@@ -62,9 +62,9 @@ class NASBench201Cell(nn.Module):
 
         name_op = BENCH_PRIMITIVES[op_idx]
         if layer_idx==0:
-            op = OPS[name_op](self.C_in, self.C_out, self.stride, self.bn_affine, self.bn_track_running_stats)
-        else:
             op = OPS[name_op](self.C_in, self.C_out, 1, self.bn_affine, self.bn_track_running_stats)
+        else:
+            op = OPS[name_op](self.C_in, self.C_out, self.stride, self.bn_affine, self.bn_track_running_stats)
         return op
     
     def forward(self, input): 
