@@ -16,7 +16,7 @@ import torch.backends.cudnn as cudnn
 from torch.autograd import Variable
 from darts.model_search import Network
 from nasbench201.model_search import BenchNetwork
-from nasbench201.nasbench201 import NASBench201
+#from nasbench201.nasbench201 import NASBench201
 from architect import Architect
 from utils import get_data_loaders
 from genotypes import BENCH_PRIMITIVES
@@ -185,6 +185,7 @@ def main():
     '''
       
     #info nasbench
+    '''
     if args.nasbench:
         bench = NASBench201(dataset=args.dataset)
         cell_encode = translate_genotype_to_encode(genotype)
@@ -192,8 +193,8 @@ def main():
         info = bench.get_info_from_arch(decode)
         results = {'val-acc': info['val-acc'], 'test-acc': info['test-acc'], 'flops': info['flops'], 'params': info['params']}
         logging.info('nasbench info: %s', results)
+    '''
 
-      
   utils.save(model, os.path.join(args.save, 'weights.pt'))
   
   # Info about best searched model
