@@ -16,6 +16,7 @@ import torch.backends.cudnn as cudnn
 from torch.autograd import Variable
 from darts.model_search import Network
 from nasbench201.model_search import BenchNetwork
+from nasbench201.nasbench201 import NASBench201
 from architect import Architect
 from utils import get_data_loaders
 from genotypes import BENCH_PRIMITIVES
@@ -61,6 +62,8 @@ parser.add_argument('--betadecay', action='store_true', default=False, help='use
 parser.add_argument('--sam', action='store_true', default=False, help='use sam update rule')
 parser.add_argument('--arch_learning_rate', type=float, default=3e-4, help='learning rate for arch encoding')
 parser.add_argument('--arch_weight_decay', type=float, default=1e-3, help='weight decay for arch encoding')
+parser.add_argument('--rho_alpha_sam', type=float, default=1e-2, help='rho alpha for SAM update')
+parser.add_argument('--epsilon_sam', type=float, default=1e-2, help='epsilon for SAM update')
 args = parser.parse_args()
 
 utils.create_exp_dir(args.save, scripts_to_save=glob.glob('*.py'))
@@ -181,12 +184,21 @@ def main():
       best_genotype = genotype
     '''
       
+    #info nasbench
+    if args.nasbench:
+        bench = NASBench201(dataset=args.dataset)
+        cell_encode = translate_genotype_to_encode(genotype)
+        decode = bench.decode(cell_encode)
+        info = bench.get_info_from_arch(decode)
+        results = {'val-acc': info['val-acc'], 'test-acc': info['test-acc'], 'flops': info['flops'], 'params': info['params']}
+        logging.info('nasbench info: %s', results)
+
       
   utils.save(model, os.path.join(args.save, 'weights.pt'))
   
   # Info about best searched model
 
-  logging.info('Best model found at epoch %d', epoch) 
+  logging.info('Best model found', epoch) 
   logging.info('Best genotype: %s', genotype)
   logging.info('Best validation loss: %f', valid_obj)
   logging.info('Best validation accuracy: %f', valid_acc)

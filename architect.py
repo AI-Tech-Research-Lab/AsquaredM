@@ -19,8 +19,10 @@ class Architect(object):
                                           lr=args.arch_learning_rate, betas=(0.5, 0.999),
                                           weight_decay=args.arch_weight_decay)
 
-        self.rho_alpha=1e-2
-        self.epsilon=1e-2
+        self.rho_alpha=args.rho_alpha_sam
+        self.epsilon=args.epsilon_sam
+
+        print("Rho_alpha: ", self.rho_alpha)
 
     def _train_loss(self, model, input, target):
         return model._loss(input, target)

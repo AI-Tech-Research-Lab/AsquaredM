@@ -111,8 +111,8 @@ if __name__ == "__main__":
     model = NASBenchNet(cell_encode=cell_encode, C=16, num_classes=10, stages=3, cells=5, steps=4)
     res=32
 
-    logging.info(f"DATASET: {args.dataset}")
-    logging.info("Resolution: %s", res)
+    logging.info("Train config")
+    logging.info(args)
     train_loader, val_loader, test_loader = get_data_loaders(dataset=args.dataset, batch_size=args.batch_size, threads=args.n_workers, 
                                             val_split=args.val_split, img_size=res, augmentation=True, eval_test=args.eval_test)
     
