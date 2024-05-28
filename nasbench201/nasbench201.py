@@ -158,12 +158,6 @@ class NASBench201(): #NASBench201 dataset
         info['top1']=np.round(100 - self.archive['val-acc'][val_dataset][idx],3) # top1 error
         return info
 
-# return the best test-acc on cifar-10
-bench = NASBench201(dataset='cifar10')
-encode=2,2,2,0,0,2
-decode = bench.decode(encode)
-print(decode)
-print(bench.get_info_from_arch(decode))
 
 
 
