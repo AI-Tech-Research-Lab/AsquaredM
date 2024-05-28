@@ -11,7 +11,7 @@ import logging
 
 sys.path.append(os.getcwd())
  
-from train_utils import get_optimizer, get_loss, get_lr_scheduler, get_data_loaders, load_checkpoint, validate, initialize_seed, \
+from train_utils import get_dataset, get_optimizer, get_loss, get_lr_scheduler, get_data_loaders, load_checkpoint, validate, initialize_seed, \
                         Log, train, get_net_info
 from perturb import get_net_info_runtime
 
@@ -40,6 +40,9 @@ if __name__ == "__main__":
     parser.add_argument("--weight_decay", default=5e-5, type=float, help="L2 weight decay.") 
     parser.add_argument("--val_split", default=0.0, type=float, help='percentage of train set for validation')
     parser.add_argument("--balanced_val", action='store_true', default=False, help='balance samples per classes in training set')
+    parser.add_argument('--cutout', action='store_true', default=False, help='use cutout')
+    parser.add_argument('--cutout_length', type=int, default=16, help='cutout length')
+    parser.add_argument('--cutout_prob', type=float, default=1.0, help='cutout probability')
     parser.add_argument('--save', action='store_true', default=False, help='save log of experiments')
     parser.add_argument('--save_ckpt', action='store_true', default=False, help='save checkpoint')
     parser.add_argument('--optim', type=str, default='SAM', help='algorithm to use for training')
@@ -115,12 +118,17 @@ if __name__ == "__main__":
 
     logging.info("Train config")
     logging.info(args)
+
+    '''
     train_loader, val_loader, test_loader = get_data_loaders(dataset=args.dataset, batch_size=args.batch_size, threads=args.n_workers, 
                                             val_split=args.val_split, balanced_val=args.balanced_val,
                                             img_size=res, augmentation=True, eval_test=args.eval_test)
     
     if val_loader is None:
         val_loader = test_loader
+    '''
+    train_set, val_set, test_set, _, _ = get_dataset(name=args.dataset, val_split=args.val_split, augmentation=True, cutout=args.cutout, balanced_val=args.balanced_val)
+    train_loader, val_loader, test_loader = get_data_loaders(train_set, val_set, test_set, batch_size=args.batch_size, threads=args.n_workers, eval_test=True)
 
     log = Log(log_each=10)
 
@@ -136,18 +144,21 @@ if __name__ == "__main__":
     if (os.path.exists(os.path.join(args.output_path,'ckpt.pth'))):
         model, optimizer = load_checkpoint(model, optimizer, os.path.join(args.output_path,'ckpt.pth'))
         logging.info("Loaded checkpoint")
-        top1 = validate(val_loader, model, device, print_freq=100)/100
+        #top1 = validate(val_loader, model, device, print_freq=100)/100
     else:
         logging.info("Start training...")
         top1, model, optimizer = train(train_loader, val_loader, epochs, model, device, optimizer, criterion, scheduler, log, ckpt_path=os.path.join(args.output_path,'ckpt.pth'))
         logging.info("Training finished")
 
     results={}
-    logging.info(f"VAL ACCURACY: {np.round(top1*100,2)}")
+
+    if val_loader:
+        top1 = validate(val_loader, model, device, print_freq=100)/100
+        logging.info(f"VAL ACCURACY: {np.round(top1*100,2)}")
+
+    top1 = validate(test_loader, model, device, print_freq=100)
+    logging.info(f"TEST ACCURACY: {top1}")
     top1_err = (1 - top1) * 100
-    if args.eval_test:
-        top1_test = validate(test_loader, model, device, print_freq=100)
-        logging.info(f"TEST ACCURACY: {top1_test}")
 
     input_shape = (3, res, res)
     #Model cost
@@ -168,7 +179,7 @@ if __name__ == "__main__":
 
     info = get_net_info(model, input_shape=input_shape, print_info=True)
 
-    results['top1'] = np.round(top1_err,2)
+    #results['top1'] = np.round(top1_err,2)
     results['macs'] = info['macs']
     results['activations'] = info['activations']
     results['params'] = info['params']

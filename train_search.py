@@ -19,7 +19,7 @@ from darts.model_search import Network
 from nasbench201.model_search import BenchNetwork
 from nasbench201.nasbench201 import NASBench201
 from architect import Architect
-from utils import get_data_loaders
+from train_utils import get_dataset, get_data_loaders
 from genotypes import BENCH_PRIMITIVES
 import wandb
 
@@ -127,10 +127,8 @@ def main():
       weight_decay=args.weight_decay,
       nesterov=args.nesterov)
   
-  res=32
-  
-  train_queue, valid_queue, test_queue = get_data_loaders(dataset='cifar10', batch_size=args.batch_size, threads=args.workers, 
-                                            val_split=args.train_portion, img_size=res, augmentation=True, eval_test=True)
+  train_set, val_set, test_set, _, _ = get_dataset(name=args.dataset, val_split=args.train_portion, augmentation=True, cutout=args.cutout, balanced_val=False)
+  train_queue, valid_queue, test_queue = get_data_loaders(train_set, val_set, test_set, batch_size=args.batch_size, threads=args.workers, eval_test=False)
 
   scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
         optimizer, float(args.epochs), eta_min=args.learning_rate_min)
@@ -161,15 +159,14 @@ def main():
   '''
 
   for epoch in range(args.epochs):
-    #lr = scheduler.get_lr()[0]
     lr = scheduler.get_last_lr()[0]
     logging.info('epoch %d lr %e', epoch, lr)
 
     if args.cutout:
         # increase the cutout probability linearly throughout search
-        train_transform.transforms[-1].cutout_prob = args.cutout_prob * epoch / (args.epochs - 1)
+        train_set.dataset.transform.transforms[-1].prob = args.cutout_prob * epoch / (args.epochs - 1)
         logging.info('epoch %d lr %e cutout_prob %e', epoch, lr,
-                      train_transform.transforms[-1].cutout_prob)
+                      train_set.dataset.transform.transforms[-1].prob)
     else:
         logging.info('epoch %d lr %e', epoch, lr)
 

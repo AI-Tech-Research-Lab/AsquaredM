@@ -155,9 +155,15 @@ def load_checkpoint(model, optimizer, device, filename='checkpoint.pth'):
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     return model, optimizer
 
-def train(train_loader, val_loader, num_epochs, model, device, optimizer, criterion, scheduler, log, ckpt_path=None, label_smoothing=0.1):
+def train(train_loader, val_loader, num_epochs, model, device, optimizer, criterion, scheduler, log, ckpt_path=None, label_smoothing=0.1, cutout=False, cutout_prob=1.0):
         model.to(device)
         for epoch in range(num_epochs):
+ 
+            if cutout:
+                # increase the cutout probability linearly throughout search
+                train_loader.dataset.transform.transforms[-1].prob = cutout_prob * epoch / (num_epochs - 1)
+                print('CUTOUT PROB: ', train_loader.dataset.transform.transforms[-1].prob)
+
             model.train()
             log.train(model, optimizer, len_dataset=len(train_loader))
 
@@ -623,36 +629,29 @@ class EarlyStopping:
             self.c = lambda a, b: a > b
 
 class Cutout(object):
-    def __init__(self, length, prob=0.5):
-        """
-        Args:
-            length (int): The length of the square cutout.
-            prob (float): The probability of applying the cutout.
-        """
+    def __init__(self, length, prob=1.0):
         self.length = length
         self.prob = prob
 
     def __call__(self, img):
-        if np.random.rand() > self.prob:
-            return img
+        if np.random.binomial(1, self.prob):
+            h, w = img.size(1), img.size(2)
+            mask = np.ones((h, w), np.float32)
+            y = np.random.randint(h)
+            x = np.random.randint(w)
 
-        h, w = img.size(1), img.size(2)
-        mask = np.ones((h, w), np.float32)
-        y = np.random.randint(h)
-        x = np.random.randint(w)
+            y1 = np.clip(y - self.length // 2, 0, h)
+            y2 = np.clip(y + self.length // 2, 0, h)
+            x1 = np.clip(x - self.length // 2, 0, w)
+            x2 = np.clip(x + self.length // 2, 0, w)
 
-        y1 = np.clip(y - self.length // 2, 0, h)
-        y2 = np.clip(y + self.length // 2, 0, h)
-        x1 = np.clip(x - self.length // 2, 0, w)
-        x2 = np.clip(x + self.length // 2, 0, w)
-
-        mask[y1: y2, x1: x2] = 0.
-        mask = torch.from_numpy(mask)
-        mask = mask.expand_as(img)
-        img *= mask
+            mask[y1: y2, x1: x2] = 0.
+            mask = torch.from_numpy(mask)
+            mask = mask.expand_as(img)
+            img *= mask
         return img
 
-def get_dataset(name, model_name=None, augmentation=False, resolution=32, val_split=0, balanced_val=True, 
+def get_dataset(name, model_name=None, augmentation=False, resolution=32, val_split=0, balanced_val=False, 
                 autoaugment=True, cutout=False, cutout_length=16, cutout_prob=1.0):
 
     if name == 'mnist':
@@ -768,7 +767,7 @@ def get_dataset(name, model_name=None, augmentation=False, resolution=32, val_sp
                     ])
         
         if cutout:
-                tt.extend([Cutout(cutout_length, cutout_prob)])
+                tt.extend([Cutout(cutout_length)])
 
         t = [
             Resize((resolution, resolution)),
@@ -954,20 +953,20 @@ def random_split_with_equal_per_class(train_set, val_split):
 
     return train_set, val_set
 
-def get_data_loaders(dataset, batch_size=32, threads=1, img_size=32, augmentation=False, val_split=0, balanced_val=False, eval_test=True):
+def get_data_loaders(train_set, val_set, test_set, batch_size=32, threads=1, eval_test=True):
 
-    train_set, val_set, test_set,  _, _ = get_dataset(dataset, augmentation=augmentation, resolution=img_size, balanced_val=balanced_val,
-                                                      val_split=val_split)
+    #train_set, val_set, test_set,  _, _ = get_dataset(dataset, augmentation=augmentation, resolution=img_size, balanced_val=balanced_val,
+                                                      #val_split=val_split)
 
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=threads, pin_memory=True)
 
-    if val_split:
+    if val_set:
         val_loader = DataLoader(val_set, batch_size=batch_size*2, shuffle=False, num_workers=threads, pin_memory=True)
     else:
         val_loader = None
     
     # Create DataLoader for test set if args.eval_test is True
-    if eval_test:
+    if test_set:
         test_loader = DataLoader(test_set, batch_size=batch_size*2, shuffle=False, num_workers=threads, pin_memory=True)
     else:
         test_loader=None
