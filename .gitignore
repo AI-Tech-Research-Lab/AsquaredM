@@ -132,11 +132,10 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Don't save the data folder
+# Don't save these folders
 data/
+results/
+wandb/
 
 # Checkpoints
 *.pth
-
-# Don't save the results folder
-results/
