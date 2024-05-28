@@ -137,3 +137,6 @@ data/
 
 # Checkpoints
 *.pth
+
+# Don't save the results folder
+results/
