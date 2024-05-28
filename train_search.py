@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 import time
@@ -193,6 +194,9 @@ def main():
         info = bench.get_info_from_arch(decode)
         results = {'val-acc': info['val-acc'], 'test-acc': info['test-acc'], 'flops': info['flops'], 'params': info['params']}
         logging.info('nasbench info: %s', results)
+        # Save dictionary to a JSON file
+        with open(os.path.join(args.save,'stats.json'), 'w') as file:
+            json.dump(results, file)
     
 
   utils.save(model, os.path.join(args.save, 'weights.pt'))
@@ -205,7 +209,6 @@ def main():
   logging.info('Best validation accuracy: %f', valid_acc)
   cell_encode = translate_genotype_to_encode(genotype)
   write_array_to_file(cell_encode, os.path.join(args.save, 'best_genotype.txt'))
-
 
 def train(train_queue, valid_queue, model, architect, criterion, optimizer, lr, epoch): #perturb_alpha, epsilon_alpha
     objs = utils.AvgrageMeter()
