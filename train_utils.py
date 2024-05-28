@@ -623,10 +623,19 @@ class EarlyStopping:
             self.c = lambda a, b: a > b
 
 class Cutout(object):
-    def __init__(self, length):
+    def __init__(self, length, prob=0.5):
+        """
+        Args:
+            length (int): The length of the square cutout.
+            prob (float): The probability of applying the cutout.
+        """
         self.length = length
+        self.prob = prob
 
     def __call__(self, img):
+        if np.random.rand() > self.prob:
+            return img
+
         h, w = img.size(1), img.size(2)
         mask = np.ones((h, w), np.float32)
         y = np.random.randint(h)
@@ -643,7 +652,8 @@ class Cutout(object):
         img *= mask
         return img
 
-def get_dataset(name, model_name=None, augmentation=False, resolution=32, val_split=0, balanced_val=True, autoaugment=True, cutout=True, cutout_length=16):
+def get_dataset(name, model_name=None, augmentation=False, resolution=32, val_split=0, balanced_val=True, 
+                autoaugment=True, cutout=False, cutout_length=16, cutout_prob=1.0):
 
     if name == 'mnist':
         t = [Resize((32, 32)),
@@ -735,39 +745,30 @@ def get_dataset(name, model_name=None, augmentation=False, resolution=32, val_sp
         norm_mean = [0.49139968, 0.48215827, 0.44653124]
         norm_std = [0.24703233, 0.24348505, 0.26158768]
 
-        if resolution==32:
-            # data processing used in NACHOS
-            #tt = [Resize((resolution, resolution))]
+        tt=[]
 
-            if augmentation:
-                tt=[RandomHorizontalFlip(),
-                    RandomCrop(resolution, padding=resolution//8)]
+        if augmentation:
+            if resolution==32:
 
-        else:
-        
-            tt = [RandomResizedCrop(resolution, scale=(0.08,1.0)),
-                RandomHorizontalFlip()] #p=0.5 default]
+                tt.extend([
+                RandomCrop(32, padding=4),
+                RandomHorizontalFlip(),
+                ])
+
+                #tt.extend([RandomHorizontalFlip(),
+                #    RandomCrop(resolution, padding=resolution//8)])
+
+            else:
+            
+                tt.extend([RandomResizedCrop(resolution, scale=(0.08,1.0)),
+                    RandomHorizontalFlip()]) #p=0.5 default]
         
         tt.extend([ ToTensor(),
                     Normalize(norm_mean, norm_std)
                     ])
-                    
         
-        '''
-        tt = [RandomResizedCrop(resolution, scale=(0.08,1.0)),
-                  #RandomCrop(32, padding=4),
-                  RandomHorizontalFlip(), #p=0.5 default
-                  #ToTensor(),
-                  #Normalize(norm_mean, norm_std)
-                  ]
-        
-        if autoaugment:
-            tt.extend([CIFAR10Policy()])
-        tt.extend([ToTensor()])
         if cutout:
-            tt.extend([Cutout(cutout_length)])
-        tt.extend([Normalize(norm_mean, norm_std)])
-        '''
+                tt.extend([Cutout(cutout_length, cutout_prob)])
 
         t = [
             Resize((resolution, resolution)),
@@ -786,7 +787,7 @@ def get_dataset(name, model_name=None, augmentation=False, resolution=32, val_sp
             transform=transform)
 
         input_size, classes = (3, resolution, resolution), 10
-        val_split=0.2
+        #val_split=0.2
 
     elif name == 'cifar100':
 
@@ -896,9 +897,6 @@ def get_dataset(name, model_name=None, augmentation=False, resolution=32, val_sp
         eval_len = int(train_len * val_split)
         train_len = train_len - eval_len
 
-        #print("VAL SPLIT: ", val_split)
-        val_split=0.5
-
         if balanced_val:
             train_set, val_set = random_split_with_equal_per_class(train_set, val_split)
 
@@ -956,9 +954,10 @@ def random_split_with_equal_per_class(train_set, val_split):
 
     return train_set, val_set
 
-def get_data_loaders(dataset, batch_size=32, threads=1, img_size=32, augmentation=False, val_split=0, eval_test=True):
+def get_data_loaders(dataset, batch_size=32, threads=1, img_size=32, augmentation=False, val_split=0, balanced_val=False, eval_test=True):
 
-    train_set, val_set, test_set,  _, _ = get_dataset(dataset, augmentation=augmentation, resolution=img_size, val_split=val_split)
+    train_set, val_set, test_set,  _, _ = get_dataset(dataset, augmentation=augmentation, resolution=img_size, balanced_val=balanced_val,
+                                                      val_split=val_split)
 
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=threads, pin_memory=True)
 

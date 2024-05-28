@@ -25,7 +25,7 @@ def load_array_from_file(file_path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     #seed
-    parser.add_argument("--seed", default=42, type=int, help="Seed for reproducibility.")
+    parser.add_argument("--seed", default=2, type=int, help="Seed for reproducibility.") #42
     parser.add_argument("--adaptive", default=True, type=bool, help="True if you want to use the Adaptive SAM.")
     parser.add_argument("--nesterov", action='store_true', default=False, help="True if you want to use Nesterov momentum.")
     parser.add_argument("--batch_size", default=128, type=int, help="Batch size used in the training and validation loop.")
@@ -39,6 +39,7 @@ if __name__ == "__main__":
     parser.add_argument("--n_workers", default=2, type=int, help="Number of CPU threads for dataloaders.")
     parser.add_argument("--weight_decay", default=5e-5, type=float, help="L2 weight decay.") 
     parser.add_argument("--val_split", default=0.0, type=float, help='percentage of train set for validation')
+    parser.add_argument("--balanced_val", action='store_true', default=False, help='balance samples per classes in training set')
     parser.add_argument('--save', action='store_true', default=False, help='save log of experiments')
     parser.add_argument('--save_ckpt', action='store_true', default=False, help='save checkpoint')
     parser.add_argument('--optim', type=str, default='SAM', help='algorithm to use for training')
@@ -104,17 +105,19 @@ if __name__ == "__main__":
         model_path = args.model_path
     logging.info("Model: %s", args.model)
 
-    cell_encode = load_array_from_file(os.path.join(args.output_path,'best_genotype.txt'))
+    #cell_encode = load_array_from_file(os.path.join(args.output_path,'best_genotype.txt'))
     #bench = NASBench201('cifar10')
     #cell_encode = bench.encode({'arch': '|nor_conv_3x3~0|+|nor_conv_3x3~0|nor_conv_3x3~1|+|skip_connect~0|nor_conv_3x3~1|nor_conv_1x1~2|'})
     #print("Cell encode: ", cell_encode)
+    cell_encode = [3, 3, 3, 1, 3, 2]
     model = NASBenchNet(cell_encode=cell_encode, C=16, num_classes=10, stages=3, cells=5, steps=4)
     res=32
 
     logging.info("Train config")
     logging.info(args)
     train_loader, val_loader, test_loader = get_data_loaders(dataset=args.dataset, batch_size=args.batch_size, threads=args.n_workers, 
-                                            val_split=args.val_split, img_size=res, augmentation=True, eval_test=args.eval_test)
+                                            val_split=args.val_split, balanced_val=args.balanced_val,
+                                            img_size=res, augmentation=True, eval_test=args.eval_test)
     
     if val_loader is None:
         val_loader = test_loader
