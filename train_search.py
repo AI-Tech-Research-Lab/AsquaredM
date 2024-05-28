@@ -21,6 +21,7 @@ from nasbench201.nasbench201 import NASBench201
 from architect import Architect
 from utils import get_data_loaders
 from genotypes import BENCH_PRIMITIVES
+import wandb
 
 def translate_genotype_to_encode(genotype):
     dag_integers = []
@@ -75,6 +76,16 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO,
 fh = logging.FileHandler(os.path.join(args.save, 'log.txt'))
 fh.setFormatter(logging.Formatter(log_format))
 logging.getLogger().addHandler(fh)
+
+wandb.init(
+    # team name
+    #entity='flatnas-org',
+    # set the wandb project where this run will be logged
+    project=f"FlatDARTS-{args.dataset}-nasbench{args.nasbench}",
+    name=f"SAM-{args.sam}_B-{args.betadecay}_UNROLL-{args.unrolled}",
+    # track hyperparameters and run metadata
+    config={**vars(args)},
+)
 
 #CIFAR_CLASSES = 10
 if args.dataset == 'cifar100':
@@ -176,6 +187,11 @@ def main():
     logging.info('valid_acc %f, val_loss %f', valid_acc, valid_obj)
     scheduler.step()
 
+    wandb.log({"metrics/train_acc": train_acc, 
+               "metrics/val_acc": valid_acc,
+               "metrics/train_loss": train_obj,
+               "metrics/val_loss": valid_obj})
+
     '''
     if valid_obj < best_loss:
       logging.info('Best model found at epoch %d', epoch)
@@ -193,6 +209,8 @@ def main():
         decode = bench.decode(cell_encode)
         info = bench.get_info_from_arch(decode)
         results = {'val-acc': info['val-acc'], 'test-acc': info['test-acc'], 'flops': info['flops'], 'params': info['params']}
+        wandb.log({"metrics/val_acc_nasbench": info['val-acc'], 
+               "metrics/test_acc_nasbench": info['test-acc']})
         logging.info('nasbench info: %s', results)
         # Save dictionary to a JSON file
         with open(os.path.join(args.save,'stats.json'), 'w') as file:
