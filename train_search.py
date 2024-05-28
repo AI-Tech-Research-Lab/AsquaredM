@@ -79,7 +79,7 @@ logging.getLogger().addHandler(fh)
 
 wandb.init(
     # team name
-    #entity='flatnas-org',
+    entity='flatnas',
     # set the wandb project where this run will be logged
     project=f"FlatDARTS-{args.dataset}-nasbench{args.nasbench}",
     name=f"SAM-{args.sam}_B-{args.betadecay}_UNROLL-{args.unrolled}",
