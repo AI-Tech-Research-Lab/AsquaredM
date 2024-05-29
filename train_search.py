@@ -66,6 +66,8 @@ parser.add_argument('--arch_learning_rate', type=float, default=3e-4, help='lear
 parser.add_argument('--arch_weight_decay', type=float, default=1e-3, help='weight decay for arch encoding')
 parser.add_argument('--rho_alpha_sam', type=float, default=1e-2, help='rho alpha for SAM update')
 parser.add_argument('--epsilon_sam', type=float, default=1e-2, help='epsilon for SAM update')
+parser.add_argument('--flood_level', type=float, default=0.0, help='flood level for weight regularization')
+parser.add_argument('--wandb', action='store_true', default=False, help='use wandb')
 args = parser.parse_args()
 
 utils.create_exp_dir(args.save, scripts_to_save=glob.glob('*.py'))
@@ -77,15 +79,20 @@ fh = logging.FileHandler(os.path.join(args.save, 'log.txt'))
 fh.setFormatter(logging.Formatter(log_format))
 logging.getLogger().addHandler(fh)
 
-wandb.init(
-    # team name
-    entity='flatnas',
-    # set the wandb project where this run will be logged
-    project=f"FlatDARTS-{args.dataset}-nasbench{args.nasbench}",
-    name=f"SAM-{args.sam}_B-{args.betadecay}_UNROLL-{args.unrolled}",
-    # track hyperparameters and run metadata
-    config={**vars(args)},
-)
+#key='32aca3fbbe1c852326faddfa19dcc820e7033d22'
+#wandb.login(key=key)
+
+if args.wandb:
+    wandb.init(
+        # username or team name
+        entity='matteogambella',
+        # set the wandb project where this run will be logged
+        project=f"FlatDARTS-{args.dataset}-nasbench{args.nasbench}",
+        name=f"SAM-{args.sam}_B-{args.betadecay}_UNROLL-{args.unrolled}",
+        # track hyperparameters and run metadata
+        config={**vars(args)},
+    )
+
 
 #CIFAR_CLASSES = 10
 if args.dataset == 'cifar100':
@@ -176,7 +183,7 @@ def main():
     print(model.show_alphas())
 
     # training
-    train_acc, train_obj = train(train_queue, valid_queue, model, architect, criterion, optimizer, lr, epoch)
+    train_acc, train_obj = train(train_queue, valid_queue, model, architect, criterion, optimizer, lr, epoch, flood_level=args.flood_level) 
     logging.info('train_acc %f, train_loss %f', train_acc, train_obj)
 
     # validation
@@ -184,10 +191,12 @@ def main():
     logging.info('valid_acc %f, val_loss %f', valid_acc, valid_obj)
     scheduler.step()
 
-    wandb.log({"metrics/train_acc": train_acc, 
-               "metrics/val_acc": valid_acc,
-               "metrics/train_loss": train_obj,
-               "metrics/val_loss": valid_obj})
+    if args.wandb:
+        wandb.log({"metrics/train_acc": train_acc, 
+                "metrics/val_acc": valid_acc,
+                "metrics/train_loss": train_obj,
+                "metrics/val_loss": valid_obj})
+    
 
     '''
     if valid_obj < best_loss:
@@ -206,8 +215,10 @@ def main():
         decode = bench.decode(cell_encode)
         info = bench.get_info_from_arch(decode)
         results = {'val-acc': info['val-acc'], 'test-acc': info['test-acc'], 'flops': info['flops'], 'params': info['params']}
-        wandb.log({"metrics/val_acc_nasbench": info['val-acc'], 
-               "metrics/test_acc_nasbench": info['test-acc']})
+
+        if args.wandb:
+            wandb.log({"metrics/val_acc_nasbench": info['val-acc'], "metrics/test_acc_nasbench": info['test-acc']})
+
         logging.info('nasbench info: %s', results)
         # Save dictionary to a JSON file
         with open(os.path.join(args.save,'stats.json'), 'w') as file:
@@ -225,7 +236,7 @@ def main():
   cell_encode = translate_genotype_to_encode(genotype)
   write_array_to_file(cell_encode, os.path.join(args.save, 'best_genotype.txt'))
 
-def train(train_queue, valid_queue, model, architect, criterion, optimizer, lr, epoch): #perturb_alpha, epsilon_alpha
+def train(train_queue, valid_queue, model, architect, criterion, optimizer, lr, epoch, flood_level): #perturb_alpha, epsilon_alpha
     objs = utils.AvgrageMeter()
     top1 = utils.AvgrageMeter()
     top5 = utils.AvgrageMeter()
@@ -262,6 +273,10 @@ def train(train_queue, valid_queue, model, architect, criterion, optimizer, lr, 
 
         logits = model(input) #, updateType='weight')
         loss = criterion(logits, target)
+        
+        #weight flood regularization
+        if flood_level:
+            loss = torch.abs(loss - flood_level) + flood_level
 
         loss.backward()
         nn.utils.clip_grad_norm_(model.parameters(), args.grad_clip)

@@ -129,6 +129,8 @@ if __name__ == "__main__":
     '''
     train_set, val_set, test_set, _, _ = get_dataset(name=args.dataset, val_split=args.val_split, augmentation=True, cutout=args.cutout, balanced_val=args.balanced_val)
     train_loader, val_loader, test_loader = get_data_loaders(train_set, val_set, test_set, batch_size=args.batch_size, threads=args.n_workers, eval_test=True)
+    if val_loader is None:
+        val_loader = test_loader
 
     log = Log(log_each=10)
 
@@ -147,14 +149,11 @@ if __name__ == "__main__":
         #top1 = validate(val_loader, model, device, print_freq=100)/100
     else:
         logging.info("Start training...")
-        top1, model, optimizer = train(train_loader, val_loader, epochs, model, device, optimizer, criterion, scheduler, log, ckpt_path=os.path.join(args.output_path,'ckpt.pth'))
+        top1, model, optimizer = train(train_loader, val_loader, epochs, model, device, optimizer, criterion, scheduler, log, ckpt_path=os.path.join(args.output_path,'ckpt.pth'),
+                                       cutout=args.cutout)
         logging.info("Training finished")
 
     results={}
-
-    if val_loader:
-        top1 = validate(val_loader, model, device, print_freq=100)/100
-        logging.info(f"VAL ACCURACY: {np.round(top1*100,2)}")
 
     top1 = validate(test_loader, model, device, print_freq=100)
     logging.info(f"TEST ACCURACY: {top1}")

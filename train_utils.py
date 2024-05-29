@@ -162,7 +162,7 @@ def train(train_loader, val_loader, num_epochs, model, device, optimizer, criter
             if cutout:
                 # increase the cutout probability linearly throughout search
                 train_loader.dataset.transform.transforms[-1].prob = cutout_prob * epoch / (num_epochs - 1)
-                print('CUTOUT PROB: ', train_loader.dataset.transform.transforms[-1].prob)
+                #print('CUTOUT PROB: ', train_loader.dataset.transform.transforms[-1].prob)
 
             model.train()
             log.train(model, optimizer, len_dataset=len(train_loader))
