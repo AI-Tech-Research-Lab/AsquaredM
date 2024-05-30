@@ -67,7 +67,7 @@ parser.add_argument('--arch_weight_decay', type=float, default=1e-3, help='weigh
 parser.add_argument('--rho_alpha_sam', type=float, default=1e-2, help='rho alpha for SAM update')
 parser.add_argument('--epsilon_sam', type=float, default=1e-2, help='epsilon for SAM update')
 parser.add_argument('--flood_level', type=float, default=0.0, help='flood level for weight regularization')
-parser.add_argument('--wandb', action='store_true', default=False, help='use wandb')
+parser.add_argument('--wandb', action='store_true', default=True, help='use wandb')
 args = parser.parse_args()
 
 utils.create_exp_dir(args.save, scripts_to_save=glob.glob('*.py'))
@@ -85,10 +85,10 @@ logging.getLogger().addHandler(fh)
 if args.wandb:
     wandb.init(
         # username or team name
-        entity='matteogambella',
+        #entity='flatnas',
         # set the wandb project where this run will be logged
         project=f"FlatDARTS-{args.dataset}-nasbench{args.nasbench}",
-        name=f"SAM-{args.sam}_B-{args.betadecay}_UNROLL-{args.unrolled}",
+        name=f"SAM-{args.sam}-rho{args.rho_alpha_sam}_B-{args.betadecay}_UNROLL-{args.unrolled}",
         # track hyperparameters and run metadata
         config={**vars(args)},
     )
