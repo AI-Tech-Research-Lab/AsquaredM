@@ -1,7 +1,7 @@
 # --sam: use SAM update rule
 # --unrolled: 2nd order approx , otherwise 1st order (if no SAM)
 # --betadecay: use beta darts regularization (if no SAM)
-rhos=(1.0 2.0 10.0)
+rhos=(1e-2)
 epsilons=(1e-2)
 
 for rho in "${rhos[@]}"; do

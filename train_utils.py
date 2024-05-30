@@ -790,24 +790,38 @@ def get_dataset(name, model_name=None, augmentation=False, resolution=32, val_sp
 
     elif name == 'cifar100':
 
-        tt = [Resize((resolution, resolution))]
+        norm_mean = [0.5071, 0.4865, 0.4409]
+        norm_std = [0.2673, 0.2564, 0.2762]
+
+        tt=[]
 
         if augmentation:
-            tt.extend([
-                RandomCrop(resolution, padding=resolution//8),
-                RandomHorizontalFlip(),
-            ])
+            if resolution==32:
 
-        tt.extend([
-            ToTensor(),
-            Normalize((0.4914, 0.4822, 0.4465),
-                      (0.2023, 0.1994, 0.2010))])
+                tt.extend([
+                RandomCrop(32, padding=4),
+                RandomHorizontalFlip(),
+                ])
+
+                #tt.extend([RandomHorizontalFlip(),
+                #    RandomCrop(resolution, padding=resolution//8)])
+
+            else:
+            
+                tt.extend([RandomResizedCrop(resolution, scale=(0.08,1.0)),
+                    RandomHorizontalFlip()]) #p=0.5 default]
+        
+        tt.extend([ ToTensor(),
+                    Normalize(norm_mean, norm_std)
+                    ])
+        
+        if cutout:
+                tt.extend([Cutout(cutout_length)])
 
         t = [
             Resize((resolution, resolution)),
             ToTensor(),
-            Normalize((0.4914, 0.4822, 0.4465),
-                      (0.2023, 0.1994, 0.2010))]
+            Normalize(norm_mean, norm_std)]
 
         transform = Compose(t)
         train_transform = Compose(tt)
@@ -821,7 +835,7 @@ def get_dataset(name, model_name=None, augmentation=False, resolution=32, val_sp
             transform=transform)
 
         input_size, classes = (3, resolution, resolution), 100
-        val_split=0.2
+        #val_split=0.2
     
     elif name == 'cinic10':
 

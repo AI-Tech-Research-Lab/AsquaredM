@@ -121,7 +121,7 @@ def main():
     model = Network(args.init_channels, n_classes, args.layers, criterion)
   else:
     stages = 3
-    cells = 5
+    cells = 5 #8
     model = BenchNetwork(args.init_channels, n_classes, stages, cells, criterion)
 
   model = model.cuda()
@@ -158,12 +158,12 @@ def main():
 
   architect = Architect(model, args)
 
-  '''
   best_loss= float('inf')
   best_epoch=0
   best_acc=0
   best_genotype=None
-  '''
+
+  patience=10
 
   for epoch in range(args.epochs):
     lr = scheduler.get_last_lr()[0]
@@ -197,15 +197,12 @@ def main():
                 "metrics/train_loss": train_obj,
                 "metrics/val_loss": valid_obj})
     
-
-    '''
     if valid_obj < best_loss:
       logging.info('Best model found at epoch %d', epoch)
       best_loss = valid_obj
       best_epoch = epoch
       best_acc = valid_acc
       best_genotype = genotype
-    '''
       
     #info nasbench
     
@@ -224,15 +221,20 @@ def main():
         with open(os.path.join(args.save,'stats.json'), 'w') as file:
             json.dump(results, file)
     
+    # early stopping
+    if (epoch - best_epoch) > patience:
+        logging.info('Early stopping at epoch %d', epoch)
+        break
+    
 
   utils.save(model, os.path.join(args.save, 'weights.pt'))
   
   # Info about best searched model
 
-  logging.info('Best model found', epoch) 
-  logging.info('Best genotype: %s', genotype)
-  logging.info('Best validation loss: %f', valid_obj)
-  logging.info('Best validation accuracy: %f', valid_acc)
+  logging.info('Best model found at epoch %s', best_epoch) 
+  logging.info('Best genotype: %s', best_genotype)
+  logging.info('Best validation loss: %f', best_loss)
+  logging.info('Best validation accuracy: %f', best_acc)
   cell_encode = translate_genotype_to_encode(genotype)
   write_array_to_file(cell_encode, os.path.join(args.save, 'best_genotype.txt'))
 
@@ -276,7 +278,7 @@ def train(train_queue, valid_queue, model, architect, criterion, optimizer, lr, 
         
         #weight flood regularization
         if flood_level:
-            loss = torch.abs(loss - flood_level) + flood_level
+            loss = torch.abs(loss - flood_level) + flood_level # for reduced proxies (Beta-DARTS++)
 
         loss.backward()
         nn.utils.clip_grad_norm_(model.parameters(), args.grad_clip)
