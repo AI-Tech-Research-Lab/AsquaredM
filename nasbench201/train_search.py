@@ -56,24 +56,15 @@ parser.add_argument('--arch_learning_rate', type=float, default=3e-4, help='lear
 parser.add_argument('--arch_weight_decay', type=float, default=1e-3, help='weight decay for arch encoding')
 parser.add_argument('--perturb_alpha', type=str, default='none', help='perturb for alpha')
 parser.add_argument('--epsilon_alpha', type=float, default=0.3, help='max epsilon for alpha')
-parser.add_argument('--wandb', action='store_true', default=True, help='use one-step unrolled validation loss')
-parser.add_argument('--nasbench', action='store_true', default=True, help='use one-step unrolled validation loss')
+parser.add_argument('--wandb', action='store_true', default=False, help='use one-step unrolled validation loss')
+parser.add_argument('--nasbench', action='store_true', default=False, help='use one-step unrolled validation loss')
+parser.add_argument('--betadecay', action='store_true', default=False, help='use beta-darts regularization')
+parser.add_argument('--sam', action='store_true', default=False, help='use sam update rule')
+parser.add_argument('--rho_alpha_sam', type=float, default=1e-2, help='rho alpha for SAM update')
+parser.add_argument('--epsilon_sam', type=float, default=1e-2, help='epsilon for SAM update')
+parser.add_argument('--flood_level', type=float, default=0.0, help='flood level for weight regularization')
+
 args = parser.parse_args()
-
-args.save = '../experiments/nasbench201/{}/search-{}-{}-{}'.format(
-    args.dataset, args.save, time.strftime("%Y%m%d-%H%M%S"), args.seed)
-
-if args.unrolled:
-    args.save += '-unrolled'
-if not args.weight_decay == 3e-4:
-    args.save += '-weight_l2-' + str(args.weight_decay)
-if not args.arch_weight_decay == 1e-3:
-    args.save += '-alpha_l2-' + str(args.arch_weight_decay)
-if args.cutout:
-    args.save += '-cutout-' + str(args.cutout_length) + '-' + str(args.cutout_prob)
-if not args.perturb_alpha == 'none':
-    args.save += '-alpha-' + args.perturb_alpha + '-' + str(args.epsilon_alpha)
-args.save += '-' + str(np.random.randint(10000))
 
 utils.create_exp_dir(args.save, scripts_to_save=glob.glob('*.py'))
 
@@ -91,7 +82,7 @@ if args.wandb:
         entity='flatnas',
         # set the wandb project where this run will be logged
         project=f"FlatDARTS-{args.dataset}-nasbench{args.nasbench}",
-        name=f"BetaDARTS2-DARTS_UNROLL-{args.unrolled}",
+        name=f"SAM_{args.sam}-BETADECAY_{args.betadecay}-UNROLLED_{args.unrolled}",
         # track hyperparameters and run metadata
         config={**vars(args)},
     )
@@ -214,14 +205,10 @@ def main():
         train_acc, train_obj = train(train_queue, valid_queue, model, architect, criterion, optimizer, lr, 
                                          perturb_alpha, epsilon_alpha, epoch)
         logging.info('train_acc %f', train_acc)
-        #writer.add_scalar('Acc/train', train_acc, epoch)
-        #writer.add_scalar('Obj/train', train_obj, epoch)
 
         # validation
         valid_acc, valid_obj = infer(valid_queue, model, criterion)
         logging.info('valid_acc %f', valid_acc)
-        #writer.add_scalar('Acc/valid', valid_acc, epoch)
-        #writer.add_scalar('Obj/valid', valid_obj, epoch)
 
         if args.wandb:
             wandb.log({"metrics/train_acc": train_acc, 
@@ -236,12 +223,6 @@ def main():
             best_acc = valid_acc
             best_genotype = genotype
 
-            # nasbench201
-
-            #result = api.query_by_arch(model.genotype(), hp='200')  # hp='200'
-            #logging.info('{:}'.format(result))
-            #cifar10_train, cifar10_test, cifar100_train, cifar100_valid, \
-            #    cifar100_test, imagenet16_train, imagenet16_valid, imagenet16_test = distill(result)
         if args.nasbench:
             cell_encode = translate_genotype_to_encode(genotype)
             decode = bench.decode(cell_encode)
@@ -251,17 +232,12 @@ def main():
             if args.wandb:
                 wandb.log({"metrics/val_acc_nasbench": info['val-acc'], "metrics/test_acc_nasbench": info['test-acc']})
 
-            #writer.add_scalars('nasbench201/cifar10', {'train':cifar10_train,'test':cifar10_test}, epoch)
-            #writer.add_scalars('nasbench201/cifar100', {'train':cifar100_train,'valid':cifar100_valid, 'test':cifar100_test}, epoch)
-            #writer.add_scalars('nasbench201/imagenet16', {'train':imagenet16_train,'valid':imagenet16_valid, 'test':imagenet16_test}, epoch)
-
             utils.save_checkpoint({
                 'epoch': epoch + 1,
                 'state_dict': model.state_dict(),
                 'optimizer': optimizer.state_dict(),
                 'alpha': model.arch_parameters()
             }, False, args.save)
-        #writer.close()
 
         # early stopping
         if (epoch - best_epoch) > patience:
