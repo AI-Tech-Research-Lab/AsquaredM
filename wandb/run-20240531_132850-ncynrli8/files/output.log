@@ -1,0 +1,48 @@
+05/31 01:28:51 PM gpu device = 0
+05/31 01:28:51 PM args = Namespace(data='../datasets/cifar10', dataset='cifar10', batch_size=64, learning_rate=0.025, learning_rate_min=0.001, momentum=0.9, weight_decay=0.0003, report_freq=50, gpu=0, epochs=100, init_channels=16, layers=8, model_path='saved_models', cutout=False, cutout_length=16, cutout_prob=1.0, save='../experiments/nasbench201/cifar10/search-exp-20240531-132848-2-1735', seed=2, grad_clip=5, train_portion=0.5, unrolled=False, arch_learning_rate=0.0003, arch_weight_decay=0.001, perturb_alpha='none', epsilon_alpha=0.3, wandb=True, nasbench=True)
+05/31 01:28:51 PM param size = 1.686136MB
+Files already downloaded and verified
+num_train = 50000 split_train = 25000 split_valid = 25000
+/home/gambella/env/lib/python3.11/site-packages/torch/optim/lr_scheduler.py:143: UserWarning: Detected call of `lr_scheduler.step()` before `optimizer.step()`. In PyTorch 1.1.0 and later, you should call them in the opposite order: `optimizer.step()` before `lr_scheduler.step()`.  Failure to do this will result in PyTorch skipping the first value of the learning rate schedule. See more details at https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
+  warnings.warn("Detected call of `lr_scheduler.step()` before `optimizer.step()`. "
+/home/gambella/env/lib/python3.11/site-packages/torch/optim/lr_scheduler.py:854: UserWarning: To get the last learning rate computed by the scheduler, please use `get_last_lr()`.
+  warnings.warn("To get the last learning rate computed by the scheduler, "
+05/31 01:28:55 PM epoch 0 lr 2.498816e-02
+05/31 01:28:55 PM epoch 0 epsilon_alpha 3.000000e-02
+05/31 01:28:55 PM genotype = Structure(4 nodes with |avg_pool_3x3~0|+|nor_conv_3x3~0|none~1|+|avg_pool_3x3~0|nor_conv_1x1~1|none~2|)
+arch-parameters :
+tensor([[0.2000, 0.1998, 0.2001, 0.1997, 0.2004],
+        [0.1999, 0.1998, 0.2000, 0.2002, 0.2001],
+        [0.2002, 0.1998, 0.1999, 0.2001, 0.2000],
+        [0.2000, 0.1999, 0.2001, 0.1999, 0.2001],
+        [0.1998, 0.1999, 0.2003, 0.1999, 0.2000],
+        [0.2001, 0.2000, 0.1999, 0.2001, 0.1999]])
+05/31 01:28:56 PM train 000 2.345704e+00 6.250000 54.687500
+05/31 01:29:16 PM train 050 2.103336e+00 20.649511 73.192406
+05/31 01:29:40 PM train 100 2.006034e+00 24.474009 78.001236
+05/31 01:30:00 PM train 150 1.953065e+00 26.252069 80.049667
+05/31 01:30:25 PM train 200 1.912486e+00 27.751865 81.568718
+05/31 01:30:47 PM train 250 1.879205e+00 28.548307 82.768929
+05/31 01:31:11 PM train 300 1.852631e+00 29.578487 83.611916
+05/31 01:31:33 PM train 350 1.828264e+00 30.519943 84.290421
+05/31 01:31:53 PM train_acc 31.311998
+05/31 01:31:54 PM valid 000 1.719893e+00 29.687500 85.937500
+05/31 01:31:57 PM valid 050 1.713376e+00 37.959560 88.419121
+05/31 01:31:59 PM valid 100 1.717192e+00 37.438118 88.613861
+05/31 01:32:02 PM valid 150 1.711862e+00 37.593128 88.514076
+05/31 01:32:04 PM valid 200 1.706706e+00 37.639923 88.603851
+05/31 01:32:06 PM valid 250 1.713454e+00 37.724106 88.589394
+05/31 01:32:08 PM valid 300 1.713308e+00 37.868561 88.631645
+05/31 01:32:10 PM valid 350 1.714479e+00 37.918446 88.581734
+05/31 01:32:12 PM valid_acc 37.835999
+05/31 01:32:12 PM Best model found at epoch 0
+Traceback (most recent call last):
+  File "/home/gambella/Beta-DARTS/nasbench201/train_search.py", line 370, in <module>
+    main()
+  File "/home/gambella/Beta-DARTS/nasbench201/train_search.py", line 241, in main
+    cell_encode = translate_genotype_to_encode(genotype)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/gambella/Beta-DARTS/nasbench201/train_search.py", line 282, in translate_genotype_to_encode
+    for node_op, _ in genotype.normal:
+                      ^^^^^^^^^^^^^^^
+AttributeError: 'Structure' object has no attribute 'normal'

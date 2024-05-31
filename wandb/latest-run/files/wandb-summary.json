@@ -1,0 +1,1 @@
+{"metrics/train_acc": 30.920000076293945, "metrics/val_acc": 36.343997955322266, "metrics/train_loss": 1.8193644285202026, "metrics/val_loss": 1.717496633529663, "_timestamp": 1717168836.3485932, "_runtime": 204.55514812469482, "_step": 1, "metrics/val_acc_nasbench": 76.632, "metrics/test_acc_nasbench": 81.86}

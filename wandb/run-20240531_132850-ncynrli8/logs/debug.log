@@ -1,0 +1,28 @@
+2024-05-31 13:28:50,145 INFO    MainThread:61447 [wandb_setup.py:_flush():76] Current SDK version is 0.17.0
+2024-05-31 13:28:50,145 INFO    MainThread:61447 [wandb_setup.py:_flush():76] Configure stats pid to 61447
+2024-05-31 13:28:50,145 INFO    MainThread:61447 [wandb_setup.py:_flush():76] Loading settings from /home/gambella/.config/wandb/settings
+2024-05-31 13:28:50,145 INFO    MainThread:61447 [wandb_setup.py:_flush():76] Loading settings from /home/gambella/Beta-DARTS/wandb/settings
+2024-05-31 13:28:50,145 INFO    MainThread:61447 [wandb_setup.py:_flush():76] Loading settings from environment variables: {}
+2024-05-31 13:28:50,145 INFO    MainThread:61447 [wandb_setup.py:_flush():76] Applying setup settings: {'_disable_service': False}
+2024-05-31 13:28:50,145 INFO    MainThread:61447 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'nasbench201/train_search.py', 'program_abspath': '/home/gambella/Beta-DARTS/nasbench201/train_search.py', 'program': '/home/gambella/Beta-DARTS/nasbench201/train_search.py'}
+2024-05-31 13:28:50,145 INFO    MainThread:61447 [wandb_setup.py:_flush():76] Applying login settings: {}
+2024-05-31 13:28:50,146 INFO    MainThread:61447 [wandb_init.py:_log_setup():520] Logging user logs to /home/gambella/Beta-DARTS/wandb/run-20240531_132850-ncynrli8/logs/debug.log
+2024-05-31 13:28:50,146 INFO    MainThread:61447 [wandb_init.py:_log_setup():521] Logging internal logs to /home/gambella/Beta-DARTS/wandb/run-20240531_132850-ncynrli8/logs/debug-internal.log
+2024-05-31 13:28:50,146 INFO    MainThread:61447 [wandb_init.py:init():560] calling init triggers
+2024-05-31 13:28:50,146 INFO    MainThread:61447 [wandb_init.py:init():567] wandb.init called with sweep_config: {}
+config: {'data': '../datasets/cifar10', 'dataset': 'cifar10', 'batch_size': 64, 'learning_rate': 0.025, 'learning_rate_min': 0.001, 'momentum': 0.9, 'weight_decay': 0.0003, 'report_freq': 50, 'gpu': 0, 'epochs': 100, 'init_channels': 16, 'layers': 8, 'model_path': 'saved_models', 'cutout': False, 'cutout_length': 16, 'cutout_prob': 1.0, 'save': '../experiments/nasbench201/cifar10/search-exp-20240531-132848-2-1735', 'seed': 2, 'grad_clip': 5, 'train_portion': 0.5, 'unrolled': False, 'arch_learning_rate': 0.0003, 'arch_weight_decay': 0.001, 'perturb_alpha': 'none', 'epsilon_alpha': 0.3, 'wandb': True, 'nasbench': True}
+2024-05-31 13:28:50,146 INFO    MainThread:61447 [wandb_init.py:init():610] starting backend
+2024-05-31 13:28:50,146 INFO    MainThread:61447 [wandb_init.py:init():614] setting up manager
+2024-05-31 13:28:50,154 INFO    MainThread:61447 [backend.py:_multiprocessing_setup():105] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2024-05-31 13:28:50,156 INFO    MainThread:61447 [wandb_init.py:init():622] backend started and connected
+2024-05-31 13:28:50,170 INFO    MainThread:61447 [wandb_init.py:init():711] updated telemetry
+2024-05-31 13:28:50,178 INFO    MainThread:61447 [wandb_init.py:init():744] communicating run to backend with 90.0 second timeout
+2024-05-31 13:28:50,583 INFO    MainThread:61447 [wandb_run.py:_on_init():2396] communicating current version
+2024-05-31 13:28:50,636 INFO    MainThread:61447 [wandb_run.py:_on_init():2405] got version response 
+2024-05-31 13:28:50,636 INFO    MainThread:61447 [wandb_init.py:init():795] starting run threads in backend
+2024-05-31 13:28:50,890 INFO    MainThread:61447 [wandb_run.py:_console_start():2374] atexit reg
+2024-05-31 13:28:50,891 INFO    MainThread:61447 [wandb_run.py:_redirect():2229] redirect: wrap_raw
+2024-05-31 13:28:50,891 INFO    MainThread:61447 [wandb_run.py:_redirect():2294] Wrapping output streams.
+2024-05-31 13:28:50,891 INFO    MainThread:61447 [wandb_run.py:_redirect():2319] Redirects installed.
+2024-05-31 13:28:50,894 INFO    MainThread:61447 [wandb_init.py:init():838] run started, returning control to user process
+2024-05-31 13:32:21,649 WARNING MsgRouterThr:61447 [router.py:message_loop():77] message_loop has been closed
