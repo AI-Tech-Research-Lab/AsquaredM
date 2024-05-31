@@ -1,7 +1,12 @@
 # --sam: use SAM update rule
 # --unrolled: 2nd order approx , otherwise 1st order (if no SAM)
 # --betadecay: use beta darts regularization (if no SAM)
+<<<<<<< Updated upstream
 rhos=(1e-2)
+=======
+rhos=(1e-5 1e-4 1e-3 1e-2 1e-1)
+#rhos=(1.0 2.0 10.0)
+>>>>>>> Stashed changes
 epsilons=(1e-2)
 
 for rho in "${rhos[@]}"; do
