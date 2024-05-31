@@ -1,3 +1,5 @@
+#Beta-DARTS with flood weigth regularization
+
 flood_level=0.0
 
 python train_search.py --nasbench --save results/nasbench_search_beta_flood_level$flood_level --dataset cifar10 \

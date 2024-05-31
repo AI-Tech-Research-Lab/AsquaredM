@@ -117,8 +117,13 @@ def drop_path(x, drop_prob):
 
 
 def create_exp_dir(path, scripts_to_save=None):
-  if not os.path.exists(path):
-    os.mkdir(path)
+
+  #if not os.path.exists(path):
+
+  #remove old folder
+  if os.path.exists(path):
+    shutil.rmtree(path)
+  os.mkdir(path)
   print('Experiment dir : {}'.format(path))
 
   script_path = os.path.join(path, 'scripts')
