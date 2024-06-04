@@ -1,6 +1,6 @@
 import os
 import sys
-sys.path.insert(0, '/home/gambella/darts-SAM')
+sys.path.insert(0, '/home/gambella/Beta-DARTS')
 import time
 import glob
 import numpy as np
@@ -137,15 +137,13 @@ def main():
     if args.dataset == 'cifar10':
         train_transform, valid_transform = utils._data_transforms_cifar10(args)
         train_data = dset.CIFAR10(root=args.data, train=True, download=True, transform=train_transform)
-        valid_data = dset.CIFAR10(root=args.data, train=True, download=True, transform=valid_transform)
     elif args.dataset == 'cifar100':
         train_transform, valid_transform = utils._data_transforms_cifar100(args)
         train_data = dset.CIFAR100(root=args.data, train=True, download=True, transform=train_transform)
-        valid_data = dset.CIFAR100(root=args.data, train=True, download=True, transform=valid_transform)
     elif args.dataset == 'svhn':
         train_transform, valid_transform = utils._data_transforms_svhn(args)
         train_data = dset.SVHN(root=args.data, split='train', download=True, transform=train_transform)
-        valid_data = dset.SVHN(root=args.data, split='train', download=True, transform=valid_transform)
+    
 
     num_train = len(train_data)
     indices = list(range(num_train))
@@ -163,7 +161,7 @@ def main():
         pin_memory=True)
 
     valid_queue = torch.utils.data.DataLoader(
-        valid_data, batch_size=args.batch_size,
+        train_data, batch_size=args.batch_size,
         sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[split_valid:num_train]),
         pin_memory=True)
 
@@ -182,8 +180,8 @@ def main():
     patience=10
 
     for epoch in range(args.epochs):
-        #scheduler.step()
-        lr = scheduler.get_last_lr()[0]
+        scheduler.step()
+        lr = scheduler.get_lr()[0]
         if args.cutout:
             # increase the cutout probability linearly throughout search
             train_transform.transforms[-1].cutout_prob = args.cutout_prob * epoch / (args.epochs - 1)
@@ -206,17 +204,17 @@ def main():
         # training
         train_acc, train_obj = train(train_queue, valid_queue, model, architect, criterion, optimizer, lr, 
                                          perturb_alpha, epsilon_alpha, epoch)
+        logging.info('train_acc %f', train_acc)
 
         # validation
         valid_acc, valid_obj = infer(valid_queue, model, criterion)
+        logging.info('valid_acc %f', valid_acc)
 
         if args.wandb:
             wandb.log({"metrics/train_acc": train_acc, 
                     "metrics/val_acc": valid_acc,
                     "metrics/train_loss": train_obj,
                     "metrics/val_loss": valid_obj})
-        logging.info("Train acc: %.2f, Val acc: %.2f", train_acc, valid_acc)
-        logging.info("Train loss: %.2f, Val loss: %.2f", train_obj, valid_obj)
     
         if valid_obj < best_loss:
             logging.info('Best model found at epoch %d', epoch)
@@ -229,21 +227,17 @@ def main():
             cell_encode = translate_genotype_to_encode(genotype)
             decode = bench.decode(cell_encode)
             info = bench.get_info_from_arch(decode)
-            #results = {'val-acc': info['val-acc'], 'test-acc': info['test-acc'], 'flops': info['flops'], 'params': info['params']}
+            results = {'val-acc': info['val-acc'], 'test-acc': info['test-acc'], 'flops': info['flops'], 'params': info['params']}
 
             if args.wandb:
                 wandb.log({"metrics/val_acc_nasbench": info['val-acc'], "metrics/test_acc_nasbench": info['test-acc']})
-            logging.info('NASBench201 val acc: %.2f, test acc: %.2f', info['val-acc'], info['test-acc'])
-            
-            if not args.unrolled:
-                utils.save_checkpoint({
-                    'epoch': epoch + 1,
-                    'state_dict': model.state_dict(),
-                    'optimizer': optimizer.state_dict(),
-                    'alpha': model.arch_parameters()
-                }, False, args.save)
 
-        scheduler.step() # scheduler step must be done after optimizer.step() in latest pytorch versions
+            utils.save_checkpoint({
+                'epoch': epoch + 1,
+                'state_dict': model.state_dict(),
+                'optimizer': optimizer.state_dict(),
+                'alpha': model.arch_parameters()
+            }, False, args.save)
 
         # early stopping
         if (epoch - best_epoch) > patience:
