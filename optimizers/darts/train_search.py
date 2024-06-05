@@ -179,8 +179,8 @@ def main():
     architect = Architect(model, args)
 
     for epoch in range(args.epochs):
-        scheduler.step()
-        lr = scheduler.get_lr()[0]
+        #scheduler.step()
+        lr = scheduler.get_last_lr()[0]
         if args.cutout:
             # increase the cutout probability linearly throughout search
             train_transform.transforms[-1].cutout_prob = args.cutout_prob * epoch / (args.epochs - 1)

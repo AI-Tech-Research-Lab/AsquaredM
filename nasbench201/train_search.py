@@ -82,7 +82,7 @@ if args.wandb:
         entity='flatnas',
         # set the wandb project where this run will be logged
         project=f"FlatDARTS-{args.dataset}-nasbench{args.nasbench}",
-        name=f"SAM_{args.sam}-BETADECAY_{args.betadecay}-UNROLLED_{args.unrolled}",
+        name=f"DATASET_{args.dataset}-SAM_{args.sam}-BETADECAY_{args.betadecay}-UNROLLED_{args.unrolled}-RHO_ALPHA_SAM_{args.rho_alpha_sam}",
         # track hyperparameters and run metadata
         config={**vars(args)},
     )
@@ -206,6 +206,8 @@ def main():
         # training
         train_acc, train_obj = train(train_queue, valid_queue, model, architect, criterion, optimizer, lr, 
                                          perturb_alpha, epsilon_alpha, epoch)
+        
+        scheduler.step() # scheduler step must be done after optimizer.step() in latest pytorch versions
 
         # validation
         valid_acc, valid_obj = infer(valid_queue, model, criterion)
@@ -242,8 +244,6 @@ def main():
                     'optimizer': optimizer.state_dict(),
                     'alpha': model.arch_parameters()
                 }, False, args.save)
-
-        scheduler.step() # scheduler step must be done after optimizer.step() in latest pytorch versions
 
         # early stopping
         if (epoch - best_epoch) > patience:
