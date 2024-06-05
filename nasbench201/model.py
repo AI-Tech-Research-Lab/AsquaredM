@@ -131,6 +131,7 @@ class Network(nn.Module):
     self._layerN   = N
     self._criterion = criterion
     self.max_nodes = max_nodes
+    self.num_classes = num_classes
     self.stem = nn.Sequential(
                     nn.Conv2d(3, C, kernel_size=3, padding=1, bias=False),
                     nn.BatchNorm2d(C))
@@ -225,6 +226,13 @@ class Network(nn.Module):
   def restore_arch_parameters(self):
     self._arch_parameters.data.copy_(self._saved_arch_parameters)
     del self._saved_arch_parameters
+
+  def new(self):
+        #(self, C, N, max_nodes, num_classes, criterion, search_space=NAS_BENCH_201, affine=False, track_running_stats=True):
+        model_new = Network(self._C, self._layerN, self.max_nodes, self.num_classes, self._criterion).cuda()
+        for x, y in zip(model_new.arch_parameters(), self.arch_parameters()):
+            x.data.copy_(y.data)
+        return model_new
 
   def clip(self):
     for line in self._arch_parameters:
