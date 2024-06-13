@@ -1,6 +1,6 @@
 import os
 import sys
-sys.path.insert(0, '/home/gambella/darts-SAM')
+sys.path.append(os.path.join(os.path.expanduser('~'),'darts-SAM'))
 import time
 import glob
 import numpy as np
