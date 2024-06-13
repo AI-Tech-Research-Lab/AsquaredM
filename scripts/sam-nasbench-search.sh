@@ -1,5 +1,5 @@
 dataset=cifar10
-rho=1e-3
+rho=1e-1
 epsilon=1e-2
 
 python nasbench201/train_search.py --nasbench --save results/nasbench_search_sam_dataset${dataset}_rho$rho \

@@ -1,0 +1,7 @@
+2024-06-13 14:28:22,502 gpu device = 0
+2024-06-13 14:28:22,503 args = Namespace(data='../datasets/cifar10', dataset='cifar10', batch_size=64, learning_rate=0.025, learning_rate_min=0.001, momentum=0.9, weight_decay=0.0003, report_freq=50, gpu=0, epochs=50, init_channels=16, layers=8, model_path='saved_models', cutout=False, cutout_length=16, cutout_prob=1.0, save='results/nasbench_search_beta_datasetcifar10_flood_level0.0', seed=2, grad_clip=5.0, train_portion=0.5, unrolled=False, arch_learning_rate=0.0003, arch_weight_decay=0.001, perturb_alpha='none', epsilon_alpha=0.3, wandb=False, nasbench=True, betadecay=True, sam=False, rho_alpha_sam=0.01, epsilon_sam=0.01, flood_level=0.0, data_aug=True)
+2024-06-13 14:28:23,012 param size = 1.686136MB
+2024-06-13 14:28:27,891 epoch 0 lr 2.500000e-02
+2024-06-13 14:28:27,891 epoch 0 epsilon_alpha 3.000000e-02
+2024-06-13 14:28:27,900 genotype = [('avg_pool_3x3', 0), ('nor_conv_3x3', 0), ('none', 1), ('avg_pool_3x3', 0), ('nor_conv_1x1', 1), ('none', 2)]
+2024-06-13 14:28:29,209 train 000 2.345717e+00 6.250000 54.687500

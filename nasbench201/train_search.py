@@ -63,6 +63,7 @@ parser.add_argument('--sam', action='store_true', default=False, help='use sam u
 parser.add_argument('--rho_alpha_sam', type=float, default=1e-2, help='rho alpha for SAM update')
 parser.add_argument('--epsilon_sam', type=float, default=1e-2, help='epsilon for SAM update')
 parser.add_argument('--flood_level', type=float, default=0.0, help='flood level for weight regularization')
+parser.add_argument('--data_aug', action='store_true', default=False, help='use data augmentation')
 
 args = parser.parse_args()
 
@@ -81,8 +82,8 @@ if args.wandb:
         # username or team name
         entity='flatnas',
         # set the wandb project where this run will be logged
-        project=f"FlatDARTS-{args.dataset}-nasbench{args.nasbench}",
-        name=f"SAM_{args.sam}-BETADECAY_{args.betadecay}-UNROLLED_{args.unrolled}-RHO_ALPHA_SAM_{args.rho_alpha_sam}",
+        project=f"FlatDARTS-{args.dataset}-nasbench{args.nasbench}-data_aug",
+        name=f"SAM_{args.sam}-BETADECAY_{args.betadecay}-UNROLLED_{args.unrolled}-DATA_AUG_{args.data_aug}",
         # track hyperparameters and run metadata
         config={**vars(args)},
     )
@@ -162,10 +163,16 @@ def main():
         sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[:split_train]),
         pin_memory=True)
 
-    valid_queue = torch.utils.data.DataLoader(
-        valid_data, batch_size=args.batch_size,
-        sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[split_valid:num_train]),
-        pin_memory=True)
+    if args.data_aug:
+        valid_queue = torch.utils.data.DataLoader(
+            train_data, batch_size=args.batch_size,
+            sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[split_valid:num_train]),
+            pin_memory=True)
+    else:
+        valid_queue = torch.utils.data.DataLoader(
+            valid_data, batch_size=args.batch_size,
+            sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[split_valid:num_train]),
+            pin_memory=True)
 
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
         optimizer, float(args.epochs), eta_min=args.learning_rate_min)
