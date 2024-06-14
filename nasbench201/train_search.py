@@ -29,6 +29,16 @@ from archive import NASBench201
 from genotypes import BENCH_PRIMITIVES
 import wandb
 
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
 
 parser = argparse.ArgumentParser("sota")
 parser.add_argument('--data', type=str, default='../datasets/cifar10', help='location of the data corpus')
@@ -51,19 +61,19 @@ parser.add_argument('--save', type=str, default='exp', help='experiment name')
 parser.add_argument('--seed', type=int, default=2, help='random seed')
 parser.add_argument('--grad_clip', type=float, default=5, help='gradient clipping')
 parser.add_argument('--train_portion', type=float, default=0.5, help='portion of training data')
-parser.add_argument('--unrolled', action='store_true', default=False, help='use one-step unrolled validation loss')
+parser.add_argument('--unrolled', type=str2bool, default=False, help='use one-step unrolled validation loss')
 parser.add_argument('--arch_learning_rate', type=float, default=3e-4, help='learning rate for arch encoding')
 parser.add_argument('--arch_weight_decay', type=float, default=1e-3, help='weight decay for arch encoding')
 parser.add_argument('--perturb_alpha', type=str, default='none', help='perturb for alpha')
 parser.add_argument('--epsilon_alpha', type=float, default=0.3, help='max epsilon for alpha')
-parser.add_argument('--wandb', action='store_true', default=False, help='use one-step unrolled validation loss')
+parser.add_argument('--wandb', type=str2bool, default=False, help='use one-step unrolled validation loss')
 parser.add_argument('--nasbench', action='store_true', default=False, help='use one-step unrolled validation loss')
-parser.add_argument('--betadecay', action='store_true', default=False, help='use beta-darts regularization')
+parser.add_argument('--betadecay', type=str2bool, default=False, help='use beta-darts regularization')
 parser.add_argument('--sam', action='store_true', default=False, help='use sam update rule')
 parser.add_argument('--rho_alpha_sam', type=float, default=1e-2, help='rho alpha for SAM update')
 parser.add_argument('--epsilon_sam', type=float, default=1e-2, help='epsilon for SAM update')
 parser.add_argument('--flood_level', type=float, default=0.0, help='flood level for weight regularization')
-parser.add_argument('--data_aug', action='store_true', default=False, help='use data augmentation')
+parser.add_argument('--data_aug', type=str2bool, default=False, help='use data augmentation')
 
 args = parser.parse_args()
 
