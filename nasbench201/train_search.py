@@ -1,6 +1,7 @@
 import os
 import sys
 sys.path.append(os.path.join(os.path.expanduser('~'),'darts-SAM'))
+from imagenet16 import ImageNet16
 import time
 import glob
 import numpy as np
@@ -99,10 +100,12 @@ if args.wandb:
     )
 
 
-if args.dataset == 'cifar100':
-    n_classes = 100
-else:
+if args.dataset == 'cifar10':
     n_classes = 10
+elif args.dataset == 'cifar100':
+    n_classes = 100
+elif args.dataset == 'imagenet16':
+    n_classes = 120
 
 def flatten_tuples(nested_list):
     flat_list = [item for sublist in nested_list for item in sublist]
@@ -157,6 +160,10 @@ def main():
         train_transform, valid_transform = utils._data_transforms_svhn(args)
         train_data = dset.SVHN(root=args.data, split='train', download=True, transform=train_transform)
         valid_data = dset.SVHN(root=args.data, split='train', download=True, transform=valid_transform)
+    elif args.dataset == 'imagenet16':
+        train_transform, valid_transform = utils._data_transforms_imagenet16(args)
+        train_data = ImageNet16(root=args.data, train=True, transform=train_transform)
+        valid_data = ImageNet16(root=args.data, train=False, transform=valid_transform)
 
     num_train = len(train_data)
     indices = list(range(num_train))

@@ -136,6 +136,24 @@ def _data_transforms_cifar10(args):
     ])
     return train_transform, valid_transform
 
+def _data_transforms_imagenet16(args):
+
+    IMAGENET16_MEAN = [x / 255 for x in [122.68, 116.66, 104.01]]
+    IMAGENET16_STD = [x / 255 for x in [63.22, 61.26, 65.09]]
+
+    train_transform = transforms.Compose([
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomCrop(16, padding=2),
+        transforms.ToTensor(),
+        transforms.Normalize(IMAGENET16_MEAN, IMAGENET16_STD),
+    ])
+
+    valid_transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize(IMAGENET16_MEAN, IMAGENET16_STD),
+    ])
+    
+    return train_transform, valid_transform
 
 def count_parameters_in_MB(model):
     return np.sum(np.prod(v.size()) for name, v in model.named_parameters() if "auxiliary" not in name) / 1e6
