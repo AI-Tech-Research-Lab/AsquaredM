@@ -11,6 +11,8 @@ if sys.version_info[0] == 2:
 else:
     import pickle
 
+# use_num_of_class_only: number of classes used (<=1000)
+# ImageNet16-120: 120 classes
 
 def calculate_md5(fpath, chunk_size=1024 * 1024):
     md5 = hashlib.md5()

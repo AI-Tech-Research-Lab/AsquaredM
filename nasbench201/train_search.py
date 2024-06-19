@@ -102,10 +102,13 @@ if args.wandb:
 
 if args.dataset == 'cifar10':
     n_classes = 10
+    dataset = 'cifar10'
 elif args.dataset == 'cifar100':
     n_classes = 100
+    dataset = 'cifar100'
 elif args.dataset == 'imagenet16':
     n_classes = 120
+    dataset = 'ImageNet16-120'
 
 def flatten_tuples(nested_list):
     flat_list = [item for sublist in nested_list for item in sublist]
@@ -162,9 +165,9 @@ def main():
         valid_data = dset.SVHN(root=args.data, split='train', download=True, transform=valid_transform)
     elif args.dataset == 'imagenet16':
         train_transform, valid_transform = utils._data_transforms_imagenet16(args)
-        train_data = ImageNet16(root=args.data, train=True, transform=train_transform)
-        valid_data = ImageNet16(root=args.data, train=False, transform=valid_transform)
-
+        train_data = ImageNet16(root=args.data, train=True, transform=train_transform, use_num_of_class_only=n_classes)
+        valid_data = ImageNet16(root=args.data, train=True, transform=valid_transform, use_num_of_class_only=n_classes)
+    
     num_train = len(train_data)
     indices = list(range(num_train))
     # split = int(np.floor(args.train_portion * num_train))
@@ -196,7 +199,7 @@ def main():
 
     architect = Architect(model, args)
 
-    bench=NASBench201(dataset=args.dataset)
+    bench=NASBench201(dataset=dataset)
 
     best_loss= float('inf')
     best_epoch=0
@@ -222,7 +225,6 @@ def main():
 
         temp,_ = model.genotype().tolist(True)
         genotype = flatten_tuples(temp)
-        cell_encode = translate_genotype_to_encode(genotype)
         logging.info('genotype = %s', genotype)
 
         print(model.show_alphas())
