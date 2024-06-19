@@ -157,10 +157,3 @@ class NASBench201(): #NASBench201 dataset
         str=self.archive['str'][idx]
         info['top1']=np.round(100 - self.archive['val-acc'][val_dataset][idx],3) # top1 error
         return info
-
-'''
-config= {'arch': '|none~0|+|none~0|nor_conv_3x3~1|+|none~0|none~1|nor_conv_1x1~2|'}
-bench = NASBench201(dataset='cifar100')
-info = bench.get_info_from_arch(config)
-print(info)
-'''
