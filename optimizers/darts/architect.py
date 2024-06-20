@@ -26,7 +26,13 @@ class Architect(object):
 
     def _val_loss(self, model, input, target):
         return model._loss(input, target)
-
+    
+    def _val_beta_loss(self, model, input, target, epoch):
+        weights = 0 + 50 * epoch / 100
+        ssr_normal = self.mlc_loss(model._arch_parameters)
+        loss = model._loss(input, target) + weights * ssr_normal
+        return loss
+        
     def _compute_unrolled_model(self, input, target, eta, network_optimizer):
         loss = self._train_loss(model=self.model, input=input, target=target)
         theta = _concat(self.model.parameters()).data
@@ -42,7 +48,7 @@ class Architect(object):
     def step(self, input_train, target_train, input_valid, target_valid, eta, network_optimizer, epoch, unrolled):
         self.optimizer.zero_grad()
         if self.sam:
-            self._backward_step_SAM(input_valid, target_valid)
+            self._backward_step_SAM(input_valid, target_valid, epoch)
         else:
             if unrolled: 
                 self._backward_step_unrolled(input_train, target_train, input_valid, target_valid, eta, network_optimizer)
@@ -140,8 +146,13 @@ class Architect(object):
 
         return [(x - y).div_(2 * R) for x, y in zip(grads_p, grads_n)]
     
-    def _backward_step_SAM(self, input_val, target_val):
-        val_loss = self._val_loss(self.model, input_val, target_val)
+    def _backward_step_SAM(self, input_val, target_val, epoch):
+
+        if self.betadecay:
+            val_loss = self._val_beta_loss(self.model, input_val, target_val, epoch)
+        else:
+            val_loss = self._val_loss(self.model, input_val, target_val)
+            
         dL_val_dalpha = torch.autograd.grad(val_loss, self.model.arch_parameters())
 
         tilde_alpha = [alpha + self.rho_alpha * dalpha for alpha, dalpha in zip(self.model.arch_parameters(), dL_val_dalpha)]
@@ -151,7 +162,12 @@ class Architect(object):
         with torch.no_grad():
             for param, alpha_p in zip(self.model.arch_parameters(), tilde_alpha):
                 param.data.copy_(alpha_p)
-        val_loss_tilde = self._val_loss(self.model, input_val, target_val)
+
+        if self.betadecay:
+            val_loss_tilde = self._val_beta_loss(self.model, input_val, target_val, epoch)
+        else:
+            val_loss_tilde = self._val_loss(self.model, input_val, target_val)
+        
         dL_val_dtilde_alpha = torch.autograd.grad(val_loss_tilde, self.model.arch_parameters())
 
         alpha_plus = [alpha + self.epsilon * dalpha for alpha, dalpha in zip(self.model.arch_parameters(), dL_val_dtilde_alpha)]
@@ -160,13 +176,23 @@ class Architect(object):
         with torch.no_grad():
             for param, alpha_p in zip(self.model.arch_parameters(), alpha_plus):
                 param.data.copy_(alpha_p)
-        val_loss_plus = self._val_loss(self.model, input_val, target_val)
+
+        if self.betadecay:
+            val_loss_plus = self._val_beta_loss(self.model, input_val, target_val, epoch)
+        else:
+            val_loss_plus = self._val_loss(self.model, input_val, target_val)
+
         dL_val_plus = torch.autograd.grad(val_loss_plus, self.model.arch_parameters())
 
         with torch.no_grad():
             for param, alpha_m in zip(self.model.arch_parameters(), alpha_minus):
                 param.data.copy_(alpha_m)
-        val_loss_minus = self._val_loss(self.model, input_val, target_val)
+
+        if self.betadecay:
+            val_loss_minus = self._val_beta_loss(self.model, input_val, target_val, epoch)
+        else:
+            val_loss_minus = self._val_loss(self.model, input_val, target_val)
+
         dL_val_minus = torch.autograd.grad(val_loss_minus, self.model.arch_parameters())
 
         with torch.no_grad():
