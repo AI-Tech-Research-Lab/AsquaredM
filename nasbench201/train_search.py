@@ -70,7 +70,7 @@ parser.add_argument('--epsilon_alpha', type=float, default=0.3, help='max epsilo
 parser.add_argument('--wandb', type=str2bool, default=False, help='use one-step unrolled validation loss')
 parser.add_argument('--nasbench', action='store_true', default=False, help='use one-step unrolled validation loss')
 parser.add_argument('--betadecay', type=str2bool, default=False, help='use beta-darts regularization')
-parser.add_argument('--sam', action='store_true', default=False, help='use sam update rule')
+parser.add_argument('--sam', type=str2bool, default=False, help='use sam update rule')
 parser.add_argument('--rho_alpha_sam', type=float, default=1e-2, help='rho alpha for SAM update')
 parser.add_argument('--epsilon_sam', type=float, default=1e-2, help='epsilon for SAM update')
 parser.add_argument('--flood_level', type=float, default=0.0, help='flood level for weight regularization')
@@ -94,7 +94,7 @@ if args.wandb:
         entity='flatnas',
         # set the wandb project where this run will be logged
         project=f"FlatDARTS-{args.dataset}-nasbench{args.nasbench}-data_aug",
-        name=f"SAM_{args.sam}-BETADECAY_{args.betadecay}-UNROLLED_{args.unrolled}-DATA_AUG_{args.data_aug}",
+        name=f"SAM_{args.sam}-BETADECAY_{args.betadecay}-UNROLLED_{args.unrolled}-DATA_AUG_{args.data_aug}-RHO_ALPHA_{args.rho_alpha_sam}",
         # track hyperparameters and run metadata
         config={**vars(args)},
     )
