@@ -9,6 +9,8 @@ __pycache__/
 
 #repos
 cifar/
+err/
+out/
 
 # Distribution / packaging
 .Python
