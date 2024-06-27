@@ -1,17 +1,18 @@
 #Beta-DARTS with flood weight regularization
 # imagenet16, cifar10, cifar100
 dataset=cifar100
-flood_level=0.0
-betadecay=False
-unrolled=False
-data_aug=False
-wandb=True
 sam=True
+betadecay=True
+unrolled=False
+data_augs=(False True)
 rho_alpha_sams=(1e-5 1e-4 1e-3 1e-2 1e-1 1.0 2.0)
-epsilon_sams=(1e-2)
+
+epsilon_sam=1e-2
+flood_level=0.0
+wandb=True
 
 for rho_alpha_sam in "${rho_alpha_sams[@]}"; do
-    for epsilon_sam in "${epsilon_sams[@]}"; do 
+    for data_aug in "${data_augs[@]}"; do 
         python nasbench201/train_search.py --nasbench --save results/nasbench_search_dataset${dataset}_betadecay${betadecay}_unrolled${unrolled}_data_aug${data_aug} \
                         --dataset $dataset --data ../datasets/$dataset \
                         --batch_size 64 --weight_decay 3e-4 --epochs 50 --momentum 0.9 \
