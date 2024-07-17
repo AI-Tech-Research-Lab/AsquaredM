@@ -14,27 +14,30 @@ def neighbors_by_radius(N, possible_values, vector, radius):
             neighbors.append(config)
     return neighbors
 
-def avg_val_acc(bench, configs):
-    avg_val_acc = 0
+def avg_test_acc(bench, configs):
+    avg_test_acc = 0
     accs = []
     for c in configs:
         arch = bench.decode(c)
-        val_acc = bench.get_info_from_arch(arch)['val-acc']
-        accs.append(val_acc)
-        avg_val_acc += val_acc
-    return avg_val_acc/len(configs), accs, np.std(accs)
+        test_acc = bench.get_info_from_arch(arch)['test-acc']
+        accs.append(test_acc)
+        avg_test_acc += test_acc
+    return avg_test_acc/len(configs), accs, np.std(accs)
 
-def rank_by_val_acc(bench):
+def rank_by_test_acc(bench):
+    '''
     if bench.dataset=='cifar10':
         val_dataset = bench.dataset + '-valid'
     else:
         val_dataset = bench.dataset
-    val_accs = bench.archive['val-acc'][val_dataset]
-    idxs = list(range(len(val_accs)))
-    val_accs_idxs = list(zip(val_accs, idxs))
-    sorted_val_accs_idxs = sorted(val_accs_idxs, key=lambda x: x[0])
-    sorted_val_accs = [val_acc for val_acc, _ in sorted_val_accs_idxs]
-    sorted_idxs = [idx for _, idx in sorted_val_accs_idxs]
+    '''
+    val_dataset = bench.dataset
+    test_accs = bench.archive['test-acc'][val_dataset]
+    idxs = list(range(len(test_accs)))
+    test_accs_idxs = list(zip(test_accs, idxs))
+    sorted_test_accs_idxs = sorted(test_accs_idxs, key=lambda x: x[0])
+    sorted_test_accs = [test_acc for test_acc, _ in sorted_test_accs_idxs]
+    sorted_idxs = [idx for _, idx in sorted_test_accs_idxs]
     # Filter the indices for architectures with specific validation accuracies
     filtered_idxs = []
     filtered_idxs.append(sorted_idxs[-1])  # Add the best architecture
@@ -50,21 +53,21 @@ def rank_by_val_acc(bench):
         min = 25
     found_max= False 
     found_min = False
-    for val_acc, idx in reversed(sorted_val_accs_idxs):
-        if not found_max and val_acc < max:
+    for test_acc, idx in reversed(sorted_test_accs_idxs):
+        if not found_max and test_acc < max:
             filtered_idxs.append(idx)
             found_max = True
         
-        if not found_min and val_acc < min:
+        if not found_min and test_acc < min:
             filtered_idxs.append(idx)
             found_min = True
         
         if found_max and found_min:
             break  # Stop if both conditions are met
     
-    filtered_val_accs = [val_acc for val_acc, _ in sorted_val_accs_idxs if _ in filtered_idxs]
+    filtered_test_accs = [test_acc for test_acc, _ in sorted_test_accs_idxs if _ in filtered_idxs]
 
-    return filtered_val_accs, filtered_idxs
+    return filtered_test_accs, filtered_idxs
 
 def pvalue(data):
     import scipy.stats as stats
@@ -88,17 +91,17 @@ def pvalue(data):
 def plot_avgacc_vs_radius():
 
     bench = NASBench201(dataset='cifar10')
-    sorted_val_accs, sorted_idxs = rank_by_val_acc(bench)
-    print("SORTED VAL ACCS: ", sorted_val_accs)
+    sorted_test_accs, sorted_idxs = rank_by_test_acc(bench)
+    print("SORTED VAL ACCS: ", sorted_test_accs)
 
     config1 = bench.encode({'arch':bench.archive['str'][sorted_idxs[0]]})
     config2 = bench.encode({'arch':bench.archive['str'][sorted_idxs[1]]})
     config3 = bench.encode({'arch':bench.archive['str'][sorted_idxs[2]]})
     radius_range=range(1,4)
     # Placeholder lists to store accuracy values
-    acc_config1 = [sorted_val_accs[2]]
-    acc_config2 = [sorted_val_accs[1]]
-    acc_config3 = [sorted_val_accs[0]]
+    acc_config1 = [sorted_test_accs[2]]
+    acc_config2 = [sorted_test_accs[1]]
+    acc_config3 = [sorted_test_accs[0]]
 
     for radius in radius_range:
         # Calculate neighbors for each configuration
@@ -107,9 +110,9 @@ def plot_avgacc_vs_radius():
         neighbors_config3 = neighbors_by_radius(bench.nvar, list(range(bench.num_operations)), config3, radius)
         
         # Calculate average validation accuracy for each configuration
-        avg_acc_config1 = avg_val_acc(bench, neighbors_config1)[0]
-        avg_acc_config2 = avg_val_acc(bench, neighbors_config2)[0]
-        avg_acc_config3 = avg_val_acc(bench, neighbors_config3)[0]
+        avg_acc_config1 = avg_test_acc(bench, neighbors_config1)[0]
+        avg_acc_config2 = avg_test_acc(bench, neighbors_config2)[0]
+        avg_acc_config3 = avg_test_acc(bench, neighbors_config3)[0]
         
         # Append accuracy values to respective lists
         acc_config1.append(avg_acc_config1)
@@ -131,8 +134,8 @@ def plot_avgacc_vs_radius():
 def boxplot_acc_vs_radius():
 
     bench = NASBench201(dataset='cifar10')
-    sorted_val_accs, sorted_idxs = rank_by_val_acc(bench)
-    print("SORTED VAL ACCS: ", sorted_val_accs)
+    sorted_test_accs, sorted_idxs = rank_by_test_acc(bench)
+    print("SORTED VAL ACCS: ", sorted_test_accs)
 
     config1 = bench.encode({'arch':bench.archive['str'][sorted_idxs[0]]})
     config2 = bench.encode({'arch':bench.archive['str'][sorted_idxs[1]]})
@@ -151,9 +154,9 @@ def boxplot_acc_vs_radius():
         neighbors_config3 = neighbors_by_radius(bench.nvar, list(range(bench.num_operations)), config3, radius)
         
         # Calculate validation accuracy for each configuration
-        acc_neighbors_config1 = avg_val_acc(bench, neighbors_config1)[1]
-        acc_neighbors_config2 = avg_val_acc(bench, neighbors_config2)[1]
-        acc_neighbors_config3 = avg_val_acc(bench, neighbors_config3)[1]
+        acc_neighbors_config1 = avg_test_acc(bench, neighbors_config1)[1]
+        acc_neighbors_config2 = avg_test_acc(bench, neighbors_config2)[1]
+        acc_neighbors_config3 = avg_test_acc(bench, neighbors_config3)[1]
         
         # Append accuracy values to respective lists
         accuracies_by_radius_config1.append(acc_neighbors_config1)
@@ -273,8 +276,8 @@ def plot_simple_histograms(data_array, bins=36, path=''):
 def compute_acc_by_radius(dataset='cifar10'):
     bench = NASBench201(dataset=dataset)
     result_dir = os.path.join('../results/flatness_exp', dataset)  
-    sorted_val_accs, sorted_idxs = rank_by_val_acc(bench)
-    val_accs = bench.archive['val-acc'][dataset]
+    sorted_test_accs, sorted_idxs = rank_by_test_acc(bench)
+    test_accs = bench.archive['test-acc'][dataset]
 
     config1 = bench.encode({'arch':bench.archive['str'][sorted_idxs[0]]})
     config2 = bench.encode({'arch':bench.archive['str'][sorted_idxs[1]]})
@@ -291,7 +294,7 @@ def compute_acc_by_radius(dataset='cifar10'):
 
         acc_neighbors_configs = []
         for radius in radius_range:
-            model_path = os.path.join(result_dir,"accuracies_config_" + str(idx+1) + "_radius_" + str(radius) + ".npy")
+            model_path = os.path.join(result_dir,"test_accuracies_config_" + str(idx+1) + "_radius_" + str(radius) + ".npy")
             if not os.path.exists(model_path):
                 print("Calculating array")
                 config=configs[idx]
@@ -299,7 +302,7 @@ def compute_acc_by_radius(dataset='cifar10'):
                 neighbors_config = neighbors_by_radius(bench.nvar, list(range(bench.num_operations)), config, radius)
                 
                 # Calculate validation accuracy for each configuration
-                acc_neighbors_config = avg_val_acc(bench, neighbors_config)[1]
+                acc_neighbors_config = avg_test_acc(bench, neighbors_config)[1]
                 
                 acc_neighbors_config = np.array(acc_neighbors_config)
 
@@ -319,9 +322,9 @@ def compute_acc_by_radius(dataset='cifar10'):
     #idx = np.argmax(accuracies_by_radius_configs[0][2])
     #config = neighbors_by_radius(bench.nvar, list(range(bench.num_operations)), config1, 3)[idx]
 
-    acc_by_configs = [val_accs, accuracies_by_radius_configs[0], accuracies_by_radius_configs[1], accuracies_by_radius_configs[2]]
+    acc_by_configs = [test_accs, accuracies_by_radius_configs[0], accuracies_by_radius_configs[1], accuracies_by_radius_configs[2]]
     return acc_by_configs
-    #plot_histograms(acc_by_configs, path=os.path.join(result_dir,'histogram_configs.png'), baselines=(sorted_val_accs)[::-1]) 
+    #plot_histograms(acc_by_configs, path=os.path.join(result_dir,'histogram_configs.png'), baselines=(sorted_test_accs)[::-1]) 
 
 def search_tree(root_config, target_config):
         def generate_moves(curr_config, target_config, path):
@@ -366,7 +369,7 @@ def path_bench(dataset):
     print("DATASET: ", dataset)
     bench = NASBench201(dataset=dataset)
     #net1 config
-    sorted_val_accs, sorted_idxs = rank_by_val_acc(bench)
+    sorted_test_accs, sorted_idxs = rank_by_test_acc(bench)
     if dataset=='cifar10':
         config_idx = 0
     elif dataset=='cifar100':
@@ -397,21 +400,21 @@ def path_bench(dataset):
                 archs_by_level[i].append(path[i+1])
     #print("CONFIGS BY LEVEL: ", archs_by_level)
     # Average validation accuracy by level
-    avg_val_accs = []
-    std_val_accs = []
+    avg_test_accs = []
+    std_test_accs = []
     for configs in archs_by_level:
-        avg, _, std = avg_val_acc(bench, configs)
-        avg_val_accs.append(avg)
-        std_val_accs.append(std)
-    path_accs= [acc1['val-acc']] + avg_val_accs + [acc2['val-acc']]
+        avg, _, std = avg_test_acc(bench, configs)
+        avg_test_accs.append(avg)
+        std_test_accs.append(std)
+    path_accs= [acc1['test-acc']] + avg_test_accs + [acc2['test-acc']]
     print("PATH ACCS: ", path_accs)
-    print("STD VAL ACCS: ", std_val_accs)
+    print("STD VAL ACCS: ", std_test_accs)
     # Plot the path
     # (flat plot is better)
     # Plot the path
     x = list(range(4))  # 0, 1, 2, 3 representing the radius
     y = path_accs
-    yerr = [0] + std_val_accs + [0]  # no std dev for acc1 and acc2
+    yerr = [0] + std_test_accs + [0]  # no std dev for acc1 and acc2
     
     plt.figure(figsize=(10, 5))
     plt.errorbar(x, y, yerr=yerr, fmt='-o', capsize=5, capthick=2, elinewidth=1, label='Validation Accuracy')
