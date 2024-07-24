@@ -1,7 +1,8 @@
 import os
 import sys
+
 sys.path.append(os.path.join(os.path.expanduser('~'),'workspace/darts-SAM')) 
-#sys.path.append("/u01/homes/fpittorino/workspace/darts-SAM")
+#sys.path.append("/u01/homes/fpittorino/workspace/darts-SAM") 
 from imagenet16 import ImageNet16
 import time
 import glob
@@ -17,7 +18,8 @@ import torchvision.datasets as dset
 import torch.backends.cudnn as cudnn
 
 from torch.autograd import Variable
-from nasbench201.model import Network, distill
+from nasbench201.model import Network as BenchNetwork
+from optimizers.darts.model_search2 import Network as DARTSNetwork
 from optimizers.darts.architect import Architect
 
 from attacker.perturb import Linf_PGD_alpha, Random_alpha
@@ -27,8 +29,8 @@ from numpy import linalg as LA
 
 #from torch.utils.tensorboard import SummaryWriter
 #from nas_201_api import NASBench201API as API
-from archive import NASBench201
-from genotypes import BENCH_PRIMITIVES
+from nasbench201.archive import NASBench201
+from nasbench201.genotypes import BENCH_PRIMITIVES
 import wandb
 
 def str2bool(v):
@@ -54,7 +56,7 @@ parser.add_argument('--report_freq', type=float, default=50, help='report freque
 parser.add_argument('--gpu', type=int, default=0, help='gpu device id')
 parser.add_argument('--epochs', type=int, default=100, help='num of training epochs')
 parser.add_argument('--init_channels', type=int, default=16, help='num of init channels')
-parser.add_argument('--layers', type=int, default=8, help='total number of layers')
+parser.add_argument('--n_cells', type=int, default=8, help='total number of cells')
 parser.add_argument('--model_path', type=str, default='saved_models', help='path to save the model')
 parser.add_argument('--cutout', action='store_true', default=False, help='use cutout')
 parser.add_argument('--cutout_length', type=int, default=16, help='cutout length')
@@ -75,7 +77,9 @@ parser.add_argument('--sam', type=str2bool, default=False, help='use sam update 
 parser.add_argument('--rho_alpha_sam', type=float, default=1e-2, help='rho alpha for SAM update')
 parser.add_argument('--epsilon_sam', type=float, default=1e-2, help='epsilon for SAM update')
 parser.add_argument('--flood_level', type=float, default=0.0, help='flood level for weight regularization')
-parser.add_argument('--data_aug', type=str2bool, default=False, help='use data augmentation')
+parser.add_argument('--data_aug', type=str2bool, default=True, help='use data augmentation on validation set')
+parser.add_argument('--output_weights', type=bool, default=True, help='Whether to use weights on the output nodes')
+parser.add_argument('--search_space', choices=['1', '2', '3'], default='1')
 
 args = parser.parse_args()
 
@@ -141,7 +145,20 @@ def main():
     #api = API('/remote-home/share/share/dataset/NAS-Bench-201-v1_0-e61699.pth')
     criterion = nn.CrossEntropyLoss()
     criterion = criterion.cuda()
-    model = Network(C=args.init_channels, N=5, max_nodes=4, num_classes=n_classes, criterion=criterion)  # N=5/1/3
+    #model = Network(C=args.init_channels, N=5, max_nodes=4, num_classes=n_classes, criterion=criterion)  # N=5/1/3
+
+    if not args.nasbench:
+        model = DARTSNetwork(args.init_channels, n_classes, args.n_cells, criterion)
+        '''
+        model = DARTSNetwork(args.init_channels, n_classes, args.layers, criterion, 
+                    output_weights=args.output_weights, steps=4, 
+                    search_space=args.search_space)
+        '''
+    else:
+        #stages = 3
+        #cells = 5
+        model = BenchNetwork(C=args.init_channels, N=5, max_nodes=4, num_classes=n_classes, criterion=criterion)
+
     model = model.cuda()
     logging.info("param size = %fMB", utils.count_parameters_in_MB(model))
 
@@ -224,8 +241,9 @@ def main():
             epsilon_alpha = 0.03 + (args.epsilon_alpha - 0.03) * epoch / args.epochs
             logging.info('epoch %d epsilon_alpha %e', epoch, epsilon_alpha)
 
-        temp,_ = model.genotype().tolist(True)
-        genotype = flatten_tuples(temp)
+        #temp,_ = model.genotype().tolist(True)
+        #genotype = flatten_tuples(temp)
+        genotype = model.genotype()
         logging.info('genotype = %s', genotype)
 
         print(model.show_alphas())

@@ -5,7 +5,7 @@ import os
 import sys
 sys.path.append(os.path.join(os.path.expanduser('~'),'darts-SAM/nasbench201'))
 from operations import *
-from genotypes import BENCH_PRIMITIVES
+from nasbench201.genotypes import BENCH_PRIMITIVES
 
 
 class NASBench201Cell(nn.Module):

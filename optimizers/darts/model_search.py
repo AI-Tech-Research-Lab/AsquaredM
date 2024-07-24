@@ -1,18 +1,19 @@
+import torch
+import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 
-from nasbench_analysis.search_spaces.search_space_1 import SearchSpace1
-from optimizers.darts.genotypes import PRIMITIVES
-from optimizers.darts.operations import *
+#from nasbench_analysis.search_spaces.search_space_1 import SearchSpace1
 
+from operations import OPS, ReLUConvBN, ConvBnRelu, DARTS_SPACE
 
 class MixedOp(nn.Module):
 
-    def __init__(self, C, stride):
+    def __init__(self, C_in, C_out, stride, affine=False, track_running_stats=True):
         super(MixedOp, self).__init__()
         self._ops = nn.ModuleList()
-        for primitive in PRIMITIVES:
-            op = OPS[primitive](C, stride, False)
+        for primitive in DARTS_SPACE:
+            op = OPS[primitive](C_in, C_out, stride, affine, track_running_stats)
             '''
             Not used in NASBench
             if 'pool' in primitive:
@@ -34,7 +35,7 @@ class ChoiceBlock(nn.Module):
     def __init__(self, C_in):
         super(ChoiceBlock, self).__init__()
         # Pre-processing 1x1 convolution at the beginning of each choice block.
-        self.mixed_op = MixedOp(C_in, stride=1)
+        self.mixed_op = MixedOp(C_in, C_in, stride=1)
 
     def forward(self, inputs, input_weights, weights):
         if input_weights is not None:
@@ -52,7 +53,7 @@ class ChoiceBlock(nn.Module):
 
 class Cell(nn.Module):
 
-    def __init__(self, steps, C_prev, C, layer, search_space):
+    def __init__(self, steps, C_prev, C, layer, search_space=1):
         super(Cell, self).__init__()
         # All cells are normal cells in NASBench case.
         self._steps = steps
@@ -86,7 +87,7 @@ class Cell(nn.Module):
             # Select the current weighting for input edges to each choice block
             if input_weights is not None:
                 # Node 1 has no choice with respect to its input
-                if (choice_block_idx == 0) or (choice_block_idx == 1 and type(self.search_space) == SearchSpace1):
+                if (choice_block_idx == 0) or (choice_block_idx == 1 and self.search_space == 1):
                     input_weight = None
                 else:
                     input_weight = input_weights.pop(0)
@@ -140,7 +141,7 @@ class Network(nn.Module):
             self.cells += [cell]
             C_prev = C_curr
         self.postprocess = ReLUConvBN(C_in=C_prev * self._steps, C_out=C_curr, kernel_size=1, stride=1, padding=0,
-                                      affine=False)
+                                      affine=False, dilation=False)
 
         self.classifier = nn.Linear(C_prev, num_classes)
         self._initialize_alphas()
@@ -211,13 +212,13 @@ class Network(nn.Module):
 
     def _initialize_alphas(self):
         # Initializes the weights for the mixed ops.
-        num_ops = len(PRIMITIVES)
+        num_ops = len(DARTS_SPACE)
         self.alphas_mixed_op = Variable(1e-3 * torch.randn(self._steps, num_ops).cuda(), requires_grad=True)
 
         # For the alphas on the output node initialize a weighting vector for all choice blocks and the input edge.
         self.alphas_output = Variable(1e-3 * torch.randn(1, self._steps + 1).cuda(), requires_grad=True)
 
-        if type(self.search_space) == SearchSpace1:
+        if self.search_space == 1:
             begin = 3
         else:
             begin = 2
@@ -265,3 +266,8 @@ class Network(nn.Module):
                 if line.sum() == 0.0:
                     line.data[max_index] = 1.0
                 line.data.div_(line.sum())
+    
+    def get_weights(self):
+        xlist = list( self.stem.parameters() ) + list( self.cells.parameters() )# + list( self.global_pooling.parameters() )
+        xlist+= list( self.classifier.parameters() )
+        return xlist

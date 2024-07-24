@@ -61,8 +61,25 @@ class Architect(object):
         base_entropy = torch.log(torch.tensor(2).float())
         aux_loss = torch.mean(valid_loss) + base_entropy
         return aux_loss
-
+    
     def mlc_loss(self, arch_param):
+        # This update is for the case of 2 sets of architecture parameters (like in DARTS)
+        
+        if isinstance(arch_param, list) and len(arch_param) == 2:
+            y_pred_neg_1, y_pred_neg_2 = arch_param
+            neg_loss_1 = torch.logsumexp(y_pred_neg_1, dim=-1)
+            neg_loss_2 = torch.logsumexp(y_pred_neg_2, dim=-1)
+            aux_loss_1 = torch.mean(neg_loss_1)
+            aux_loss_2 = torch.mean(neg_loss_2)
+            aux_loss = (aux_loss_1 + aux_loss_2) / 2
+        else:
+            y_pred_neg = arch_param
+            neg_loss = torch.logsumexp(y_pred_neg, dim=-1)
+            aux_loss = torch.mean(neg_loss)
+        
+        return aux_loss
+
+    def mlc_loss_1setarchparams(self, arch_param):
         y_pred_neg = arch_param
         neg_loss = torch.logsumexp(y_pred_neg, dim=-1)
         aux_loss = torch.mean(neg_loss)

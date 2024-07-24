@@ -155,20 +155,22 @@ def load_checkpoint(model, optimizer, device, filename='checkpoint.pth'):
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     return model, optimizer
 
-def train(train_loader, val_loader, num_epochs, model, device, optimizer, criterion, scheduler, log, ckpt_path=None, label_smoothing=0.1, cutout=False, cutout_prob=1.0):
+def train(train_loader, val_loader, num_epochs, model, device, optimizer, criterion, scheduler, log, ckpt_path=None, label_smoothing=0.1, cutout=False, cutout_prob=1.0, 
+          auxiliary=False, auxiliary_weight=0.4, drop_path_prob=0.0):
         model.to(device)
         for epoch in range(num_epochs):
  
             if cutout:
                 # increase the cutout probability linearly throughout search
-                train_loader.dataset.transform.transforms[-1].prob = cutout_prob * epoch / (num_epochs - 1)
+                train_loader.dataset.dataset.transform.transforms[-1].prob = cutout_prob * epoch / (num_epochs - 1)
                 #print('CUTOUT PROB: ', train_loader.dataset.transform.transforms[-1].prob)
+            
+            model.drop_path_prob = drop_path_prob * epoch / num_epochs
 
             model.train()
             log.train(model, optimizer, len_dataset=len(train_loader))
 
             for (inputs,targets) in train_loader:
-                #inputs = F.interpolate(inputs, size=180, mode='bicubic', align_corners=False)
                 inputs, targets = inputs.to(device), targets.to(device)
 
                 # first forward-backward step
@@ -177,8 +179,11 @@ def train(train_loader, val_loader, num_epochs, model, device, optimizer, criter
                 else:
                     optimizer.zero_grad()
                     
-                predictions = model(inputs)
+                predictions, predictions_aux = model(inputs)
                 loss = criterion(predictions, targets)
+                if auxiliary:
+                    loss_aux = criterion(predictions_aux, targets)
+                    loss += auxiliary_weight*loss_aux
                 loss.backward()
 
                 if not isinstance(optimizer, SAM):

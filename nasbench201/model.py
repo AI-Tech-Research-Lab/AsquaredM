@@ -7,7 +7,7 @@ import math, random
 import warnings
 import sys
 sys.path.insert(0, '../')
-from nasbench201.operations import ResNetBasicblock, OPS, NAS_BENCH_201
+from operations import ResNetBasicblock, OPS, NAS_BENCH_201
 from nasbench201.genotypes import Structure
 
 

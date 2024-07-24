@@ -182,4 +182,26 @@ class FactorizedReduce(nn.Module):
 
   def extra_repr(self):
     return 'C_in={C_in}, C_out={C_out}, stride={stride}'.format(**self.__dict__)
+  
+# Batch Normalization from nasbench
+BN_MOMENTUM = 0.997
+BN_EPSILON = 1e-5
+
+class ConvBnRelu(nn.Module):
+    """
+    Equivalent to conv_bn_relu https://github.com/google-research/nasbench/blob/master/nasbench/lib/base_ops.py#L32
+    """
+
+    def __init__(self, C_in, C_out, kernel_size, stride, padding=1):
+        super(ConvBnRelu, self).__init__()
+        self.op = nn.Sequential(
+            # Padding = 1 is for a 3x3 kernel equivalent to tensorflow padding = same
+            nn.Conv2d(C_in, C_out, kernel_size, stride=stride, padding=padding, bias=False),
+            # affine is equivalent to scale in original tensorflow code
+            nn.BatchNorm2d(C_out, affine=True, momentum=BN_MOMENTUM, eps=BN_EPSILON),
+            nn.ReLU(inplace=False)
+        )
+
+    def forward(self, x):
+        return self.op(x)
 

@@ -1,7 +1,5 @@
 import argparse
 from nasbench201.archive import NASBench201
-from optimizers.darts.genotypes import Genotype
-from optimizers.darts.model import NetworkCIFAR
 import torch
 
 import sys
@@ -24,9 +22,43 @@ def load_array_from_file(file_path):
         arr = list(map(int, array_str.split(',')))  # Split string by comma and convert to integers
     return arr
 
+def generate_neighbors(config, value_range):
+    neighbors = []
+    for i in range(len(config)):
+        for value in value_range:
+            if config[i] != value:
+                neighbor = config.copy()
+                neighbor[i] = value
+                neighbors.append(neighbor)
+    return neighbors
+
+def evaluate_configuration(config, args, device, bench, train_loader, val_loader, test_loader):
+    cell_encode = bench.encode({'arch': config})
+    model = NASBenchNet(cell_encode=cell_encode, C=16, num_classes=args.n_classes, stages=3, cells=5, steps=4)
+    model.to(device)
+    
+    log = Log(log_each=10)
+    optimizer = get_optimizer(model.parameters(), args.optim, args.learning_rate, args.momentum, args.weight_decay, args.rho, args.adaptive, args.nesterov)
+    criterion = get_loss('ce')
+    scheduler = get_lr_scheduler(optimizer, 'cosine', epochs=args.epochs, lr_min=args.lr_min)
+    
+    top1, model, optimizer = train(train_loader, val_loader, args.epochs, model, device, optimizer, criterion, scheduler, log, ckpt_path=None, cutout=args.cutout)
+    top1_test = validate(test_loader, model, device, print_freq=100)
+    
+    return top1_test, model.state_dict()
+
+def check_if_evaluated(config, output_path):
+    config_str = ','.join(map(str, config))
+    save_path = os.path.join(output_path, f"net_{config_str}.pt")
+    if os.path.exists(save_path):
+        return True, save_path
+    return False, save_path
+
+
+
 if __name__ == "__main__":
+
     parser = argparse.ArgumentParser()
-    #seed
     parser.add_argument("--seed", default=2, type=int, help="Seed for reproducibility.") #42
     parser.add_argument("--adaptive", default=True, type=bool, help="True if you want to use the Adaptive SAM.")
     parser.add_argument("--nesterov", action='store_true', default=False, help="True if you want to use Nesterov momentum.")
@@ -45,7 +77,6 @@ if __name__ == "__main__":
     parser.add_argument('--cutout', action='store_true', default=False, help='use cutout')
     parser.add_argument('--cutout_length', type=int, default=16, help='cutout length')
     parser.add_argument('--cutout_prob', type=float, default=1.0, help='cutout probability')
-    parser.add_argument('--drop_path_prob', type=float, default=0.2, help='drop path probability')
     parser.add_argument('--save', action='store_true', default=False, help='save log of experiments')
     parser.add_argument('--save_ckpt', action='store_true', default=False, help='save checkpoint')
     parser.add_argument('--optim', type=str, default='SAM', help='algorithm to use for training')
@@ -78,9 +109,6 @@ if __name__ == "__main__":
     parser.add_argument('--wm', default=0.0, type=float, help="weight for macs")
     parser.add_argument('--wa', default=0.0, type=float, help="weight for activations")
     parser.add_argument('--penalty', default=1e10, type=float, help="penalty for constraint violation")
-    parser.add_argument('--auxiliary', action='store_true', default=False, help='add auxiliary head')
-    parser.add_argument('--auxiliary_weight', default=0.4, type=float, help="weight for auxiliary loss")
-
 
     args = parser.parse_args()
 
@@ -109,113 +137,40 @@ if __name__ == "__main__":
     device = torch.device(device)
     initialize_seed(args.seed, use_cuda)
 
-    supernet_path = args.supernet_path
-    if args.model_path is not None:
-        model_path = args.model_path
-    logging.info("Model: %s", args.model)
+    bench = #NASBench201('cifar100')
+    initial_config = load_array_from_file(os.path.join(args.output_path,'best_genotype.txt'))
+    value_range = range(4)  # Assuming values in config can be 0, 1, 2, 3
 
-    '''
-    #cell_encode = load_array_from_file(os.path.join(args.output_path,'best_genotype.txt'))
-    bench = NASBench201('cifar100')
-    cell_encode = bench.encode({'arch': '|none~0|+|none~0|nor_conv_3x3~1|+|none~0|none~1|nor_conv_1x1~2|'})
-    #print("Cell encode: ", cell_encode)
-    #cell_encode = [3, 3, 3, 1, 3, 2]
-    model = NASBenchNet(cell_encode=cell_encode, C=16, num_classes=args.n_classes, stages=3, cells=5, steps=4)
-    res=32
-    '''
-    genotype = Genotype(
-    normal=[
-        ('nor_conv_3x3', 0), ('nor_conv_3x3', 1), 
-        ('nor_conv_3x3', 0), ('nor_conv_3x3', 1), 
-        ('nor_conv_3x3', 1), ('skip_connect', 0), 
-        ('skip_connect', 0), ('dil_sepc_3x3', 2)
-    ], 
-    normal_concat=[2, 3, 4, 5],
-    reduce=[
-        ('max_pool_3x3', 0), ('max_pool_3x3', 1), 
-        ('skip_connect', 2), ('max_pool_3x3', 1), 
-        ('max_pool_3x3', 0), ('skip_connect', 2), 
-        ('skip_connect', 2), ('max_pool_3x3', 1)
-    ], 
-    reduce_concat=[2, 3, 4, 5]
-)
-    
-    model = NetworkCIFAR(C=36, num_classes=10, layers=20, genotype=genotype, auxiliary=True)
-
-    res=32
-
-    logging.info("Train config")
-    logging.info(args)
-
-    '''
-    train_loader, val_loader, test_loader = get_data_loaders(dataset=args.dataset, batch_size=args.batch_size, threads=args.n_workers, 
-                                            val_split=args.val_split, balanced_val=args.balanced_val,
-                                            img_size=res, augmentation=True, eval_test=args.eval_test)
-    
-    if val_loader is None:
-        val_loader = test_loader
-    '''
     train_set, val_set, test_set, _, _ = get_dataset(name=args.dataset, val_split=args.val_split, augmentation=True, cutout=args.cutout, balanced_val=args.balanced_val)
     train_loader, val_loader, test_loader = get_data_loaders(train_set, val_set, test_set, batch_size=args.batch_size, threads=args.n_workers, eval_test=True)
-    print("TRANSFORM")
-    print(train_set.dataset.transform)
     if val_loader is None:
         val_loader = test_loader
 
-    log = Log(log_each=10)
+    neighbors = generate_neighbors(initial_config, value_range)
+    results = {}
 
-    model.to(device)
-    epochs = args.epochs
+    for neighbor in neighbors:
+        logging.info(f"Evaluating config: {neighbor}")
+        already_evaluated, save_path = check_if_evaluated(neighbor, args.output_path)
+        
+        if already_evaluated:
+            logging.info(f"Configuration {neighbor} already evaluated. Loading results from {save_path}")
+            state_dict = torch.load(save_path)
+            top1_test = state_dict['accuracy']
+        else:
+            top1_test, state_dict = evaluate_configuration(neighbor, args, device, bench, train_loader, val_loader, test_loader)
+            torch.save({'accuracy': top1_test, 'state_dict': state_dict}, save_path)
+        
+        config_str = ','.join(map(str, neighbor))
+        results[config_str] = {
+            'accuracy': top1_test,
+            'state_dict': state_dict
+        }
+        
+        save_path = os.path.join(args.output_path, f"net_{config_str}.pt")
+        torch.save(state_dict, save_path)
 
-    optimizer = get_optimizer(model.parameters(), args.optim, args.learning_rate, args.momentum, args.weight_decay, args.rho, args.adaptive, args.nesterov)
+    with open(os.path.join(args.output_path, 'results.json'), 'w') as f:
+        json.dump(results, f)
 
-    criterion = get_loss('ce')
-    
-    scheduler = get_lr_scheduler(optimizer, 'cosine', epochs=epochs, lr_min=args.lr_min)
-    
-    if (os.path.exists(os.path.join(args.output_path,'ckpt.pth'))):
-        model, optimizer = load_checkpoint(model, optimizer, os.path.join(args.output_path,'ckpt.pth'))
-        logging.info("Loaded checkpoint")
-        #top1 = validate(val_loader, model, device, print_freq=100)/100
-    else:
-        logging.info("Start training...")
-        top1, model, optimizer = train(train_loader, val_loader, epochs, model, device, optimizer, criterion, scheduler, log, ckpt_path=os.path.join(args.output_path,'ckpt.pth'),
-                                       cutout=args.cutout, auxiliary=args.auxiliary, auxiliary_weight=args.auxiliary_weight, drop_path_prob=args.drop_path_prob)
-        logging.info("Training finished")
-
-    results={}
-
-    top1 = validate(test_loader, model, device, print_freq=100)
-    logging.info(f"TEST ACCURACY: {top1}")
-    top1_err = (1 - top1) * 100
-
-    input_shape = (3, res, res)
-    #Model cost
-    
-    if args.optim == 'SAM' or args.eval_robust:
-        sigma_step = args.sigma_step
-        if args.sigma_max == args.sigma_min:
-            sigma_step = 1
-        n=round((args.sigma_max-args.sigma_min)/sigma_step)+1
-        sigma_list = [round(args.sigma_min + i * args.sigma_step, 2) for i in range(n)] 
-
-        info_runtime = get_net_info_runtime(device, model, val_loader, sigma_list, print_info=True)
-        results['robustness'] = info_runtime['robustness'][0]
-        logging.info(f"ROBUSTNESS: {info_runtime['robustness'][0]}")
-        alpha = args.alpha
-        alpha_norm = args.alpha_norm
-        results['top1_robust'] = np.round(alpha * top1_err + alpha_norm * (1-alpha) * info_runtime['robustness'][0],2)
-
-    info = get_net_info(model, input_shape=input_shape, print_info=True)
-
-    #results['top1'] = np.round(top1_err,2)
-    results['macs'] = info['macs']
-    results['activations'] = info['activations']
-    results['params'] = info['params']
-
-    n_subnet = args.output_path.rsplit("_", 1)[1] 
-    
-    save_path = os.path.join(args.output_path, 'net_{}.stats'.format(n_subnet)) 
-
-    with open(save_path, 'w') as handle:
-        json.dump(results, handle)
+    logging.info("All configurations evaluated and results saved.")

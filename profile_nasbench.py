@@ -24,6 +24,30 @@ def avg_test_acc(bench, configs):
         avg_test_acc += test_acc
     return avg_test_acc/len(configs), accs, np.std(accs)
 
+def get_targets_acc(bench):
+    if bench.dataset == 'cifar10':
+        max = 85 #avg acc
+        min = 75 #bad acc
+    elif bench.dataset == 'cifar100':
+        max = 65
+        min = 55
+    else: # imagenet
+        max = 35
+        min = 25
+    return max, min
+
+def get_limits_plot(dataset):
+    if dataset == 'cifar10':
+        max = 95 #avg acc
+        min = 70 #bad acc
+    elif dataset == 'cifar100':
+        max = 75
+        min = 40
+    else: # imagenet
+        max = 50
+        min = 10
+    return max, min
+
 def rank_by_test_acc(bench):
     '''
     if bench.dataset=='cifar10':
@@ -31,6 +55,8 @@ def rank_by_test_acc(bench):
     else:
         val_dataset = bench.dataset
     '''
+    # Return indexes of architectures with target test accuracies and the corresponding accuracies
+
     val_dataset = bench.dataset
     test_accs = bench.archive['test-acc'][val_dataset]
     idxs = list(range(len(test_accs)))
@@ -41,16 +67,7 @@ def rank_by_test_acc(bench):
     # Filter the indices for architectures with specific validation accuracies
     filtered_idxs = []
     filtered_idxs.append(sorted_idxs[-1])  # Add the best architecture
-    # cifar10: 80,70 cifar100: 65,55 imagenet: 35,25
-    if bench.dataset == 'cifar10':
-        max = 80
-        min = 70
-    elif bench.dataset == 'cifar100':
-        max = 65
-        min = 55
-    else: # imagenet
-        max = 35
-        min = 25
+    max,min=get_targets_acc(bench)
     found_max= False 
     found_min = False
     for test_acc, idx in reversed(sorted_test_accs_idxs):
@@ -194,7 +211,7 @@ def boxplot_acc_vs_radius():
     plt.savefig('accuracy_vs_radius_boxplot.png')
     plt.show()
 
-def plot_histograms(data_array, bins=100, path='', baselines=None):
+def plot_histograms(data_array, bins=100, path='', baselines=None, dataset='cifar10'):
 
     FONT_SIZE = 8
     #FIGSIZE = (3.5, 3.0)
@@ -206,10 +223,13 @@ def plot_histograms(data_array, bins=100, path='', baselines=None):
     # Set up subplots
     fig, axs = plt.subplots(num_plots, 1, figsize=FIGSIZE, sharex=False)
 
+    #print("DATA ARRAY: ", data_array)
+    print("ALL DATASET: ", data_array[0][:10])
     all_dataset = data_array[0]
-
+    data_array = data_array[1:]
     # Plot histograms and curves for each element in the array
-    for i, data in enumerate(data_array[1:]):
+    for i, data in enumerate(data_array):
+        print("DATA: ", data[:10])
         data = np.array(data)   
         data = data[data > 10]
         # Plot transparent curve behind histogram for the first element
@@ -218,7 +238,9 @@ def plot_histograms(data_array, bins=100, path='', baselines=None):
         axs[i].tick_params(axis='y', which='both', left=False, right=False, labelleft=True)  # Hide y-axis values
         #axs[i].set_xlim(60, 95)  # Set x-axis limits cifar10
         #axs[i].set_xlim(40, 75) #cifar100
-        axs[i].set_xlim(10, 50)
+        max,min = get_limits_plot(dataset)
+        axs[i].set_xlim(min, max)
+        #axs[i].set_xlim(10, 50)
         axs[i].set_ylim(0, 0.8)  # Set y-axis limits
         # Add title to each subplot
         axs[i].set_title(f'Plot {i+1}')  # Adjust title as needed
@@ -275,13 +297,16 @@ def plot_simple_histograms(data_array, bins=36, path=''):
 
 def compute_acc_by_radius(dataset='cifar10'):
     bench = NASBench201(dataset=dataset)
-    result_dir = os.path.join('../results/flatness_exp', dataset)  
+    result_dir = os.path.join('../results/flatness_exp', dataset)
+    if not os.path.exists(result_dir):
+        os.makedirs(result_dir, exist_ok=True)  
     sorted_test_accs, sorted_idxs = rank_by_test_acc(bench)
     test_accs = bench.archive['test-acc'][dataset]
 
     config1 = bench.encode({'arch':bench.archive['str'][sorted_idxs[0]]})
     config2 = bench.encode({'arch':bench.archive['str'][sorted_idxs[1]]})
     config3 = bench.encode({'arch':bench.archive['str'][sorted_idxs[2]]})
+    print("CONFIG BAD ARCH: ", config3)
 
     configs = [config1, config2, config3]
 
@@ -316,15 +341,9 @@ def compute_acc_by_radius(dataset='cifar10'):
                 #print("ACC NEIGHBORS CONFIG: ", acc_neighbors_config.shape)
         
         accuracies_by_radius_configs.append(acc_neighbors_configs)
-    
-    #give the config of neighbor of radius 3 of the first config with best val acc
-
-    #idx = np.argmax(accuracies_by_radius_configs[0][2])
-    #config = neighbors_by_radius(bench.nvar, list(range(bench.num_operations)), config1, 3)[idx]
 
     acc_by_configs = [test_accs, accuracies_by_radius_configs[0], accuracies_by_radius_configs[1], accuracies_by_radius_configs[2]]
     return acc_by_configs
-    #plot_histograms(acc_by_configs, path=os.path.join(result_dir,'histogram_configs.png'), baselines=(sorted_test_accs)[::-1]) 
 
 def search_tree(root_config, target_config):
         def generate_moves(curr_config, target_config, path):
@@ -365,29 +384,95 @@ def remove_outliers(data):
     new_indices = np.delete(np.arange(len(data)), outlier_indices)
     return new_data, new_indices
 
-def path_bench(dataset):
-    print("DATASET: ", dataset)
-    bench = NASBench201(dataset=dataset)
+def get_2good_archs(bench):
+
+    # Returns best config and best config of neighbor of radius 3
     #net1 config
     sorted_test_accs, sorted_idxs = rank_by_test_acc(bench)
-    if dataset=='cifar10':
+    if bench.dataset=='cifar10':
         config_idx = 0
-    elif dataset=='cifar100':
+    elif bench.dataset=='cifar100':
         config_idx = 1
     else:
         config_idx = 2
     config1 = bench.encode({'arch':bench.archive['str'][sorted_idxs[0]]})
-    print("CONFIG1: ", config1)
     arch = bench.decode(config1)
     acc1 = bench.get_info_from_arch(arch)
-    #net2 config: give the config of neighbor of radius 3 of the first config with best val acc
-    acc_radius3= compute_acc_by_radius(dataset)[config_idx+1][2]
+    #net2 config: give the config of neighbor of radius 3 of the first config with best test acc
+    acc_radius3= compute_acc_by_radius(bench.dataset)[config_idx+1][2]
     new_data,new_indices = remove_outliers(acc_radius3)
     idx = new_indices[np.argmax(new_data)]
     config2 = list(neighbors_by_radius(bench.nvar, list(range(bench.num_operations)), config1, 3)[idx])
     arch=bench.decode(config2)
     acc2 = bench.get_info_from_arch(arch)
-    print("CONFIG2: ", config2)
+    return config1, config2, acc1, acc2
+
+def get_good_bad_archs(bench):
+
+    # Returns best config and worst config of neighbor of radius 3
+    #net1 config
+    sorted_test_accs, sorted_idxs = rank_by_test_acc(bench)
+    if bench.dataset=='cifar10':
+        config_idx = 0
+    elif bench.dataset=='cifar100':
+        config_idx = 1
+    else:
+        config_idx = 2
+    config1 = bench.encode({'arch':bench.archive['str'][sorted_idxs[0]]})
+    arch = bench.decode(config1)
+    acc1 = bench.get_info_from_arch(arch)
+    #net2 config: give the config of neighbor of radius 3 of the first config with worst test acc
+    acc_radius3= compute_acc_by_radius(bench.dataset)[config_idx+1][2]
+    new_data,new_indices = remove_outliers(acc_radius3)
+    idx = new_indices[np.argmin(new_data)]
+    config2 = list(neighbors_by_radius(bench.nvar, list(range(bench.num_operations)), config1, 3)[idx])
+    arch=bench.decode(config2)
+    acc2 = bench.get_info_from_arch(arch)
+    return config1, config2, acc1, acc2
+
+def get_2bad_archs(bench):
+
+    # Returns worst config and worst config of neighbor of radius 3
+    #net1 config
+    #sorted_test_accs, sorted_idxs = rank_by_test_acc(bench)
+
+    #get worst test acc nasbench arch 
+    '''
+    idx = np.argmin(bench.archive['test-acc'][bench.dataset])
+    if bench.dataset=='cifar10':
+        config_idx = 0
+    elif bench.dataset=='cifar100':
+        config_idx = 1
+    else:
+        config_idx = 2
+    config1 = bench.encode({'arch':bench.archive['str'][idx]})
+    '''
+    #config1 = get_bad_arch(bench.dataset)
+    #config1 = bench.encode({'arch':bench.archive['str'][idx]})
+    #arch = bench.decode(config1)
+    #acc1 = bench.get_info_from_arch(arch)
+    #net2 config: give the config in the neighborhood of radius 3 of the third config (bad arch) with worst test acc
+    _, sorted_idxs = rank_by_test_acc(bench)
+    config1 = bench.encode({'arch':bench.archive['str'][sorted_idxs[2]]})
+    arch=bench.decode(config1)
+    acc1 = bench.get_info_from_arch(arch)
+    _,_,_,acc_neighbor_config3= compute_acc_by_radius(bench.dataset)
+    acc_radius3 = acc_neighbor_config3[2] #accs of neighbor radius 3 of config1
+    print("ACC1: ", acc1)
+    new_data,new_indices = remove_outliers(acc_radius3)
+    idx = new_indices[np.argmin(new_data)]
+    config2 = list(neighbors_by_radius(bench.nvar, list(range(bench.num_operations)), config1, 3)[idx])
+    arch=bench.decode(config2)
+    acc2 = bench.get_info_from_arch(arch)
+    print("ACC2: ", acc2)
+    return config1, config2, acc1, acc2
+
+def path_bench(dataset):
+    print("DATASET: ", dataset)
+    bench = NASBench201(dataset=dataset)
+    #config1, config2, acc1, acc2 = get_2good_archs(bench)
+    #config1, config2, acc1, acc2 = get_good_bad_archs(bench)
+    config1, config2, acc1, acc2 = get_2bad_archs(bench)
     # Find the paths between the two configurations
     paths = search_tree(config1, config2)
     #print("PATHS: ", paths)
@@ -417,7 +502,7 @@ def path_bench(dataset):
     yerr = [0] + std_test_accs + [0]  # no std dev for acc1 and acc2
     
     plt.figure(figsize=(10, 5))
-    plt.errorbar(x, y, yerr=yerr, fmt='-o', capsize=5, capthick=2, elinewidth=1, label='Validation Accuracy')
+    plt.errorbar(x, y, yerr=yerr, fmt='-o', capsize=5, capthick=2, elinewidth=1, label='Test Accuracy')
     plt.xlabel('Radius')
     plt.ylabel('Accuracy')
     plt.title(f'Path Accuracies for {dataset}')
@@ -426,10 +511,31 @@ def path_bench(dataset):
     plt.grid(True)
     plt.show()
 
-    if not os.path.exists('results/plots'):
-        os.makedirs('results/plots', exist_ok=True)
-    plt.savefig('results/plots/path_accs_'+dataset+'.png')
+    if not os.path.exists('../results/flatness_exp'):
+        os.makedirs('../results/flatness_exp', exist_ok=True)
+    plt.savefig('../results/flatness_exp/'+dataset+'/path_accs_2bad.png')
+
+def plot_histo_configs_radius1(dataset):
+    bench=NASBench201(dataset=dataset)
+    sorted_test_accs, sorted_idxs = rank_by_test_acc(bench)
+    accs = compute_acc_by_radius(dataset=dataset)
+    result_dir = os.path.join('../results/flatness_exp', dataset)
+    # test_accs
+    plot_histograms([accs[0],accs[1][0], accs[2][0], accs[3][0]], path=os.path.join(result_dir,'histogram_config'+'_'+dataset+'.png'), baselines=(sorted_test_accs)[::-1], dataset=dataset) 
+
+
 
 path_bench('cifar10')
 path_bench('cifar100')
 path_bench('ImageNet16-120')
+
+
+
+#path_bench('cifar10')
+#plot_histo_configs_radius1('ImageNet16-120') 
+
+#compute_acc_by_radius('cifar10')
+#compute_acc_by_radius('cifar100')
+#compute_acc_by_radius('ImageNet16-120')
+
+

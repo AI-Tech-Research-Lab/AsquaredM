@@ -2,7 +2,7 @@ import itertools
 
 import matplotlib.pyplot as plt
 import numpy as np
-from nasbench import api
+#from nasbench import api
 
 from nasbench_analysis.search_spaces.search_space import SearchSpace
 from nasbench_analysis.utils import upscale_to_nasbench_format, OUTPUT_NODE, INPUT, CONV1X1, OUTPUT, NasbenchWrapper
@@ -127,5 +127,5 @@ def analysis():
     print('test_error', min(test_error), 'valid_error', min(valid_error))
 
 
-if __name__ == '__main__':
-    analysis()
+#if __name__ == '__main__':
+    #analysis()
