@@ -1,6 +1,6 @@
 import argparse
 from nasbench201.archive import NASBench201
-from optimizers.darts.genotypes import Genotype
+from optimizers.darts.genotypes import Genotype, DARTS_V2, BETADARTS
 from optimizers.darts.model import NetworkCIFAR
 import torch
 
@@ -13,9 +13,10 @@ import logging
 sys.path.append(os.getcwd())
  
 from train_utils import get_dataset, get_optimizer, get_loss, get_lr_scheduler, get_data_loaders, load_checkpoint, validate, initialize_seed, \
-                        Log, train, get_net_info
+                        Log, train, get_net_info, count_parameters_in_MB
 from perturb import get_net_info_runtime
 from nasbench201.nasbenchnet import NASBenchNet
+
 
 def load_array_from_file(file_path):
     arr = []
@@ -123,24 +124,11 @@ if __name__ == "__main__":
     model = NASBenchNet(cell_encode=cell_encode, C=16, num_classes=args.n_classes, stages=3, cells=5, steps=4)
     res=32
     '''
-    genotype = Genotype(
-    normal=[
-        ('nor_conv_3x3', 0), ('nor_conv_3x3', 1), 
-        ('nor_conv_3x3', 0), ('nor_conv_3x3', 1), 
-        ('nor_conv_3x3', 1), ('skip_connect', 0), 
-        ('skip_connect', 0), ('dil_sepc_3x3', 2)
-    ], 
-    normal_concat=[2, 3, 4, 5],
-    reduce=[
-        ('max_pool_3x3', 0), ('max_pool_3x3', 1), 
-        ('skip_connect', 2), ('max_pool_3x3', 1), 
-        ('max_pool_3x3', 0), ('skip_connect', 2), 
-        ('skip_connect', 2), ('max_pool_3x3', 1)
-    ], 
-    reduce_concat=[2, 3, 4, 5]
-)
-    
+    genotype = DARTS_V2
+
     model = NetworkCIFAR(C=36, num_classes=10, layers=20, genotype=genotype, auxiliary=True)
+    n_params = count_parameters_in_MB(model)
+    logging.info("MODEL SIZE: {:.2f} MB".format(n_params))
 
     res=32
 
@@ -157,8 +145,7 @@ if __name__ == "__main__":
     '''
     train_set, val_set, test_set, _, _ = get_dataset(name=args.dataset, val_split=args.val_split, augmentation=True, cutout=args.cutout, balanced_val=args.balanced_val)
     train_loader, val_loader, test_loader = get_data_loaders(train_set, val_set, test_set, batch_size=args.batch_size, threads=args.n_workers, eval_test=True)
-    print("TRANSFORM")
-    print(train_set.dataset.transform)
+
     if val_loader is None:
         val_loader = test_loader
 
@@ -176,7 +163,7 @@ if __name__ == "__main__":
     if (os.path.exists(os.path.join(args.output_path,'ckpt.pth'))):
         model, optimizer = load_checkpoint(model, optimizer, os.path.join(args.output_path,'ckpt.pth'))
         logging.info("Loaded checkpoint")
-        #top1 = validate(val_loader, model, device, print_freq=100)/100
+        top1 = validate(val_loader, model, device, print_freq=100)
     else:
         logging.info("Start training...")
         top1, model, optimizer = train(train_loader, val_loader, epochs, model, device, optimizer, criterion, scheduler, log, ckpt_path=os.path.join(args.output_path,'ckpt.pth'),
@@ -185,8 +172,8 @@ if __name__ == "__main__":
 
     results={}
 
-    top1 = validate(test_loader, model, device, print_freq=100)
-    logging.info(f"TEST ACCURACY: {top1}")
+    #top1 = validate(test_loader, model, device, print_freq=100)
+    logging.info("TEST ACCURACY: {:.2f}".format(top1))
     top1_err = (1 - top1) * 100
 
     input_shape = (3, res, res)
@@ -211,7 +198,7 @@ if __name__ == "__main__":
     #results['top1'] = np.round(top1_err,2)
     results['macs'] = info['macs']
     results['activations'] = info['activations']
-    results['params'] = info['params']
+    results['params'] = n_params #info['params']
 
     n_subnet = args.output_path.rsplit("_", 1)[1] 
     

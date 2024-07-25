@@ -149,11 +149,6 @@ def main():
 
     if not args.nasbench:
         model = DARTSNetwork(args.init_channels, n_classes, args.n_cells, criterion)
-        '''
-        model = DARTSNetwork(args.init_channels, n_classes, args.layers, criterion, 
-                    output_weights=args.output_weights, steps=4, 
-                    search_space=args.search_space)
-        '''
     else:
         #stages = 3
         #cells = 5

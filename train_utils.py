@@ -26,7 +26,7 @@ from torch.nn.modules.batchnorm import _BatchNorm
 import torch.nn.functional as F
 
 from torchprofile import profile_macs
-from ofa.utils.pytorch_utils import count_parameters
+#from ofa.utils.pytorch_utils import count_parameters
 from torch.nn import Conv2d,ReLU,Linear,Sequential,Flatten,BatchNorm2d,AvgPool2d,MaxPool2d
 import torch.backends.cudnn as cudnn
 
@@ -157,12 +157,18 @@ def load_checkpoint(model, optimizer, device, filename='checkpoint.pth'):
 
 def train(train_loader, val_loader, num_epochs, model, device, optimizer, criterion, scheduler, log, ckpt_path=None, label_smoothing=0.1, cutout=False, cutout_prob=1.0, 
           auxiliary=False, auxiliary_weight=0.4, drop_path_prob=0.0):
+        
         model.to(device)
+        if isinstance(train_loader.dataset, Subset): #if val split 
+            train_set=train_loader.dataset.dataset
+        else:
+            train_set=train_loader.dataset
+
         for epoch in range(num_epochs):
  
             if cutout:
                 # increase the cutout probability linearly throughout search
-                train_loader.dataset.dataset.transform.transforms[-1].prob = cutout_prob * epoch / (num_epochs - 1)
+                train_set.transform.transforms[-1].prob = cutout_prob * epoch / (num_epochs - 1)
                 #print('CUTOUT PROB: ', train_loader.dataset.transform.transforms[-1].prob)
             
             model.drop_path_prob = drop_path_prob * epoch / num_epochs
@@ -179,11 +185,15 @@ def train(train_loader, val_loader, num_epochs, model, device, optimizer, criter
                 else:
                     optimizer.zero_grad()
                     
-                predictions, predictions_aux = model(inputs)
-                loss = criterion(predictions, targets)
                 if auxiliary:
+                    predictions, predictions_aux = model(inputs)
+                    loss = criterion(predictions, targets)
                     loss_aux = criterion(predictions_aux, targets)
                     loss += auxiliary_weight*loss_aux
+                else:
+                    predictions = model(inputs)
+                    loss = criterion(predictions, targets)
+
                 loss.backward()
 
                 if not isinstance(optimizer, SAM):
@@ -206,7 +216,10 @@ def train(train_loader, val_loader, num_epochs, model, device, optimizer, criter
             with torch.no_grad():
                 for batch in val_loader:
                     inputs, targets = (b.to(device) for b in batch)
-                    predictions = model(inputs)
+                    if auxiliary:
+                        predictions,_ = model(inputs)
+                    else:
+                        predictions = model(inputs)
                     loss = criterion(predictions, targets)
                     correct = torch.argmax(predictions, 1) == targets
                     log(model, loss.cpu(), correct.cpu())
@@ -327,8 +340,10 @@ def validate(val_loader, model, device=None, print_info=True, print_freq=0):
 
             images, target = images.to(device), target.to(device)
             # compute output
-            output = model(images)
-
+            if model._auxiliary:
+                output,_ = model(images)
+            else:
+                output = model(images)
             # measure accuracy and record loss
             acc1 = accuracy(output, target, topk=(1, ))
             top1.update(acc1[0].cpu().numpy()[0], images.size(0))
@@ -1563,3 +1578,6 @@ def profile_activation_size(model,input):
           total = total + activation_size
     
     return total
+
+def count_parameters_in_MB(model):
+  return np.sum(np.prod(v.size()) for name, v in model.named_parameters() if "auxiliary" not in name)/1e6

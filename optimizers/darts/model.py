@@ -4,11 +4,20 @@ from operations import FactorizedReduce, ReLUConvBN, OPS, Identity
 
 def drop_path(x, drop_prob):
   if drop_prob > 0.:
+    '''
     keep_prob = 1.-drop_prob
     mask = torch.tensor(x.size(0), 1, 1, 1, dtype=torch.float32, device='cuda').bernoulli_(keep_prob)
     #mask = Variable(torch.cuda.FloatTensor(x.size(0), 1, 1, 1).bernoulli_(keep_prob))
     x.div_(keep_prob)
     x.mul_(mask)
+    '''
+    keep_prob = 1.-drop_prob
+    # Create a mask with the same batch size as x
+    mask = torch.empty((x.size(0), 1, 1, 1), dtype=torch.float32, device='cuda').bernoulli_(keep_prob)
+    # Scale the mask
+    mask.div_(keep_prob)
+    # Apply the mask to x
+    x = x * mask
   return x
 
 class Cell(nn.Module):
@@ -22,8 +31,8 @@ class Cell(nn.Module):
     if reduction_prev:
       self.preprocess0 = FactorizedReduce(C_prev_prev, C, 2, affine=False, track_running_stats=False)
     else:
-      self.preprocess0 = ReLUConvBN(C_prev_prev, C, 1, 1, 0, affine=False, dilation=False)
-    self.preprocess1 = ReLUConvBN(C_prev, C, 1, 1, 0, affine=False, dilation=False)
+      self.preprocess0 = ReLUConvBN(C_prev_prev, C, 1, 1, 0, affine=False, dilation=1)
+    self.preprocess1 = ReLUConvBN(C_prev, C, 1, 1, 0, affine=False, dilation=1)
     
     if reduction:
       op_names, indices = zip(*genotype.reduce)
