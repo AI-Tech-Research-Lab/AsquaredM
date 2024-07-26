@@ -1,4 +1,5 @@
 import argparse
+from collections import namedtuple
 from nasbench201.archive import NASBench201
 from optimizers.darts.genotypes import Genotype, DARTS_V2, BETADARTS
 from optimizers.darts.model import NetworkCIFAR
@@ -12,10 +13,27 @@ import logging
 
 sys.path.append(os.getcwd())
  
-from train_utils import get_dataset, get_optimizer, get_loss, get_lr_scheduler, get_data_loaders, load_checkpoint, validate, initialize_seed, \
+from train_utils import get_dataset, get_optimizer, get_loss, get_lr_scheduler, get_data_loaders, load_checkpoint, train_loop, validate, initialize_seed, \
                         Log, train, get_net_info, count_parameters_in_MB
 from perturb import get_net_info_runtime
 from nasbench201.nasbenchnet import NASBenchNet
+
+def dict_to_genotype(genotype_dict):
+    # Extract mandatory fields
+    normal = genotype_dict['normal']
+    normal_concat = genotype_dict['normal_concat']
+    
+    # Extract optional fields if they exist
+    reduce = genotype_dict.get('reduce', None)
+    reduce_concat = genotype_dict.get('reduce_concat', None)
+
+    if reduce is None:
+        Genotype = namedtuple('Genotype', 'normal normal_concat')
+        return Genotype(normal, normal_concat)
+    else:
+        Genotype = namedtuple('Genotype', 'normal normal_concat reduce reduce_concat')
+        # Create and return an instance of Genotype
+        return Genotype(normal, normal_concat, reduce, reduce_concat)
 
 
 def load_array_from_file(file_path):
@@ -124,7 +142,12 @@ if __name__ == "__main__":
     model = NASBenchNet(cell_encode=cell_encode, C=16, num_classes=args.n_classes, stages=3, cells=5, steps=4)
     res=32
     '''
-    genotype = DARTS_V2
+
+    #genotype = DARTS_V2
+    #read from json file
+    with open(os.path.join(args.output_path,'genotype.json'), 'r') as config:
+        genotype_dict = json.load(config)
+        genotype = dict_to_genotype(genotype_dict)
 
     model = NetworkCIFAR(C=36, num_classes=10, layers=20, genotype=genotype, auxiliary=True)
     n_params = count_parameters_in_MB(model)
@@ -135,14 +158,6 @@ if __name__ == "__main__":
     logging.info("Train config")
     logging.info(args)
 
-    '''
-    train_loader, val_loader, test_loader = get_data_loaders(dataset=args.dataset, batch_size=args.batch_size, threads=args.n_workers, 
-                                            val_split=args.val_split, balanced_val=args.balanced_val,
-                                            img_size=res, augmentation=True, eval_test=args.eval_test)
-    
-    if val_loader is None:
-        val_loader = test_loader
-    '''
     train_set, val_set, test_set, _, _ = get_dataset(name=args.dataset, val_split=args.val_split, augmentation=True, cutout=args.cutout, balanced_val=args.balanced_val)
     train_loader, val_loader, test_loader = get_data_loaders(train_set, val_set, test_set, batch_size=args.batch_size, threads=args.n_workers, eval_test=True)
 
@@ -161,21 +176,21 @@ if __name__ == "__main__":
     scheduler = get_lr_scheduler(optimizer, 'cosine', epochs=epochs, lr_min=args.lr_min)
     
     if (os.path.exists(os.path.join(args.output_path,'ckpt.pth'))):
-        model, optimizer = load_checkpoint(model, optimizer, os.path.join(args.output_path,'ckpt.pth'))
+        model, optimizer = load_checkpoint(model, optimizer, device, os.path.join(args.output_path,'ckpt.pth'))
         logging.info("Loaded checkpoint")
-        top1 = validate(val_loader, model, device, print_freq=100)
+        top1, loss = validate(val_loader, model, criterion, device, auxiliary=args.auxiliary, print_info=True)
     else:
         logging.info("Start training...")
-        top1, model, optimizer = train(train_loader, val_loader, epochs, model, device, optimizer, criterion, scheduler, log, ckpt_path=os.path.join(args.output_path,'ckpt.pth'),
-                                       cutout=args.cutout, auxiliary=args.auxiliary, auxiliary_weight=args.auxiliary_weight, drop_path_prob=args.drop_path_prob)
+        top1, loss, model, optimizer = train_loop(train_loader, val_loader, epochs, model, device, optimizer, criterion, scheduler, ckpt_path=os.path.join(args.output_path,'ckpt.pth'), args=args)
         logging.info("Training finished")
-
+    
     results={}
 
     #top1 = validate(test_loader, model, device, print_freq=100)
     logging.info("TEST ACCURACY: {:.2f}".format(top1))
     top1_err = (1 - top1) * 100
-
+   
+    '''
     input_shape = (3, res, res)
     #Model cost
     
@@ -198,7 +213,7 @@ if __name__ == "__main__":
     #results['top1'] = np.round(top1_err,2)
     results['macs'] = info['macs']
     results['activations'] = info['activations']
-    results['params'] = n_params #info['params']
+    results['params'] = info['params']
 
     n_subnet = args.output_path.rsplit("_", 1)[1] 
     
@@ -206,3 +221,4 @@ if __name__ == "__main__":
 
     with open(save_path, 'w') as handle:
         json.dump(results, handle)
+    '''

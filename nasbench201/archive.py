@@ -7,7 +7,7 @@ import numpy as np
 class NASBench201(): #NASBench201 dataset
 
     def __init__(self, dataset='ImageNet16-120', output_path='./output', model_path='../datasets/nasbench201_info.pt', device='cpu'):
-        self.archive = torch.load(model_path, map_location=device)
+        self.archive = torch.load(model_path, map_location=device, weights_only=False)
         self.num_nodes = 4
         self.num_operations = 5
         self.nvar = int(self.num_nodes*(self.num_nodes-1)/2) #nvar is the len of the encoding. 6 is the number of edges in a 4-node cell

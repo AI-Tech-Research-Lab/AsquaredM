@@ -1,6 +1,7 @@
+from collections import namedtuple
 from copy import deepcopy
 
-
+Genotype = namedtuple('Genotype', 'normal normal_concat')
 BENCH_PRIMITIVES = ['none', 'skip_connect', 'nor_conv_1x1', 'nor_conv_3x3', 'avg_pool_3x3']
 
 def get_combination(space, num):
@@ -106,6 +107,41 @@ class Structure:
 
   def __getitem__(self, index):
     return self.nodes[index]
+  
+  def to_genotype(self, concat_nodes=None):
+    """
+    Converts a Structure object to a Genotype object with only the normal part.
+    
+    Args:
+        structure (self): The Structure object to convert.
+        concat_nodes (list, optional): The list of nodes to concatenate. If None, it defaults to the nodes at the end of the structure.
+
+    Returns:
+        Genotype: The corresponding Genotype object.
+    """
+    if concat_nodes is None:
+        # Default to concatenating the last few nodes
+        concat_nodes = list(range(len(self) - 4, len(self)-1))
+    
+    # Extract the normal part from the Structure
+    normal = []
+    for i, node_info in enumerate(self.nodes):
+        if i in concat_nodes:
+            normal.extend(node_info)
+    
+    # Fill in the concatenation list
+    if len(normal) == 0:
+        raise ValueError("No valid normal nodes found in the structure.")
+    
+    # Create Genotype object
+    genotype = Genotype(
+        normal=normal,
+        normal_concat=concat_nodes,
+        #reduce=[],  # The reduce part is not required for this function
+        #reduce_concat=[]  # The reduce_concat part is also not required for this function
+    )
+    
+    return genotype
 
   @staticmethod
   def str2structure(xstr):
@@ -205,3 +241,6 @@ print(list)
 flattened_list = flatten_tuples(list)
 print(flattened_list)
 '''
+
+Genotype = namedtuple('Genotype', 'normal normal_concat')
+

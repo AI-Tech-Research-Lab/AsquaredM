@@ -1,4 +1,7 @@
+from collections import OrderedDict
+import json
 import os
+import subprocess
 import sys
 
 sys.path.append(os.path.join(os.path.expanduser('~'),'workspace/darts-SAM')) 
@@ -30,7 +33,7 @@ from numpy import linalg as LA
 #from torch.utils.tensorboard import SummaryWriter
 #from nas_201_api import NASBench201API as API
 from nasbench201.archive import NASBench201
-from nasbench201.genotypes import BENCH_PRIMITIVES
+from nasbench201.genotypes import BENCH_PRIMITIVES, Structure
 import wandb
 
 def str2bool(v):
@@ -53,7 +56,7 @@ parser.add_argument('--learning_rate_min', type=float, default=0.001, help='min 
 parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
 parser.add_argument('--weight_decay', type=float, default=3e-4, help='weight decay')  # DARTS: 3e-4  RDARTS: 81e-4
 parser.add_argument('--report_freq', type=float, default=50, help='report frequency')
-parser.add_argument('--gpu', type=int, default=0, help='gpu device id')
+parser.add_argument('--device', type=int, default=0, help='gpu device id')
 parser.add_argument('--epochs', type=int, default=100, help='num of training epochs')
 parser.add_argument('--init_channels', type=int, default=16, help='num of init channels')
 parser.add_argument('--n_cells', type=int, default=8, help='total number of cells')
@@ -78,8 +81,6 @@ parser.add_argument('--rho_alpha_sam', type=float, default=1e-2, help='rho alpha
 parser.add_argument('--epsilon_sam', type=float, default=1e-2, help='epsilon for SAM update')
 parser.add_argument('--flood_level', type=float, default=0.0, help='flood level for weight regularization')
 parser.add_argument('--data_aug', type=str2bool, default=True, help='use data augmentation on validation set')
-parser.add_argument('--output_weights', type=bool, default=True, help='Whether to use weights on the output nodes')
-parser.add_argument('--search_space', choices=['1', '2', '3'], default='1')
 
 args = parser.parse_args()
 
@@ -127,12 +128,12 @@ def main():
         sys.exit(1)
 
     np.random.seed(args.seed)
-    torch.cuda.set_device(args.gpu)
+    torch.cuda.set_device(args.device)
     cudnn.benchmark = True
     torch.manual_seed(args.seed)
     cudnn.enabled = True
     torch.cuda.manual_seed(args.seed)
-    logging.info('gpu device = %d' % args.gpu)
+    logging.info('gpu device = %d' % args.device)
     logging.info("args = %s", args)
 
     if args.perturb_alpha == 'none':
@@ -220,7 +221,7 @@ def main():
     best_genotype=None
 
     patience=10
-
+    
     for epoch in range(args.epochs):
         #scheduler.step()
         lr = scheduler.get_last_lr()[0]
@@ -236,9 +237,9 @@ def main():
             epsilon_alpha = 0.03 + (args.epsilon_alpha - 0.03) * epoch / args.epochs
             logging.info('epoch %d epsilon_alpha %e', epoch, epsilon_alpha)
 
-        #temp,_ = model.genotype().tolist(True)
-        #genotype = flatten_tuples(temp)
         genotype = model.genotype()
+        if args.nasbench:
+            genotype=genotype.to_genotype()
         logging.info('genotype = %s', genotype)
 
         print(model.show_alphas())
@@ -277,13 +278,13 @@ def main():
                 wandb.log({"metrics/val_acc_nasbench": info['val-acc'], "metrics/test_acc_nasbench": info['test-acc']})
             logging.info('NASBench201 val acc: %.2f, test acc: %.2f', info['val-acc'], info['test-acc'])
             
-            if not args.unrolled:
-                utils.save_checkpoint({
-                    'epoch': epoch + 1,
-                    'state_dict': model.state_dict(),
-                    'optimizer': optimizer.state_dict(),
-                    'alpha': model.arch_parameters()
-                }, False, args.save)
+        if not args.unrolled:
+            utils.save_checkpoint({
+                'epoch': epoch + 1,
+                'state_dict': model.state_dict(),
+                'optimizer': optimizer.state_dict(),
+                'alpha': model.arch_parameters()
+            }, False, args.save)
 
         # early stopping
         if (epoch - best_epoch) > patience:
@@ -296,8 +297,75 @@ def main():
     logging.info('Best genotype: %s', best_genotype)
     logging.info('Best validation loss: %f', best_loss)
     logging.info('Best validation accuracy: %f', best_acc)
-    cell_encode = translate_genotype_to_encode(genotype)
-    write_array_to_file(cell_encode, os.path.join(args.save, 'best_genotype.txt'))
+
+    genotype_dict = genotype_to_dict(genotype)
+
+    # Save to a file
+    with open(os.path.join(args.save,'genotype.json'), 'w') as f:
+        json.dump(genotype_dict, f, indent=4)
+
+    call_training_script(n_classes,args)
+
+def call_training_script(n_classes,args):
+    # Prepare the command to call train.py and save command script in the same directory
+
+    bash_file = ['#!/bin/bash']
+    cfg =OrderedDict()
+    
+    cfg['dataset'] = args.dataset
+    cfg['data'] = args.data
+    cfg['device'] = args.device
+    cfg['output_path'] = args.save
+    cfg['n_classes'] = n_classes
+    cfg['epochs'] = 600
+    cfg['batch_size'] = 96
+    cfg['learning_rate'] = 0.1
+    cfg['weight_decay'] = 0.0005
+    cfg['momentum'] = 0.9
+    cfg['drop_path_prob'] = 0.2
+    cfg['auxiliary'] = True
+    cfg['auxiliary_weight'] = 0.4
+    cfg['cutout'] = True
+    cfg['res'] = 32
+    cfg['optim'] = 'SGD'
+    cfg['eval_test'] = True
+    cfg['nesterov'] = True
+    cfg['seed'] = args.seed
+
+    execution_line = "python train.py"
+    for k, v in cfg.items():
+        if v is not None:
+            if isinstance(v, bool):
+                if v:
+                    execution_line += " --{}".format(k)
+            else:
+                execution_line += " --{} {}".format(k, v)
+    
+    bash_file.append(execution_line)
+    
+    with open(os.path.join(args.save, 'run_bash.sh'), 'w') as handle:
+        for line in bash_file:
+            handle.write(line + os.linesep)
+
+    subprocess.call("sh {}/run_bash.sh".format(args.save), shell=True)
+
+
+# Convert Genotype to a serializable dictionary
+def genotype_to_dict(genotype):
+    # Create a dictionary with mandatory fields
+    genotype_dict = {
+        'normal': genotype.normal,
+        'normal_concat': list(genotype.normal_concat)
+    }
+    
+    # Check if 'reduce' and 'reduce_concat' attributes exist
+    if hasattr(genotype, 'reduce'):
+        genotype_dict['reduce'] = genotype.reduce
+    if hasattr(genotype, 'reduce_concat'):
+        genotype_dict['reduce_concat'] = list(genotype.reduce_concat)
+    
+    return genotype_dict
+
 
 def write_array_to_file(arr, file_path):
     with open(file_path, 'w') as file:
@@ -306,7 +374,7 @@ def write_array_to_file(arr, file_path):
 
 def translate_genotype_to_encode(genotype):
     dag_integers = []
-    for node_op, _ in genotype:
+    for node_op, _ in genotype.normal:
         dag_integers.append(BENCH_PRIMITIVES.index(node_op))
     return dag_integers
 

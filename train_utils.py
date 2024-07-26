@@ -1,5 +1,6 @@
 from collections import defaultdict
 import csv
+import logging
 import random
 import time
 import torch
@@ -149,13 +150,13 @@ def save_checkpoint(model, optimizer, filename='checkpoint.pth'):
     }
     torch.save(checkpoint, filename)
 
-def load_checkpoint(model, optimizer, device, filename='checkpoint.pth'):
-    checkpoint = torch.load(filename, map_location=device)
+def load_checkpoint(model, optimizer, device, filename):
+    checkpoint = torch.load(filename, map_location=device, weights_only=True)
     model.load_state_dict(checkpoint['model_state_dict'])
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     return model, optimizer
 
-def train(train_loader, val_loader, num_epochs, model, device, optimizer, criterion, scheduler, log, ckpt_path=None, label_smoothing=0.1, cutout=False, cutout_prob=1.0, 
+def train2(train_loader, val_loader, num_epochs, model, device, optimizer, criterion, scheduler, log, ckpt_path=None, label_smoothing=0.1, cutout=False, cutout_prob=1.0, 
           auxiliary=False, auxiliary_weight=0.4, drop_path_prob=0.0):
         
         model.to(device)
@@ -238,127 +239,116 @@ def train(train_loader, val_loader, num_epochs, model, device, optimizer, criter
         top1=log.best_accuracy
         return top1, model, optimizer
 
-'''
-def train(train_loader, val_loader, num_epochs, model, device, criterion, optimizer, print_freq=10, ckpt='ckpt'):
+def train(train_loader, model, criterion, optimizer, scheduler, device, auxiliary=False, auxiliary_weight=0.4):
+    model.train()
+    train_loss_meter = AverageMeter('Loss', ':.4e')
+    train_acc_meter = AverageMeter('Acc@1', ':.2f')
 
-    batch_time = AverageMeter('Time', ':6.3f')
-    top1 = AverageMeter('Acc@1', ':6.2f')
-    progress = ProgressMeter(len(train_loader), [batch_time, top1], prefix='Train: ')
-    model = model.to(device)
-    for epoch in range(num_epochs):
-        # Training phase
-        model.train()
-        end = time.time()
-        for i, (images, labels) in enumerate(train_loader):
-            images, labels = images.to(device), labels.to(device)
+    for inputs, targets in train_loader:
+        inputs, targets = inputs.to(device), targets.to(device)
+
+        if isinstance(optimizer, SAM):
+            enable_running_stats(model)
+        else:
             optimizer.zero_grad()
-            outputs = model(images)
-            loss = criterion(outputs, labels)
-            loss.backward()
+
+        if auxiliary:
+            predictions, predictions_aux = model(inputs)
+            loss = criterion(predictions, targets)
+            loss_aux = criterion(predictions_aux, targets)
+            loss += auxiliary_weight * loss_aux
+        else:
+            predictions = model(inputs)
+            loss = criterion(predictions, targets)
+
+        loss.backward()
+
+        if not isinstance(optimizer, SAM):
             optimizer.step()
+        else:
+            optimizer.first_step(zero_grad=True)
+            disable_running_stats(model)
+            criterion(model(inputs), targets).backward()
+            optimizer.second_step(zero_grad=True)
 
-            # Update training statistics
-            acc1 = accuracy(outputs, labels, topk=(1,))
-            top1.update(acc1[0].cpu().numpy()[0], images.size(0))
+        n = inputs.size(0)
+        train_loss_meter.update(loss.item(), n)
+        correct = torch.sum(torch.argmax(predictions, dim=1) == targets).item()
+        train_acc_meter.update(correct / n, n)
+        scheduler.step()
 
-            # measure elapsed time
-            batch_time.update(time.time() - end)
-            end = time.time()
+    return train_acc_meter.avg, train_loss_meter.avg
 
-            if i % print_freq == 0:
-                progress.display(i)
-
-        # Validation phase
-        model.eval()
-        top1_val = validate(val_loader, model, device, print_freq)  # Reuse the validate function
-
-        # Print training and validation statistics
-        print(f'Train Epoch: {epoch + 1}, Train Accuracy: {top1.avg:.2f}%, Val Accuracy: {top1_val:.2f}%')
-
-    # Save the trained model weights
-    save_checkpoint(model, optimizer, ckpt)
-
-
-
-def train_mix(train_loader, val_loader, num_epochs, model, n_classes, device, criterion, optimizer, print_freq=10, ckpt='ckpt'):
-
-    batch_time = AverageMeter('Time', ':6.3f')
-    top1 = AverageMeter('Acc@1', ':6.2f')
-    progress = ProgressMeter(len(train_loader), [batch_time, top1], prefix='Train: ')
-    model = model.to(device)
-    cutmix = v2.CutMix(num_classes=n_classes)
-    mixup = v2.MixUp(num_classes=n_classes)
-    cutmix_or_mixup = v2.RandomChoice([cutmix, mixup])
-    for epoch in range(num_epochs):
-        # Training phase
-        model.train()
-        end = time.time()
-        for i, (images, labels) in enumerate(train_loader):
-            images, ori_labels = images.to(device), labels.to(device)
-            images, labels = cutmix_or_mixup(images, ori_labels)
-            optimizer.zero_grad()
-            outputs = model(images)
-            loss = criterion(outputs, labels)
-            loss.backward()
-            optimizer.step()
-
-            # Update training statistics
-            acc1 = accuracy(outputs, ori_labels, topk=(1,))
-            top1.update(acc1[0].cpu().numpy()[0], images.size(0))
-
-            # measure elapsed time
-            batch_time.update(time.time() - end)
-            end = time.time()
-
-            if i % print_freq == 0:
-                progress.display(i)
-
-        # Validation phase
-        model.eval()
-        top1_val = validate(val_loader, model, device, print_freq)  # Reuse the validate function
-
-        # Print training and validation statistics
-        print(f'Train Epoch: {epoch + 1}, Train Accuracy: {top1.avg:.2f}%, Val Accuracy: {top1_val:.2f}%')
-
-    # Save the trained model weights
-    save_checkpoint(model, optimizer, ckpt)
-'''
-
-def validate(val_loader, model, device=None, print_info=True, print_freq=0):
-
-    batch_time = AverageMeter('Time', ':6.3f')
-    top1 = AverageMeter('Acc@1', ':6.2f')
-    progress = ProgressMeter(len(val_loader), [batch_time, top1], prefix='Test: ')
-    model.to(device)
-
-    # switch to evaluate mode
+def validate(val_loader, model, criterion, device, auxiliary=False, print_freq=0, print_info=False):
     model.eval()
+    val_loss_meter = AverageMeter('Loss', ':.4e')
+    val_acc_meter = AverageMeter('Acc@1', ':.2f')
+    batch_time = AverageMeter('Time', ':6.3f')
 
     with torch.no_grad():
         end = time.time()
-        for i, (images, target) in enumerate(val_loader):
+        for i, (inputs, targets) in enumerate(val_loader):
+            inputs, targets = inputs.to(device), targets.to(device)
 
-            images, target = images.to(device), target.to(device)
-            # compute output
-            if model._auxiliary:
-                output,_ = model(images)
+            if auxiliary:
+                predictions, _ = model(inputs)
             else:
-                output = model(images)
-            # measure accuracy and record loss
-            acc1 = accuracy(output, target, topk=(1, ))
-            top1.update(acc1[0].cpu().numpy()[0], images.size(0))
+                predictions = model(inputs)
+                
+            loss = criterion(predictions, targets)
+
+            n = inputs.size(0)
+            val_loss_meter.update(loss.item(), n)
+            correct = torch.sum(torch.argmax(predictions, dim=1) == targets).item()
+            val_acc_meter.update(correct / n, n)
 
             # measure elapsed time
             batch_time.update(time.time() - end)
             end = time.time()
 
-            if print_info and print_freq and i % print_freq == 0:
-                progress.display(i)
-        
         if print_info:
-            print('* Acc@1 {top1.avg:.3f} '.format(top1=top1))
+            logging.info('valid %03d %e %f %f', i, val_loss_meter.avg, val_acc_meter.avg, batch_time.avg)
 
-    return top1.avg
+    return val_acc_meter.avg, val_loss_meter.avg
+
+def train_loop(train_loader, val_loader, num_epochs, model, device, optimizer, criterion, scheduler, args, ckpt_path=None):
+    model.to(device)
+    best_loss = float('inf')
+    best_model = None
+    best_top1 = 0
+
+    if isinstance(train_loader.dataset, Subset): #if val split 
+            train_set=train_loader.dataset.dataset
+    else:
+        train_set=train_loader.dataset
+
+    for epoch in range(num_epochs):
+        if args.cutout:
+            # increase the cutout probability linearly throughout search
+            train_set.transform.transforms[-1].prob = args.cutout_prob * epoch / (num_epochs - 1)
+            #print('CUTOUT PROB: ', train_loader.dataset.transform.transforms[-1].prob)
+        logging.info('epoch %d lr %e', epoch, scheduler.get_last_lr()[0])
+        model.drop_path_prob = args.drop_path_prob * epoch / num_epochs
+
+        train_acc, train_loss = train(train_loader, model, criterion, optimizer, scheduler, device, auxiliary=args.auxiliary, auxiliary_weight=args.auxiliary_weight)
+        logging.info('Epoch %d - Train Loss: %.4f, Train Acc: %.4f', epoch + 1, train_loss, train_acc)
+
+        val_acc, val_loss = validate(val_loader, model, criterion, device, auxiliary=args.auxiliary)
+        logging.info('Epoch %d - Val Loss: %.4f, Val Acc: %.4f', epoch + 1, val_loss, val_acc)
+
+        if val_loss < best_loss:
+            best_loss = val_loss
+            best_top1= val_acc
+            best_model = copy.deepcopy({'state_dict': model.state_dict(), 'optimizer': optimizer.state_dict()})
+
+        if ckpt_path:
+            save_checkpoint(model, optimizer, ckpt_path)
+
+    logging.info('Training complete. Loading best model for inference.')
+    model.load_state_dict(best_model['state_dict'])
+    optimizer.load_state_dict(best_model['optimizer']) # load optim for further training 
+
+    return best_top1, best_loss, model, optimizer
 
 def accuracy(output, target, topk=(1,)):
     """Computes the accuracy over the k top predictions for the specified values of k"""
@@ -1505,7 +1495,7 @@ def get_net_info(net, input_shape=(3, 224, 224), print_info=False):
     net.eval() # this avoids batch norm error https://discuss.pytorch.org/t/error-expected-more-than-1-value-per-channel-when-training/26274
 
     # parameters
-    net_info['params'] = np.round(count_parameters(net)/1e6,2)
+    net_info['params'] = count_parameters_in_MB(net) #np.round(count_parameters(net)/1e6,2)
 
     net = copy.deepcopy(net)
 

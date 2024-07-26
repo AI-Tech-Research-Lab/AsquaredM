@@ -97,3 +97,31 @@ Genotype(
 DARTS = DARTS_V2
 
 BETADARTS = Genotype(normal=[('dua_sepc_3x3', 1), ('dua_sepc_5x5', 0), ('dua_sepc_3x3', 0), ('dua_sepc_5x5', 2), ('dua_sepc_3x3', 3), ('dua_sepc_3x3', 2), ('dua_sepc_3x3', 3), ('dua_sepc_5x5', 2)], normal_concat=range(2, 6), reduce=[('dua_sepc_5x5', 0), ('dua_sepc_5x5', 1), ('dua_sepc_5x5', 2), ('max_pool_3x3', 0), ('dil_sepc_5x5', 3), ('dil_sepc_5x5', 2), ('dua_sepc_5x5', 2), ('dil_sepc_5x5', 3)], reduce_concat=range(2, 6))
+
+'''
+# Convert Genotype to a serializable dictionary
+def genotype_to_dict(genotype):
+    # Create a dictionary with mandatory fields
+    genotype_dict = {
+        'normal': genotype.normal,
+        'normal_concat': list(genotype.normal_concat)
+    }
+    
+    # Check if 'reduce' and 'reduce_concat' attributes exist
+    if hasattr(genotype, 'reduce'):
+        genotype_dict['reduce'] = genotype.reduce
+    if hasattr(genotype, 'reduce_concat'):
+        genotype_dict['reduce_concat'] = list(genotype.reduce_concat)
+    
+    return genotype_dict
+
+dict = genotype_to_dict(BETADARTS)
+
+#save dict into a path dir
+import json
+import os
+path = 'results/darts_search_datasetcifar10_samFalse_betadecayTrue'
+with open(os.path.join(path, 'genotype.json'), 'w') as f:
+    json.dump(dict, f)
+
+'''

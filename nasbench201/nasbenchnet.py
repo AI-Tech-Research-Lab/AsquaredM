@@ -38,7 +38,7 @@ class NASBench201Cell(nn.Module):
         When set to ``True``, all ``torch.nn.BatchNorm2d`` in this cell tracks the running mean and variance. Default: True
     """
 
-    def __init__(self, cell_id, encode, C_in, C_out, stride, bn_affine=False, bn_momentum=0.1, bn_track_running_stats=True):
+    def __init__(self, cell_id, encode, C_in, C_out, stride, bn_affine=True, bn_momentum=0.1, bn_track_running_stats=True):
         super(NASBench201Cell, self).__init__()
 
         self.NUM_NODES = 4
