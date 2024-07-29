@@ -2,11 +2,7 @@ from collections import namedtuple
 
 Genotype = namedtuple('Genotype', 'normal normal_concat reduce reduce_concat')
 
-PRIMITIVES = [
-    'maxpool3x3',
-    'conv3x3-bn-relu',
-    'conv1x1-bn-relu'
-]
+PRIMITIVES = ['none', 'skip_connect', 'dua_sepc_3x3', 'dua_sepc_5x5', 'dil_sepc_3x3', 'dil_sepc_5x5', 'avg_pool_3x3', 'max_pool_3x3']
 
 NASNet = Genotype(
     normal=[
@@ -97,8 +93,8 @@ Genotype(
 DARTS = DARTS_V2
 
 BETADARTS = Genotype(normal=[('dua_sepc_3x3', 1), ('dua_sepc_5x5', 0), ('dua_sepc_3x3', 0), ('dua_sepc_5x5', 2), ('dua_sepc_3x3', 3), ('dua_sepc_3x3', 2), ('dua_sepc_3x3', 3), ('dua_sepc_5x5', 2)], normal_concat=range(2, 6), reduce=[('dua_sepc_5x5', 0), ('dua_sepc_5x5', 1), ('dua_sepc_5x5', 2), ('max_pool_3x3', 0), ('dil_sepc_5x5', 3), ('dil_sepc_5x5', 2), ('dua_sepc_5x5', 2), ('dil_sepc_5x5', 3)], reduce_concat=range(2, 6))
+DARTS = Genotype(normal=[('dua_sepc_3x3', 1), ('skip_connect', 0), ('dua_sepc_3x3', 0), ('skip_connect', 1), ('dua_sepc_3x3', 0), ('dua_sepc_5x5', 1), ('max_pool_3x3', 0), ('max_pool_3x3', 1)], normal_concat=range(2, 6), reduce=[('avg_pool_3x3', 0), ('dil_sepc_5x5', 1), ('avg_pool_3x3', 0), ('max_pool_3x3', 1), ('dua_sepc_3x3', 1), ('max_pool_3x3', 0), ('max_pool_3x3', 1), ('avg_pool_3x3', 0)], reduce_concat=range(2, 6))
 
-'''
 # Convert Genotype to a serializable dictionary
 def genotype_to_dict(genotype):
     # Create a dictionary with mandatory fields
@@ -115,13 +111,12 @@ def genotype_to_dict(genotype):
     
     return genotype_dict
 
-dict = genotype_to_dict(BETADARTS)
+dict = genotype_to_dict(DARTS)
 
 #save dict into a path dir
 import json
 import os
-path = 'results/darts_search_datasetcifar10_samFalse_betadecayTrue'
+path = 'results/darts_search_datasetcifar10_samFalse_betadecayFalse'
 with open(os.path.join(path, 'genotype.json'), 'w') as f:
     json.dump(dict, f)
 
-'''

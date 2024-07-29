@@ -117,6 +117,33 @@ class DARTS():
                 idx += preceding_nodes
         
         return adjacency_matrix
+    
+    def genotype_to_adjacency_matrix(self, genotype):
+        adjacency_matrix = np.zeros((self.int_nodes, self.input_nodes + self.int_nodes - 1), dtype=int)
+        for idx, (op, node) in enumerate(genotype.normal):
+            node_pos = idx // 2
+            op_idx = PRIMITIVES.index(op)
+            adjacency_matrix[node_pos][node] = op_idx
+        return adjacency_matrix
+
+    def adjacency_matrix_to_genotype(self, adjacency_matrix):
+        genotype = {'normal': [], 'normal_concat': range(2, 6), 'reduce': [], 'reduce_concat': range(2, 6)}
+        for i in range(self.int_nodes):
+            for j in range(self.input_nodes + i):
+                op = adjacency_matrix[i][j]
+                if op > 0:
+                    genotype['normal'].append((PRIMITIVES[op], j))
+        return genotype
+
+    def genotype_to_vector(self, genotype):
+        adjacency_matrix = self.genotype_to_adjacency_matrix(genotype)
+        encoded_vector = self.encode_adjacency_matrix(adjacency_matrix)
+        return encoded_vector
+
+    def vector_to_genotype(self, encoded_vector):
+        adjacency_matrix = self.decode_to_adjacency_matrix(encoded_vector)
+        genotype = self.adjacency_matrix_to_genotype(adjacency_matrix)
+        return genotype
    
 
 darts = DARTS(2)
@@ -126,3 +153,6 @@ vector = darts.encode_adjacency_matrix(matrix)
 print(vector)
 matrix = darts.decode_to_adjacency_matrix(vector)
 print(matrix)
+
+decoded_genotype = darts.vector_to_genotype(vector)
+print(f"Decoded Genotype: {decoded_genotype}")
