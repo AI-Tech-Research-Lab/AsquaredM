@@ -192,7 +192,8 @@ def save(model, model_path):
 def load(model, model_path):
     model.load_state_dict(torch.load(model_path))
 
-
+'''
+#deprecated
 def drop_path(x, drop_prob):
     if drop_prob > 0.:
         keep_prob = 1. - drop_prob
@@ -200,7 +201,15 @@ def drop_path(x, drop_prob):
         x.div_(keep_prob)
         x.mul_(mask)
     return x
+'''
 
+def drop_path(x, drop_prob):
+    if drop_prob > 0.:
+        keep_prob = 1. - drop_prob
+        mask = Variable(torch.bernoulli(torch.full((x.size(0), 1, 1, 1), keep_prob, device=x.device)).to(dtype=torch.float32))
+        x.div_(keep_prob)
+        x.mul_(mask)
+    return x
 
 def create_exp_dir(path, scripts_to_save=None):
 

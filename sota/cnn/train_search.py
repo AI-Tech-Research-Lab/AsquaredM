@@ -1,6 +1,6 @@
 import os
 import sys
-sys.path.insert(0, '../../')
+sys.path.insert(0, '/u01/homes/fpittorino/workspace/darts-SAM')
 import time
 import glob
 import numpy as np
@@ -26,6 +26,18 @@ from numpy import linalg as LA
 
 # from torch.utils.tensorboard import SummaryWriter
 from tensorboardX import SummaryWriter
+
+import wandb
+
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 
 parser = argparse.ArgumentParser("sota")
@@ -55,8 +67,17 @@ parser.add_argument('--arch_weight_decay', type=float, default=1e-3, help='weigh
 parser.add_argument('--search_space', type=str, default='s5', help='searching space to choose from')
 parser.add_argument('--perturb_alpha', type=str, default='random', help='perturb for alpha')
 parser.add_argument('--epsilon_alpha', type=float, default=0.3, help='max epsilon for alpha')
+parser.add_argument('--wandb', type=str2bool, default=False, help='use one-step unrolled validation loss')
+parser.add_argument('--nasbench', action='store_true', default=False, help='use one-step unrolled validation loss')
+parser.add_argument('--betadecay', type=str2bool, default=False, help='use beta-darts regularization')
+parser.add_argument('--sam', type=str2bool, default=False, help='use sam update rule')
+parser.add_argument('--rho_alpha_sam', type=float, default=1e-2, help='rho alpha for SAM update')
+parser.add_argument('--epsilon_sam', type=float, default=1e-2, help='epsilon for SAM update')
+parser.add_argument('--data_aug', type=str2bool, default=True, help='use data augmentation on validation set')
+
 args = parser.parse_args()
 
+'''
 args.save = '../../experiments/sota/{}/search-{}-{}-{}-{}'.format(
     args.dataset, args.save, time.strftime("%Y%m%d-%H%M%S"), args.search_space, args.seed)
 
@@ -73,6 +94,9 @@ if not args.perturb_alpha == 'none':
 args.save += '-' + str(np.random.randint(10000))
 
 utils.create_exp_dir(args.save, scripts_to_save=glob.glob('*.py'))
+'''
+
+utils.create_exp_dir(args.save, scripts_to_save=glob.glob('*.py'))
 
 log_format = '%(asctime)s %(message)s'
 logging.basicConfig(stream=sys.stdout, level=logging.INFO,
@@ -81,6 +105,17 @@ fh = logging.FileHandler(os.path.join(args.save, 'log.txt'))
 fh.setFormatter(logging.Formatter(log_format))
 logging.getLogger().addHandler(fh)
 writer = SummaryWriter(args.save + '/runs')
+
+if args.wandb:
+    wandb.init(
+        # username or team name
+        entity='flatnas',
+        # set the wandb project where this run will be logged
+        project=f"FlatDARTS-{args.dataset}-nasbench{args.nasbench}-data_aug",
+        name=f"SAM_{args.sam}-BETADECAY_{args.betadecay}-UNROLLED_{args.unrolled}-DATA_AUG_{args.data_aug}-RHO_ALPHA_{args.rho_alpha_sam}",
+        # track hyperparameters and run metadata
+        config={**vars(args)},
+    )
 
 
 if args.dataset == 'cifar100':
@@ -156,8 +191,8 @@ def main():
     architect = Architect(model, args)
 
     for epoch in range(args.epochs):
-        scheduler.step()
-        lr = scheduler.get_lr()[0]
+
+        lr = scheduler.get_last_lr()[0]
         if args.cutout:
             # increase the cutout probability linearly throughout search
             train_transform.transforms[-1].cutout_prob = args.cutout_prob * epoch / (args.epochs - 1)
@@ -173,8 +208,8 @@ def main():
         genotype = model.genotype()
         logging.info('genotype = %s', genotype)
 
-        print(F.softmax(model.alphas_normal, dim=-1))
-        print(F.softmax(model.alphas_reduce, dim=-1))
+        #print(F.softmax(model.alphas_normal, dim=-1))
+        #print(F.softmax(model.alphas_reduce, dim=-1))
 
         # training
         train_acc, train_obj = train(train_queue, valid_queue, model, architect, criterion, optimizer, lr, 
@@ -189,7 +224,16 @@ def main():
         writer.add_scalar('Acc/valid', valid_acc, epoch)
         writer.add_scalar('Obj/valid', valid_obj, epoch)
 
+        if args.wandb:
+            wandb.log({"metrics/train_acc": train_acc, 
+                    "metrics/val_acc": valid_acc,
+                    "metrics/train_loss": train_obj,
+                    "metrics/val_loss": valid_obj})
+    
         utils.save(model, os.path.join(args.save, 'weights.pt'))
+
+        scheduler.step()
+
     writer.close()
 
 
@@ -210,20 +254,20 @@ def train(train_queue, valid_queue, model, architect, criterion, optimizer, lr, 
         input_search = input_search.cuda()
         target_search = target_search.cuda(non_blocking=True)
 
-        architect.step(input, target, input_search, target_search, lr, optimizer, unrolled=args.unrolled)
+        architect.step(input, target, input_search, target_search, lr, optimizer, step, unrolled=args.unrolled)
         optimizer.zero_grad()
         architect.optimizer.zero_grad()
 
-        print('before softmax', model.arch_parameters())
+        #print('before softmax', model.arch_parameters())
         model.softmax_arch_parameters()
 
         # perturb on alpha
-        print('after softmax', model.arch_parameters())
+        #print('after softmax', model.arch_parameters())
         if perturb_alpha:
             perturb_alpha(model, input, target, epsilon_alpha)
             optimizer.zero_grad()
             architect.optimizer.zero_grad()
-        print('after perturb', model.arch_parameters())
+        #print('after perturb', model.arch_parameters())
 
         logits = model(input, updateType='weight')
         loss = criterion(logits, target)
@@ -232,7 +276,7 @@ def train(train_queue, valid_queue, model, architect, criterion, optimizer, lr, 
         nn.utils.clip_grad_norm_(model.parameters(), args.grad_clip)
         optimizer.step()
         model.restore_arch_parameters()
-        print('after restore', model.arch_parameters())
+        #print('after restore', model.arch_parameters())
 
         prec1, prec5 = utils.accuracy(logits, target, topk=(1, 5))
         objs.update(loss.data, n)

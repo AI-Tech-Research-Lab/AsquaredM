@@ -1,6 +1,6 @@
 import os
 import sys
-sys.path.insert(0, '../../')
+sys.path.insert(0, '/u01/homes/fpittorino/workspace/darts-SAM')
 import time
 import glob
 import numpy as np
@@ -18,6 +18,7 @@ from torch.autograd import Variable
 from sota.cnn.model import Network
 # from torch.utils.tensorboard import SummaryWriter
 from tensorboardX import SummaryWriter
+import wandb
 
 
 parser = argparse.ArgumentParser("cifar")
@@ -44,8 +45,10 @@ parser.add_argument('--save', type=str, default='exp', help='experiment name')
 parser.add_argument('--seed', type=int, default=0, help='random seed')
 parser.add_argument('--arch', type=str, default='DARTS', help='which architecture to use')
 parser.add_argument('--grad_clip', type=float, default=5, help='gradient clipping')
+parser.add_argument('--wandb', action='store_true', default=False, help='use wandb')
 args = parser.parse_args()
 
+'''
 args.save = '../../experiments/sota/{}/eval-{}-{}-{}-{}'.format(
     args.dataset, args.save, time.strftime("%Y%m%d-%H%M%S"), args.arch, args.seed)
 if args.cutout:
@@ -53,6 +56,7 @@ if args.cutout:
 if args.auxiliary:
     args.save += '-auxiliary-' + str(args.auxiliary_weight)
 args.save += '-' + str(np.random.randint(10000))
+'''
 utils.create_exp_dir(args.save, scripts_to_save=glob.glob('*.py'))
 
 log_format = '%(asctime)s %(message)s'
@@ -63,6 +67,16 @@ fh.setFormatter(logging.Formatter(log_format))
 logging.getLogger().addHandler(fh)
 writer = SummaryWriter(args.save + '/runs')
 
+if args.wandb:
+    wandb.init(
+        # username or team name
+        entity='flatnas',
+        # set the wandb project where this run will be logged
+        project=f"FlatDARTS-TRAIN-{args.dataset}",
+        name=f"TRAIN_ARCH_{args.arch}_seed_{args.seed}",
+        # track hyperparameters and run metadata
+        config={**vars(args)},
+    )
 
 if args.dataset == 'cifar100':
     n_classes = 100
@@ -86,7 +100,7 @@ def main():
     logging.info("args = %s", args)
 
     genotype = eval("genotypes.%s" % args.arch)
-    print(genotype)
+    logging.info(genotype)
     model = Network(args.init_channels, n_classes, args.layers, args.auxiliary, genotype)
     model = model.cuda()
 
@@ -124,8 +138,8 @@ def main():
         optimizer, float(args.epochs))
 
     for epoch in range(args.epochs):
-        scheduler.step()
-        lr = scheduler.get_lr()[0]
+        #scheduler.step()
+        lr = scheduler.get_last_lr()[0]
         if args.cutout:
             # increase the cutout probability linearly throughout search
             train_transform.transforms[-1].cutout_prob = args.cutout_prob * \
@@ -146,6 +160,13 @@ def main():
         writer.add_scalar('Acc/valid', valid_acc, epoch)
         writer.add_scalar('Obj/valid', valid_obj, epoch)
 
+        if args.wandb:
+            wandb.log({"metrics/train_acc": train_acc, 
+                    "metrics/val_acc": valid_acc,
+                    "metrics/train_loss": train_obj,
+                    "metrics/val_loss": valid_obj})
+
+        scheduler.step()
         utils.save(model, os.path.join(args.save, 'weights.pt'))
     writer.close()
 

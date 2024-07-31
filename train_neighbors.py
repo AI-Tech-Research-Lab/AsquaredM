@@ -1,5 +1,10 @@
 import argparse
+from collections import OrderedDict
+import glob
+import subprocess
 from nasbench201.archive import NASBench201
+from optimizers.darts import utils
+from sota.cnn.model_search import Network
 import torch
 
 import sys
@@ -13,39 +18,8 @@ sys.path.append(os.getcwd())
 from train_utils import get_dataset, get_optimizer, get_loss, get_lr_scheduler, get_data_loaders, load_checkpoint, validate, initialize_seed, \
                         Log, train, get_net_info
 from perturb import get_net_info_runtime
-from nasbench201.nasbenchnet import NASBenchNet
-
-def load_array_from_file(file_path):
-    arr = []
-    with open(file_path, 'r') as file:
-        array_str = file.read()
-        arr = list(map(int, array_str.split(',')))  # Split string by comma and convert to integers
-    return arr
-
-def generate_neighbors(config, value_range):
-    neighbors = []
-    for i in range(len(config)):
-        for value in value_range:
-            if config[i] != value:
-                neighbor = config.copy()
-                neighbor[i] = value
-                neighbors.append(neighbor)
-    return neighbors
-
-def evaluate_configuration(config, args, device, bench, train_loader, val_loader, test_loader):
-    cell_encode = bench.encode({'arch': config})
-    model = NASBenchNet(cell_encode=cell_encode, C=16, num_classes=args.n_classes, stages=3, cells=5, steps=4)
-    model.to(device)
-    
-    log = Log(log_each=10)
-    optimizer = get_optimizer(model.parameters(), args.optim, args.learning_rate, args.momentum, args.weight_decay, args.rho, args.adaptive, args.nesterov)
-    criterion = get_loss('ce')
-    scheduler = get_lr_scheduler(optimizer, 'cosine', epochs=args.epochs, lr_min=args.lr_min)
-    
-    top1, model, optimizer = train(train_loader, val_loader, args.epochs, model, device, optimizer, criterion, scheduler, log, ckpt_path=None, cutout=args.cutout)
-    top1_test = validate(test_loader, model, device, print_freq=100)
-    
-    return top1_test, model.state_dict()
+#from nasbench201.nasbenchnet import NASBenchNet
+from sota.cnn.darts import DARTS
 
 def check_if_evaluated(config, output_path):
     config_str = ','.join(map(str, config))
@@ -54,111 +28,85 @@ def check_if_evaluated(config, output_path):
         return True, save_path
     return False, save_path
 
+def call_training_script(genotype,id,args):
+    # Prepare the experiment directory
+    exp_dir = os.path.join(args.save, 'neighbor_' + str(id))
+
+    bash_file = ['#!/bin/bash']
+    cfg =OrderedDict()
+    
+    cfg['dataset'] = args.dataset
+    cfg['data'] = args.data
+    cfg['device'] = args.device
+    cfg['output_path'] = args.save
+    cfg['epochs'] = 600
+    cfg['batch_size'] = 96
+    cfg['momentum'] = 0.9
+    cfg['drop_path_prob'] = 0.2
+    cfg['auxiliary'] = True
+    cfg['auxiliary_weight'] = 0.4
+    cfg['cutout'] = True
+    cfg['seed'] = args.seed
+
+    execution_line = "python sota/cnn/train.py"
+    for k, v in cfg.items():
+        if v is not None:
+            if isinstance(v, bool):
+                if v:
+                    execution_line += " --{}".format(k)
+            else:
+                execution_line += " --{} {}".format(k, v)
+    
+    bash_file.append(execution_line)
+    
+    bash_file_path = os.path.join(args.save, 'run_bash.sh')
+    with open(bash_file_path, 'w') as handle:
+        for line in bash_file:
+            handle.write(line + os.linesep)
+    
+    utils.create_exp_dir(exp_dir, scripts_to_save=None)
+
+    subprocess.call("sh {}/run_bash.sh".format(args.save), shell=True)
 
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--seed", default=2, type=int, help="Seed for reproducibility.") #42
-    parser.add_argument("--adaptive", default=True, type=bool, help="True if you want to use the Adaptive SAM.")
-    parser.add_argument("--nesterov", action='store_true', default=False, help="True if you want to use Nesterov momentum.")
-    parser.add_argument("--batch_size", default=128, type=int, help="Batch size used in the training and validation loop.")
-    parser.add_argument("--depth", default=16, type=int, help="Number of layers.")
-    parser.add_argument("--dropout", default=0.0, type=float, help="Dropout rate.")
-    parser.add_argument("--epochs", default=200, type=int, help="Total number of epochs.")
-    parser.add_argument("--label_smoothing", default=0.1, type=float, help="Use 0.0 for no label smoothing.")
-    parser.add_argument("--learning_rate", default=0.1, type=float, help="Base learning rate at the start of the training.") #0.1
-    parser.add_argument("--lr_min", default=0, type=float, help="Min learning rate") #0.1
-    parser.add_argument("--momentum", default=0.9, type=float, help="SGD Momentum.")
-    parser.add_argument("--n_workers", default=2, type=int, help="Number of CPU threads for dataloaders.")
-    parser.add_argument("--weight_decay", default=5e-5, type=float, help="L2 weight decay.") 
-    parser.add_argument("--val_split", default=0.0, type=float, help='percentage of train set for validation')
-    parser.add_argument("--balanced_val", action='store_true', default=False, help='balance samples per classes in training set')
-    parser.add_argument('--cutout', action='store_true', default=False, help='use cutout')
-    parser.add_argument('--cutout_length', type=int, default=16, help='cutout length')
-    parser.add_argument('--cutout_prob', type=float, default=1.0, help='cutout probability')
-    parser.add_argument('--save', action='store_true', default=False, help='save log of experiments')
-    parser.add_argument('--save_ckpt', action='store_true', default=False, help='save checkpoint')
-    parser.add_argument('--optim', type=str, default='SAM', help='algorithm to use for training')
-    parser.add_argument("--rho", default=2.0, type=int, help="Rho parameter for SAM.")
-    parser.add_argument('--res', default=32, type=int, help="default resolution for training")
-    parser.add_argument('--device', type=str, default='cpu', help='device to use for training / testing')
-    parser.add_argument('--data', type=str, default='/mnt/datastore/ILSVRC2012', help='location of the data corpus')
-    parser.add_argument('--dataset', type=str, default='imagenet', help='name of the dataset (imagenet, cifar10, cifar100, ...)')
-    parser.add_argument('--model', type=str, default='mobilenetv3', help='name of the model (mobilenetv3, ...)')
-    parser.add_argument('--n_classes', type=int, default=1000, help='number of classes of the given dataset')
-    parser.add_argument('--supernet_path', type=str, default='./ofa_nets/ofa_mbv3_d234_e346_k357_w1.0', help='file path to supernet weights')
-    parser.add_argument('--model_path', type=str, default=None, help='file path to subnet')
-    parser.add_argument('--output_path', type=str, default=None, help='file path to save results')
-    parser.add_argument('--pretrained', action='store_true', default=False, help='use pretrained weights')
-    parser.add_argument('--eval_test', action='store_true', default=True, help='evaluate test accuracy')
-    parser.add_argument('--eval_robust', action='store_true', default=False, help='evaluate robustness')    
-    parser.add_argument("--sigma_min", default=0.05, type=float, help="min noise perturbation intensity")
-    parser.add_argument("--sigma_max", default=0.05, type=float, help="max noise perturbation intensity")
-    parser.add_argument("--sigma_step", default=0.0, type=float, help="step noise perturbation intensity")
-    parser.add_argument('--ood_eval', action='store_true', default=False, help='evaluate OOD robustness')
-    parser.add_argument('--load_ood', action='store_true', default=False, help='load pretrained OOD folders') 
-    parser.add_argument('--ood_data', type=str, default=None, help='OOD dataset')
-    parser.add_argument('--alpha', default=0.5, type=float, help="weight for top1_robust")  
-    parser.add_argument('--alpha_norm', default=1.0, type=float, help="weight for top1_robust normalization")
-    parser.add_argument('--func_constr', action='store_true', default=False, help="use functional constraints")
-    parser.add_argument('--pmax', default=300, type=float, help="constraint on params")
-    parser.add_argument('--mmax', default=300, type=float, help="constraint on macs")
-    parser.add_argument('--amax', default=300, type=float, help="constraint on activations")
-    parser.add_argument('--wp', default=0.0, type=float, help="weight for params")
-    parser.add_argument('--wm', default=0.0, type=float, help="weight for macs")
-    parser.add_argument('--wa', default=0.0, type=float, help="weight for activations")
-    parser.add_argument('--penalty', default=1e10, type=float, help="penalty for constraint violation")
-
+    parser.add_argument('--data', type=str, default='/remote-home/source/share/dataset',
+                    help='location of the data corpus')
+    parser.add_argument('--dataset', type=str, default='cifar10', help='choose dataset')
+    parser.add_argument('--save', type=str, default='/remote-home/source/share/dataset',
+                    help='location of the exp folder')
+    parser.add_argument('--arch', type=str, default='/remote-home/source/share/dataset',
+                    help='initial config')
+    parser.add_argument('--radius', type=int, default=1,
+                    help='radius')
+    parser.add_argument('--samples', type=int, default=1,
+                    help='number of neighbors')
     args = parser.parse_args()
 
-    log_format = '%(asctime)s %(message)s'
-    logging.basicConfig(stream=sys.stdout, level=logging.INFO,
-                        format=log_format, datefmt='%m/%d %I:%M:%S %p')
+    utils.create_exp_dir(args.save, scripts_to_save=glob.glob('*.py'))
 
-    if not os.path.exists(args.output_path):
-        os.makedirs(args.output_path, exist_ok=True)
-    logging.info('Experiment dir : {}'.format(args.output_path))
+    darts = DARTS(2)
+    genotype = eval("genotypes.%s" % args.arch)
+    logging.info(genotype)
 
-    fh = logging.FileHandler(os.path.join(args.output_path, 'log.txt'))
-    fh.setFormatter(logging.Formatter(log_format))
-    logging.getLogger().addHandler(fh)
-    
-    device = args.device
-    use_cuda=False
-    if torch.cuda.is_available() and device != 'cpu':
-        device = 'cuda:{}'.format(device)
-        logging.info("Running on GPU")
-        use_cuda=True
-    else:
-        logging.info("No device found")
-        logging.warning("Device not found or CUDA not available.")
-    
-    device = torch.device(device)
-    initialize_seed(args.seed, use_cuda)
-
-    bench = #NASBench201('cifar100')
-    initial_config = load_array_from_file(os.path.join(args.output_path,'best_genotype.txt'))
-    value_range = range(4)  # Assuming values in config can be 0, 1, 2, 3
-
-    train_set, val_set, test_set, _, _ = get_dataset(name=args.dataset, val_split=args.val_split, augmentation=True, cutout=args.cutout, balanced_val=args.balanced_val)
-    train_loader, val_loader, test_loader = get_data_loaders(train_set, val_set, test_set, batch_size=args.batch_size, threads=args.n_workers, eval_test=True)
-    if val_loader is None:
-        val_loader = test_loader
-
-    neighbors = generate_neighbors(initial_config, value_range)
+    matrix = darts.genotype_to_adjacency_matrix(genotype)
+    radius=1
+    samples=2
+    neighbors = darts.sample_neighbors(matrix, args.radius, args.samples)
     results = {}
 
     for neighbor in neighbors:
         logging.info(f"Evaluating config: {neighbor}")
-        already_evaluated, save_path = check_if_evaluated(neighbor, args.output_path)
+        already_evaluated, save_path = check_if_evaluated(neighbor, args.archive_path)
         
         if already_evaluated:
             logging.info(f"Configuration {neighbor} already evaluated. Loading results from {save_path}")
             state_dict = torch.load(save_path)
             top1_test = state_dict['accuracy']
         else:
-            top1_test, state_dict = evaluate_configuration(neighbor, args, device, bench, train_loader, val_loader, test_loader)
+            #launch process
             torch.save({'accuracy': top1_test, 'state_dict': state_dict}, save_path)
         
         config_str = ','.join(map(str, neighbor))
