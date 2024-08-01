@@ -48,11 +48,8 @@ parser.add_argument('--arch', type=str, default=None, help='which architecture t
 parser.add_argument('--grad_clip', type=float, default=5, help='gradient clipping')
 parser.add_argument('--wandb', action='store_true', default=False, help='use wandb')
 parser.add_argument('--train_limit', type=float, default=0.0, help='training loss limit')
-parser.add_argument('--epochs_limit', type=int, default=-1, help='training loss limit')
 args = parser.parse_args()
 
-if args.epochs_limit < 0:
-    args.epochs_limit = args.epochs
 '''
 args.save = '../../experiments/sota/{}/eval-{}-{}-{}-{}'.format(
     args.dataset, args.save, time.strftime("%Y%m%d-%H%M%S"), args.arch, args.seed)
@@ -199,27 +196,30 @@ def main():
             logging.info('Training loss has fallen below the threshold. Stopping training.')
             break
 
-        # Check if the max num of epochs has been reached to stop training
-        if epoch >= args.epochs_limit:
-            logging.info('Max number of epochs reached. Stopping training.')
-            break
-
         scheduler.step()
         #utils.save(model, os.path.join(args.save, 'weights.pt'))
 
     writer.close()
 
     #Save tuple (config, stats) to a json file
+    
+    #Save both best and current values
+    best_train_acc = np.round(best_train_acc.item(), 3)
+    best_train_obj = np.round(best_train_obj.item(), 3)
+    best_valid_acc = np.round(best_valid_acc.item(), 3)
+    best_valid_obj = np.round(best_valid_obj.item(), 3)
 
-    train_acc = np.round(best_train_acc.item(), 3)
-    train_obj = np.round(best_train_obj.item(), 3)
-    valid_acc = np.round(best_valid_acc.item(), 3)
-    valid_obj = np.round(best_valid_obj.item(), 3)
+    train_acc = np.round(train_acc.item(), 3)
+    train_obj = np.round(train_obj.item(), 3)
+    valid_acc = np.round(valid_acc.item(), 3)
+    valid_obj = np.round(valid_obj.item(), 3)
+
     genotype = {'normal': genotype.normal, 'normal_concat': list(genotype.normal_concat),
                 'reduce': genotype.reduce, 'reduce_concat': list(genotype.reduce_concat)}
 
     with open(os.path.join(args.save, 'stats.json'), 'w') as f:
-        json.dump({'config': genotype, 'train_acc': train_acc, 'train_loss': train_obj, 'val_acc': valid_acc, 'val_loss': valid_obj}, f)
+        json.dump({'config': genotype, 'train_acc': train_acc, 'train_loss': train_obj, 'val_acc': valid_acc, 'val_loss': valid_obj,
+        'best_train_acc': best_train_acc, 'best_train_obj': best_train_obj, 'best_valid_acc': best_valid_acc, 'best_valid_obj': best_valid_obj}, f)
 
 
 def train(train_queue, model, criterion, optimizer):

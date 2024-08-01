@@ -98,7 +98,6 @@ def call_training_script(genotypes, args):
             cfg['save'] = exp_dir
             cfg['epochs'] = args.epochs
             cfg['train_limit'] = args.train_limit
-            cfg['epochs_limit'] = args.epochs_limit
             cfg['batch_size'] = 96
             cfg['momentum'] = 0.9
             cfg['drop_path_prob'] = 0.2
@@ -179,11 +178,7 @@ if __name__ == "__main__":
     parser.add_argument('--seed', type=int, default=0, help='random seed')
     parser.add_argument('--epochs', type=int, default=50, help='number of epochs')
     parser.add_argument('--train_limit', type=float, default=0.0, help='training loss limit')
-    parser.add_argument('--epochs_limit', type=int, default=-1, help='max number of epochs')
     args = parser.parse_args()
-
-    if args.epochs_limit == -1:
-        args.epochs_limit = args.epochs
 
     # Ensure the exp directory exists
     if not os.path.exists(args.save):
