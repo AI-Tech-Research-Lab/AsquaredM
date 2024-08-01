@@ -1,3 +1,4 @@
+import logging
 import torch
 import torch.nn as nn
 
@@ -11,7 +12,6 @@ class Cell(nn.Module):
 
     def __init__(self, genotype, C_prev_prev, C_prev, C, reduction, reduction_prev):
         super(Cell, self).__init__()
-        print(C_prev_prev, C_prev, C)
 
         if reduction_prev:
             self.preprocess0 = FactorizedReduce(C_prev_prev, C)
@@ -45,6 +45,7 @@ class Cell(nn.Module):
         s1 = self.preprocess1(s1)
 
         states = [s0, s1]
+
         for i in range(self._steps):
             h1 = states[self._indices[2*i]]
             h2 = states[self._indices[2*i+1]]

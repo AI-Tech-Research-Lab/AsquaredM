@@ -1,9 +1,8 @@
-import torch
-import json
 import os
-from typing import List, Text
+import sys
 import numpy as np
-from spaces import PRIMITIVES
+sys.path.append('/u01/homes/fpittorino/workspace/darts-SAM')
+from sota.cnn.spaces import PRIMITIVES
 
 class DARTS():
 
@@ -52,7 +51,7 @@ class DARTS():
         # Randomly distribute the total number of changes between normal and reduce matrices
         normal_changes = np.random.randint(0, radius + 1)
         reduce_changes = radius - normal_changes
-        print("Normal Changes: ", normal_changes)
+        #print("Normal Changes: ", normal_changes)
 
         for _ in range(normal_changes):
             normal_matrix = self._create_single_neighboring_matrix(normal_matrix)
@@ -157,6 +156,7 @@ class DARTS():
         return adjacency_matrix
 
     def genotype_to_adjacency_matrix(self, genotype):
+        #print("Genotype: ", genotype)
         normal_matrix = self._genotype_to_single_matrix(genotype['normal'])
         reduce_matrix = self._genotype_to_single_matrix(genotype['reduce'])
         return (normal_matrix, reduce_matrix)
@@ -166,10 +166,11 @@ class DARTS():
         for idx, (op, node) in enumerate(gene):
             node_pos = idx // 2
             op_idx = PRIMITIVES.index(op)
-            adjacency_matrix[node_pos][node] = op_idx
+            adjacency_matrix[node_pos][node] = op_idx + 1
         return adjacency_matrix
 
     def adjacency_matrix_to_genotype(self, adjacency_matrices):
+        #print("Adjacency Matrices: ", adjacency_matrices)
         normal_matrix, reduce_matrix = adjacency_matrices
         normal_gene = self._matrix_to_genotype(normal_matrix)
         reduce_gene = self._matrix_to_genotype(reduce_matrix)
@@ -181,7 +182,7 @@ class DARTS():
             for j in range(self.input_nodes + i):
                 op = adjacency_matrix[i][j]
                 if op > 0:
-                    gene.append((PRIMITIVES[op], j))
+                    gene.append((PRIMITIVES[op-1], j))
         return gene
 
     def genotype_to_vector(self, genotype):
@@ -213,11 +214,16 @@ class DARTS():
             genes.append(self.adjacency_matrix_to_genotype((norm_matrix,red_matrix)))
 
         return genes
-   
+    
+    def to_dict(self, genotype):
+        return genotype._asdict()
+
+'''
 darts = DARTS(2)
 #matrix = darts.sample(1)[0]
 #print(matrix[0])
 #print(matrix[1])
+
 
 normal_matrix = np.array([
     [3, 3, 0, 0, 0],
@@ -241,13 +247,21 @@ print(reduce_matrix)
 
 matrix = (normal_matrix, reduce_matrix)
 
+gene = darts.adjacency_matrix_to_genotype(matrix)
+print("Gene:")
+print(gene)
+matrix= darts.genotype_to_adjacency_matrix(gene)
+print("Matrix:")
+print(matrix)
+'''
 
+'''
 neighbors = darts.sample_neighbors(matrix, 1, 5)
 print("Neighbors:")
 for neighbor in neighbors:
     print(neighbor)
 
-'''
+
 vector = darts.encode_adjacency_matrix(matrix)
 print(vector)
 #matrix = darts.decode_to_adjacency_matrix(vector)

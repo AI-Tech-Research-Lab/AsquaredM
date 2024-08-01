@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 sys.path.insert(0, '/u01/homes/fpittorino/workspace/darts-SAM')
@@ -37,17 +38,21 @@ parser.add_argument('--layers', type=int, default=20, help='total number of laye
 parser.add_argument('--model_path', type=str, default='saved_models', help='path to save the model')
 parser.add_argument('--auxiliary', action='store_true', default=True, help='use auxiliary tower')
 parser.add_argument('--auxiliary_weight', type=float, default=0.4, help='weight for auxiliary loss')
-parser.add_argument('--cutout', action='store_true', default=True, help='use cutout')
+parser.add_argument('--cutout', action='store_true', default=False, help='use cutout')
 parser.add_argument('--cutout_length', type=int, default=16, help='cutout length')
 parser.add_argument('--cutout_prob', type=float, default=1.0, help='cutout probability')
 parser.add_argument('--drop_path_prob', type=float, default=0.2, help='drop path probability')
 parser.add_argument('--save', type=str, default='exp', help='experiment name')
 parser.add_argument('--seed', type=int, default=0, help='random seed')
-parser.add_argument('--arch', type=str, default='DARTS', help='which architecture to use')
+parser.add_argument('--arch', type=str, default=None, help='which architecture to use')
 parser.add_argument('--grad_clip', type=float, default=5, help='gradient clipping')
 parser.add_argument('--wandb', action='store_true', default=False, help='use wandb')
+parser.add_argument('--train_limit', type=float, default=0.0, help='training loss limit')
+parser.add_argument('--epochs_limit', type=int, default=-1, help='training loss limit')
 args = parser.parse_args()
 
+if args.epochs_limit < 0:
+    args.epochs_limit = args.epochs
 '''
 args.save = '../../experiments/sota/{}/eval-{}-{}-{}-{}'.format(
     args.dataset, args.save, time.strftime("%Y%m%d-%H%M%S"), args.arch, args.seed)
@@ -99,7 +104,17 @@ def main():
     logging.info('gpu device = %d' % args.gpu)
     logging.info("args = %s", args)
 
-    genotype = eval("genotypes.%s" % args.arch)
+    if args.arch is None:
+        #read arch from genotype json file
+        with open(os.path.join(args.save, 'genotype.json'), 'r') as f:
+            genotype = json.load(f)
+        print(genotype)
+        #transform dict to genotype
+        genotype = genotypes.Genotype(normal=genotype['normal'], normal_concat=genotype['normal_concat'],
+                                      reduce=genotype['reduce'], reduce_concat=genotype['reduce_concat'])
+    else:
+        genotype = eval("genotypes.%s" % args.arch)
+        
     logging.info(genotype)
     model = Network(args.init_channels, n_classes, args.layers, args.auxiliary, genotype)
     model = model.cuda()
@@ -136,6 +151,8 @@ def main():
 
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
         optimizer, float(args.epochs))
+    
+    best_valid_loss = float('inf')  # Initialize the best validation loss as infinity
 
     for epoch in range(args.epochs):
         #scheduler.step()
@@ -165,10 +182,38 @@ def main():
                     "metrics/val_acc": valid_acc,
                     "metrics/train_loss": train_obj,
                     "metrics/val_loss": valid_obj})
+            
+        # Save the best model weights based on the lowest validation loss
+        if valid_obj < best_valid_loss:
+            best_valid_loss = valid_obj
+            utils.save(model, os.path.join(args.save, 'best_weights.pt'))
+
+        # Check if the training loss is below the threshold to stop training
+        if train_obj < args.train_limit:
+            logging.info('Training loss has fallen below the threshold. Stopping training.')
+            break
+
+        # Check if the max num of epochs has been reached to stop training
+        if epoch >= args.epochs_limit:
+            logging.info('Max number of epochs reached. Stopping training.')
+            break
 
         scheduler.step()
-        utils.save(model, os.path.join(args.save, 'weights.pt'))
+        #utils.save(model, os.path.join(args.save, 'weights.pt'))
+
     writer.close()
+
+    #Save tuple (config, stats) to a json file
+
+    train_acc = np.round(train_acc.item(), 3)
+    train_obj = np.round(train_obj.item(), 3)
+    valid_acc = np.round(valid_acc.item(), 3)
+    valid_obj = np.round(valid_obj.item(), 3)
+    genotype = {'normal': genotype.normal, 'normal_concat': list(genotype.normal_concat),
+                'reduce': genotype.reduce, 'reduce_concat': list(genotype.reduce_concat)}
+
+    with open(os.path.join(args.save, 'stats.json'), 'w') as f:
+        json.dump({'config': genotype, 'train_acc': train_acc, 'train_loss': train_obj, 'val_acc': valid_acc, 'val_loss': valid_obj}, f)
 
 
 def train(train_queue, model, criterion, optimizer):
