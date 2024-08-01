@@ -152,7 +152,10 @@ def main():
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
         optimizer, float(args.epochs))
     
-    best_valid_loss = float('inf')  # Initialize the best validation loss as infinity
+    best_valid_obj = float('inf')  # Initialize the best validation loss as infinity
+    best_valid_acc = 0.0  # Initialize the best validation accuracy as 0.0
+    best_train_acc = 0.0  # Initialize the best training accuracy as 0.0
+    best_train_obj = float('inf')  # Initialize the best training loss as infinity
 
     for epoch in range(args.epochs):
         #scheduler.step()
@@ -184,8 +187,11 @@ def main():
                     "metrics/val_loss": valid_obj})
             
         # Save the best model weights based on the lowest validation loss
-        if valid_obj < best_valid_loss:
-            best_valid_loss = valid_obj
+        if valid_obj < best_valid_obj:
+            best_valid_obj = valid_obj
+            best_valid_acc = valid_acc
+            best_train_acc = train_acc
+            best_train_obj = train_obj
             utils.save(model, os.path.join(args.save, 'best_weights.pt'))
 
         # Check if the training loss is below the threshold to stop training
@@ -205,10 +211,10 @@ def main():
 
     #Save tuple (config, stats) to a json file
 
-    train_acc = np.round(train_acc.item(), 3)
-    train_obj = np.round(train_obj.item(), 3)
-    valid_acc = np.round(valid_acc.item(), 3)
-    valid_obj = np.round(valid_obj.item(), 3)
+    train_acc = np.round(best_train_acc.item(), 3)
+    train_obj = np.round(best_train_obj.item(), 3)
+    valid_acc = np.round(best_valid_acc.item(), 3)
+    valid_obj = np.round(best_valid_obj.item(), 3)
     genotype = {'normal': genotype.normal, 'normal_concat': list(genotype.normal_concat),
                 'reduce': genotype.reduce, 'reduce_concat': list(genotype.reduce_concat)}
 
