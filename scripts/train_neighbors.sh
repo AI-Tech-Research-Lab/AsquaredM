@@ -1,12 +1,12 @@
 dataset=cifar10 train_min=0.43
 #dataset=cifar100
 gpus="0"
-arch=DARTS
-epochs=2
+arch=BETADARTS
+epochs=600
 seed=2
 radius=1
-samples=2
-epochs_max=-1
+samples=30
+epochs_max=100
 
 python train_neighbors.py --dataset $dataset --arch $arch \
     --data ../datasets/$dataset --gpus $gpus \

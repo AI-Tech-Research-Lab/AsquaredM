@@ -1,17 +1,29 @@
-dataset=cifar10
+#!/bin/bash
+
+# Define common parameters
+dataset="cifar100"
 res=32
 device=0
-optim=SGD
+optim="SGD"
 epochs=600
 seed=2
 sam=False
 betadecay=True
-arch=SAM
+base_save_dir="results/darts_train"
 
-python sota/cnn/train.py --dataset $dataset --arch $arch \
-    --data ../datasets/$dataset --gpu $device \
-    --save results/darts_train_dataset${dataset}_arch${arch} \
-    --epochs $epochs --momentum 0.9 --batch_size 96 \
-    --auxiliary --auxiliary_weight 0.4 --drop_path_prob 0.2 --cutout --seed $seed 
+# Define the architectures
+architectures=("DARTS" "BETADARTS" "SAM_exp3")
 
-#darts_train_dataset${dataset}_arch${arch}
+# Loop through each architecture and execute the command
+for arch in "${architectures[@]}"; do
+    # Construct the save directory for each architecture
+    save_dir="${base_save_dir}_dataset${dataset}_arch${arch}"
+    
+    # Run the training command
+    python sota/cnn/train.py --dataset $dataset --arch $arch \
+        --data ../datasets/$dataset --gpu $device \
+        --save $save_dir \
+        --epochs $epochs --momentum 0.9 --batch_size 96 \
+        --auxiliary --auxiliary_weight 0.4 --drop_path_prob 0.2 --cutout --seed $seed --wandb
+done
+
