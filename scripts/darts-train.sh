@@ -12,7 +12,7 @@ betadecay=True
 base_save_dir="results/darts_train"
 
 # Define the architectures
-architectures=("DARTS" "BETADARTS" "SAM_exp3")
+architectures=("SAM_exp1") #"DARTS" "BETADARTS" "SAM_exp3")
 
 # Loop through each architecture and execute the command
 for arch in "${architectures[@]}"; do

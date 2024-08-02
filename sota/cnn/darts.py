@@ -45,18 +45,31 @@ class DARTS():
                 adjacency_matrix[i][j] = np.random.randint(1, self.operations)
         return adjacency_matrix
 
+    def _count_differences(self, matrix1, matrix2):
+        # Conta il numero di differenze tra due matrici
+        return np.sum(matrix1 != matrix2)
+
     def create_neighboring_matrix(self, adjacency_matrices, radius):
         normal_matrix, reduce_matrix = adjacency_matrices
 
         # Randomly distribute the total number of changes between normal and reduce matrices
         normal_changes = np.random.randint(0, radius + 1)
         reduce_changes = radius - normal_changes
-        #print("Normal Changes: ", normal_changes)
 
-        for _ in range(normal_changes):
+        initial_normal_matrix = normal_matrix.copy()
+        initial_reduce_matrix = reduce_matrix.copy()
+
+        # Applicazione delle modifiche alla matrice normal_matrix
+        current_differences_normal = 0
+        while current_differences_normal < normal_changes:
             normal_matrix = self._create_single_neighboring_matrix(normal_matrix)
-        for _ in range(reduce_changes):
+            current_differences_normal = self._count_differences(initial_normal_matrix, normal_matrix)
+        
+        # Applicazione delle modifiche alla matrice reduce_matrix
+        current_differences_reduce = 0
+        while current_differences_reduce < reduce_changes:
             reduce_matrix = self._create_single_neighboring_matrix(reduce_matrix)
+            current_differences_reduce = self._count_differences(initial_reduce_matrix, reduce_matrix)
 
         return (normal_matrix, reduce_matrix)
 
