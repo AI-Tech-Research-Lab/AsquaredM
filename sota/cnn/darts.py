@@ -45,7 +45,7 @@ class DARTS():
                 adjacency_matrix[i][j] = np.random.randint(1, self.operations)
         return adjacency_matrix
 
-    def _count_differences(matrix1, original_matrix):
+    def _count_differences(self, matrix1, original_matrix):
         # Crea una maschera per le celle non zero in original_matrix
         mask = original_matrix != 0
         
