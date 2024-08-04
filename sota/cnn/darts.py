@@ -45,9 +45,15 @@ class DARTS():
                 adjacency_matrix[i][j] = np.random.randint(1, self.operations)
         return adjacency_matrix
 
-    def _count_differences(self, matrix1, matrix2):
-        # Conta il numero di differenze tra due matrici
-        return np.sum(matrix1 != matrix2)
+    def _count_differences(matrix1, original_matrix):
+        # Crea una maschera per le celle non zero in original_matrix
+        mask = original_matrix != 0
+        
+        # Applica la maschera alle differenze tra matrix1 e matrix2
+        differences = (matrix1 != original_matrix) & mask
+        
+        # Conta le differenze
+        return np.sum(differences)
 
     def create_neighboring_matrix(self, adjacency_matrices, radius):
         normal_matrix, reduce_matrix = adjacency_matrices
