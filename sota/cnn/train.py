@@ -21,7 +21,7 @@ from torch.autograd import Variable
 from sota.cnn.model_cifar import NetworkCIFAR
 from sota.cnn.model_imagenet import NetworkImageNet
 # from torch.utils.tensorboard import SummaryWriter
-from tensorboardX import SummaryWriter
+#from tensorboardX import SummaryWriter
 import wandb
 
 
@@ -39,7 +39,7 @@ parser.add_argument('--epochs', type=int, default=600, help='num of training epo
 parser.add_argument('--init_channels', type=int, default=36, help='num of init channels')
 parser.add_argument('--layers', type=int, default=20, help='total number of layers')
 parser.add_argument('--model_path', type=str, default='saved_models', help='path to save the model')
-parser.add_argument('--auxiliary', action='store_true', default=True, help='use auxiliary tower')
+parser.add_argument('--auxiliary', action='store_true', default=False, help='use auxiliary tower')
 parser.add_argument('--auxiliary_weight', type=float, default=0.4, help='weight for auxiliary loss')
 parser.add_argument('--cutout', action='store_true', default=False, help='use cutout')
 parser.add_argument('--cutout_length', type=int, default=16, help='cutout length')
@@ -70,7 +70,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO,
 fh = logging.FileHandler(os.path.join(args.save, 'log.txt'))
 fh.setFormatter(logging.Formatter(log_format))
 logging.getLogger().addHandler(fh)
-writer = SummaryWriter(args.save + '/runs')
+#writer = SummaryWriter(args.save + '/runs')
 
 if args.wandb:
     wandb.init(
@@ -183,13 +183,13 @@ def main():
 
         train_acc, train_obj = train(train_queue, model, criterion, optimizer)
         logging.info('train_acc %f', train_acc)
-        writer.add_scalar('Acc/train', train_acc, epoch)
-        writer.add_scalar('Obj/train', train_obj, epoch)
+        #writer.add_scalar('Acc/train', train_acc, epoch)
+        #writer.add_scalar('Obj/train', train_obj, epoch)
 
         valid_acc, valid_obj = infer(valid_queue, model, criterion)
         logging.info('valid_acc %f', valid_acc)
-        writer.add_scalar('Acc/valid', valid_acc, epoch)
-        writer.add_scalar('Obj/valid', valid_obj, epoch)
+        #writer.add_scalar('Acc/valid', valid_acc, epoch)
+        #writer.add_scalar('Obj/valid', valid_obj, epoch)
 
         if args.wandb:
             wandb.log({"metrics/train_acc": train_acc, 
@@ -213,7 +213,7 @@ def main():
         scheduler.step()
         #utils.save(model, os.path.join(args.save, 'weights.pt'))
 
-    writer.close()
+    #writer.close()
 
     #Save tuple (config, stats) to a json file
     

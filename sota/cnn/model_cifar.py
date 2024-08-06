@@ -68,6 +68,7 @@ class AuxiliaryHead(nn.Module):
     def __init__(self, C, num_classes):
         """assuming input size 8x8"""
         super(AuxiliaryHead, self).__init__()
+
         self.features = nn.Sequential(
             nn.ReLU(inplace=True),
             # image size = 2 x 2
@@ -79,9 +80,15 @@ class AuxiliaryHead(nn.Module):
             nn.BatchNorm2d(768),
             nn.ReLU(inplace=True)
         )
+
+        if num_classes==120: #ImageNet16-120
+            self.features[1] = nn.AvgPool2d(2, stride=2, padding=0, count_include_pad=False)
+
         self.classifier = nn.Linear(768, num_classes)
 
     def forward(self, x):
+        #print("SHAPE")
+        #print(x.shape)
         x = self.features(x)
         x = self.classifier(x.view(x.size(0), -1))
         return x

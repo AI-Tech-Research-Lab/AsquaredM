@@ -2,7 +2,6 @@
 
 # Define common parameters
 dataset="ImageNet16"
-res=32
 device=0
 optim="SGD"
 epochs=600
@@ -12,7 +11,7 @@ betadecay=True
 base_save_dir="results/darts_train"
 
 # Define the architectures
-architectures=("DARTS") # "BETADARTS" "SAM_exp3")
+architectures=("DARTS" "BETADARTS" "SAM_exp3")
 
 # Loop through each architecture and execute the command
 for arch in "${architectures[@]}"; do
@@ -24,6 +23,7 @@ for arch in "${architectures[@]}"; do
         --data ../datasets/$dataset --gpu $device \
         --save $save_dir \
         --epochs $epochs --momentum 0.9 --batch_size 96 \
-        --auxiliary --auxiliary_weight 0.4 --drop_path_prob 0.2 --cutout --seed $seed 
+         --drop_path_prob 0.2 --cutout --seed $seed \
+         --auxiliary --auxiliary_weight 0.4 
 done
 
