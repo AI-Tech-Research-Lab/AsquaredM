@@ -1,6 +1,10 @@
+import logging
+import torch
+import torch.nn as nn
+
+from sota.cnn.operations import *
 import sys
 sys.path.insert(0, '../../')
-from optimizers.darts.operations import *
 from optimizers.darts.utils import drop_path
 
 
@@ -8,7 +12,7 @@ class Cell(nn.Module):
 
     def __init__(self, genotype, C_prev_prev, C_prev, C, reduction, reduction_prev):
         super(Cell, self).__init__()
-        print(C_prev_prev, C_prev, C)
+        #print(C_prev_prev, C_prev, C)
 
         if reduction_prev:
             self.preprocess0 = FactorizedReduce(C_prev_prev, C)

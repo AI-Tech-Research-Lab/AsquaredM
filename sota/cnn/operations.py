@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
+import logging
 
 OPS = {
     'noise': lambda C, stride, affine: NoiseOp(stride, 0., 1.),
@@ -120,6 +121,7 @@ class FactorizedReduce(nn.Module):
 
     def forward(self, x):
         x = self.relu(x)
-        out = torch.cat([self.conv_1(x), self.conv_2(x[:, :, 1:, 1:])], dim=1)
+        cropped_x = x[:, :, 1:, 1:]
+        out = torch.cat([self.conv_1(x), self.conv_2(cropped_x)], dim=1)
         out = self.bn(out)
         return out

@@ -2,6 +2,8 @@ import json
 import os
 import sys
 sys.path.insert(0, '/u01/homes/fpittorino/workspace/darts-SAM')
+from imagenet16 import ImageNet16
+
 import time
 import glob
 import numpy as np
@@ -16,7 +18,8 @@ import torch.backends.cudnn as cudnn
 import sota.cnn.genotypes as genotypes
 
 from torch.autograd import Variable
-from sota.cnn.model import Network
+from sota.cnn.model_cifar import NetworkCIFAR
+from sota.cnn.model_imagenet import NetworkImageNet
 # from torch.utils.tensorboard import SummaryWriter
 from tensorboardX import SummaryWriter
 import wandb
@@ -82,9 +85,13 @@ if args.wandb:
 
 if args.dataset == 'cifar100':
     n_classes = 100
-else:
+elif args.dataset == 'cifar10':
     n_classes = 10
+elif args.dataset == 'ImageNet16':
+    n_classes = 120
 
+
+print("N_classes: ", n_classes)
 
 def main():
     torch.set_num_threads(3)
@@ -113,7 +120,10 @@ def main():
         genotype = eval("genotypes.%s" % args.arch)
         
     logging.info(genotype)
-    model = Network(args.init_channels, n_classes, args.layers, args.auxiliary, genotype)
+    #if args.dataset == 'cifar10' or args.dataset == 'cifar100':
+    model = NetworkCIFAR(args.init_channels, n_classes, args.layers, args.auxiliary, genotype)
+    #else: 
+    #    model = NetworkImageNet(args.init_channels, n_classes, args.layers, args.auxiliary, genotype)
     model = model.cuda()
 
     logging.info("param size = %fMB", utils.count_parameters_in_MB(model))
@@ -139,6 +149,10 @@ def main():
         train_transform, valid_transform = utils._data_transforms_svhn(args)
         train_data = dset.SVHN(root=args.data, split='train', download=True, transform=train_transform)
         valid_data = dset.SVHN(root=args.data, split='test', download=True, transform=valid_transform)
+    elif args.dataset == 'ImageNet16':
+        train_transform, valid_transform = utils._data_transforms_imagenet16(args)
+        train_data = ImageNet16(root=args.data, train=True, transform=train_transform, use_num_of_class_only=n_classes)
+        valid_data = ImageNet16(root=args.data, train=True, transform=valid_transform, use_num_of_class_only=n_classes)
 
     train_queue = torch.utils.data.DataLoader(
         train_data, batch_size=args.batch_size, shuffle=True, pin_memory=True)

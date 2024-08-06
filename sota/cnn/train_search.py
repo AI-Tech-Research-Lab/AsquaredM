@@ -1,5 +1,7 @@
 import os
 import sys
+
+from imagenet16 import ImageNet16
 sys.path.insert(0, '/u01/homes/fpittorino/workspace/darts-SAM')
 import time
 import glob
@@ -167,6 +169,10 @@ def main():
     elif args.dataset == 'svhn':
         train_transform, valid_transform = utils._data_transforms_svhn(args)
         train_data = dset.SVHN(root=args.data, split='train', download=True, transform=train_transform)
+    elif args.dataset == 'imagenet16':
+        train_transform, valid_transform = utils._data_transforms_imagenet16(args)
+        train_data = ImageNet16(root=args.data, train=True, transform=train_transform, use_num_of_class_only=n_classes)
+        valid_data = ImageNet16(root=args.data, train=True, transform=valid_transform, use_num_of_class_only=n_classes)
 
     num_train = len(train_data)
     indices = list(range(num_train))
@@ -180,7 +186,7 @@ def main():
         sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[:split]),
         pin_memory=True)
 
-    valid_queue = torch.utils.data.DataLoader(
+    valid_queue = torch.utils.data.DataLoader(sh 
         train_data, batch_size=args.batch_size,
         sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[split:num_train]),
         pin_memory=True)

@@ -87,10 +87,10 @@ class AuxiliaryHead(nn.Module):
         return x
 
 
-class Network(nn.Module):
+class NetworkCIFAR(nn.Module):
 
     def __init__(self, C, num_classes, layers, auxiliary, genotype):
-        super(Network, self).__init__()
+        super(NetworkCIFAR, self).__init__()
         self._layers = layers
         self._auxiliary = auxiliary
 

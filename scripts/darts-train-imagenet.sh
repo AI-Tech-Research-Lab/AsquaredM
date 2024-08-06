@@ -10,6 +10,8 @@ seed=2
 sam=False
 betadecay=True
 base_save_dir="results/darts_train"
+init_channels=48
+layers=14
 
 # Define the architectures
 architectures=("DARTS") # "BETADARTS" "SAM_exp3")
@@ -24,6 +26,6 @@ for arch in "${architectures[@]}"; do
         --data ../datasets/$dataset --gpu $device \
         --save $save_dir \
         --epochs $epochs --momentum 0.9 --batch_size 96 \
-        --auxiliary --auxiliary_weight 0.4 --drop_path_prob 0.2 --cutout --seed $seed 
+        --auxiliary --auxiliary_weight 0.4 --drop_path_prob 0.2 --cutout --seed $seed \
+        --init_channels $init_channels --layers $layers
 done
-
