@@ -18,8 +18,7 @@ import torch.backends.cudnn as cudnn
 import sota.cnn.genotypes as genotypes
 
 from torch.autograd import Variable
-from sota.cnn.model_cifar import NetworkCIFAR
-from sota.cnn.model_imagenet import NetworkImageNet
+from sota.cnn.model_cifar import NetworkCIFAR as Network
 # from torch.utils.tensorboard import SummaryWriter
 #from tensorboardX import SummaryWriter
 import wandb
@@ -87,7 +86,7 @@ if args.dataset == 'cifar100':
     n_classes = 100
 elif args.dataset == 'cifar10':
     n_classes = 10
-elif args.dataset == 'ImageNet16':
+elif args.dataset == 'ImageNet16': #imagenet16-120
     n_classes = 120
 
 
@@ -121,7 +120,7 @@ def main():
         
     logging.info(genotype)
     #if args.dataset == 'cifar10' or args.dataset == 'cifar100':
-    model = NetworkCIFAR(args.init_channels, n_classes, args.layers, args.auxiliary, genotype)
+    model = Network(args.init_channels, n_classes, args.layers, args.auxiliary, genotype)
     #else: 
     #    model = NetworkImageNet(args.init_channels, n_classes, args.layers, args.auxiliary, genotype)
     model = model.cuda()
