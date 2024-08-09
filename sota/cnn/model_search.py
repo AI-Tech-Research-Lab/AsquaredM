@@ -150,6 +150,7 @@ class Network(nn.Module):
             self.alphas_normal,
             self.alphas_reduce,
         ]
+        
 
     def arch_parameters(self):
         return self._arch_parameters

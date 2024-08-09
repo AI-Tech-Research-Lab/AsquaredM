@@ -1,3 +1,4 @@
+import logging
 import torch
 import torch.nn.functional as F
 from torch.autograd import Variable
@@ -20,7 +21,6 @@ class Architect(object):
         self.rho_alpha = args.rho_alpha_sam
         self.epsilon = args.epsilon_sam
         self.betadecay = args.betadecay
-        print("BETADecay: ", self.betadecay)
 
     def _train_loss(self, model, input, target):
         return model._loss(input, target)
@@ -29,7 +29,7 @@ class Architect(object):
         return model._loss(input, target)
     
     def _val_beta_loss(self, model, input, target, epoch):
-        weights = 0 + 50 * epoch / 100
+        weights = 0 + 50 * epoch / 100  
         ssr_normal = self.mlc_loss(model._arch_parameters)
         loss = model._loss(input, target) + weights * ssr_normal
         return loss

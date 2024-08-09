@@ -1,6 +1,7 @@
 import argparse
 from collections import OrderedDict
 import glob
+import math
 import subprocess
 import torch
 import json
@@ -10,6 +11,11 @@ import os
 import sys
 
 sys.path.append(os.getcwd())
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+import matplotlib.colors as mcolors
+
 from sota.cnn.darts import DARTS
 from sota.cnn import genotypes
 from sota.cnn.genotypes import Genotype
@@ -159,6 +165,158 @@ def update_archive_from_stats(exp_dir, archive_path):
         for config_str, stats in results:
             f.write(f"{config_str}:{json.dumps(stats)}\n")
 
+def read_val_accs_from_archive(filename):
+    
+    array=[]
+    baseline = True
+    acc_baseline=0
+    with open(filename, 'r') as file:
+        for line in file:
+            if line.strip():  # Make sure the line is not empty
+
+                # Split the line into the architecture and metrics part
+                arch_part, metrics_part = line.split('}:')
+
+                # Parse the architecture part
+                architecture_json = arch_part + '}'
+                try:
+                    architecture = json.loads(architecture_json)
+                except json.JSONDecodeError as e:
+                    print(f"Failed to decode architecture JSON: {e}")
+                    continue
+
+                # Parse the metrics part
+                metrics_json = metrics_part.strip()
+                try:
+                    metrics = json.loads(metrics_json)
+                except json.JSONDecodeError as e:
+                    print(f"Failed to decode metrics JSON: {e}")
+                    continue
+
+                valid_acc = metrics.get("best_valid_acc", -float('inf'))
+
+                if baseline: #the first line refers to the baseline
+                    acc_baseline = valid_acc
+                    baseline = False
+                else:
+                    array.append(valid_acc)
+
+    return array, acc_baseline
+
+def read_val_accs_path_from_archive(filename,n):
+    
+    array=[]
+    avg_array=[]
+    baseline = True
+    acc_baseline=0
+    K=1
+    to_samples = math.comb(n,K) #number of samples to sample for level K (binomial coefficient)
+
+    with open(filename, 'r') as file:
+        for line in file:
+            if line.strip():  # Make sure the line is not empty
+
+                # Split the line into the architecture and metrics part
+                arch_part, metrics_part = line.split('}:')
+
+                # Parse the architecture part
+                architecture_json = arch_part + '}'
+                try:
+                    architecture = json.loads(architecture_json)
+                except json.JSONDecodeError as e:
+                    print(f"Failed to decode architecture JSON: {e}")
+                    continue
+
+                # Parse the metrics part
+                metrics_json = metrics_part.strip()
+                try:
+                    metrics = json.loads(metrics_json)
+                except json.JSONDecodeError as e:
+                    print(f"Failed to decode metrics JSON: {e}")
+                    continue
+
+                valid_acc = metrics.get("best_valid_acc", -float('inf'))
+
+                if baseline: #the first line refers to the baseline
+                    acc_baseline = valid_acc
+                    baseline = False
+                else:
+                    if K == n: #last sample
+                        acc_target=valid_acc
+                    else:
+                        to_samples -= 1
+                        array.append(valid_acc)
+                        if to_samples == 0:
+                            #average the samples of array, append the value to avg_array, and clean the array, increase the level
+                            avg_array.append(sum(array)/len(array))
+                            array.clear()
+                            K+=1
+                            to_samples = math.comb(n,K)
+    
+    avg_array.insert(0, acc_baseline)
+    avg_array.append(acc_target)
+
+    return avg_array
+
+def plot_histogram(data, bins=100, path='', baseline=None, dataset='cifar10'):
+    FONT_SIZE = 8
+    FIGSIZE = (8, 4)
+    
+    # Set up the plot
+    fig, ax = plt.subplots(figsize=FIGSIZE)
+
+    # Plot histogram and KDE
+    sns.histplot(data, bins=bins, color='darkblue', edgecolor='black', kde=True, line_kws={'linewidth': 1}, ax=ax, stat='density')
+    
+    # Add vertical line for baseline if provided
+    if baseline is not None:
+        ax.axvline(baseline, color='red', linestyle='--', linewidth=1)
+    
+    # Set axis labels and title
+    ax.set_xlabel('Value', fontsize=FONT_SIZE)
+    ax.set_title('Histogram', fontsize=FONT_SIZE)
+    
+    # Add grid and customize y-axis ticks
+    ax.grid(True, axis='y', which='both', linestyle='--', linewidth=0.5)
+    ax.set_yticks(np.arange(0, 0.9, 0.2))
+
+    # Adjust layout to prevent clipping
+    plt.tight_layout()
+
+    # Save and show the plot
+    plt.savefig(path, bbox_inches='tight')
+    plt.show()
+
+def plot_line(accuracies, output_path='test_accuracies_plot.png'):
+    """
+    Plot a line graph of test accuracies.
+
+    Args:
+    - accuracies (list): List of test accuracies to plot.
+    - output_path (str): Path to save the plot image.
+    """
+    # Check if accuracies list is empty
+    if not accuracies:
+        print("No accuracies to plot.")
+        return
+
+    # Create a list of x values (indices of accuracies)
+    x_values = range(len(accuracies))
+
+    # Create the plot
+    plt.figure(figsize=(10, 6))
+    plt.plot(x_values, accuracies, marker='o', linestyle='-', color='b', label='Test Accuracy')
+
+    # Add labels and title
+    plt.xlabel('Index')
+    plt.ylabel('Accuracy')
+    plt.title('Path of neighbor accuracies')
+    plt.legend()
+
+    # Save the plot
+    plt.savefig(output_path, bbox_inches='tight')
+    plt.show()
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
@@ -169,6 +327,8 @@ if __name__ == "__main__":
                         help='location of the exp folder')
     parser.add_argument('--arch', type=str, default='GenotypeName',
                         help='initial config')
+    parser.add_argument('--arch_target', type=str, default='GenotypeName',
+                        help='target config for path')
     parser.add_argument('--radius', type=int, default=1,
                         help='radius')
     parser.add_argument('--samples', type=int, default=1,
@@ -194,10 +354,26 @@ if __name__ == "__main__":
     genotype = eval(f"genotypes.{args.arch}")
     dict_ = darts.to_dict(genotype)
     matrix = darts.genotype_to_adjacency_matrix(dict_)
-    neighbors = darts.sample_neighbors(matrix, args.radius, args.samples)
 
-    print("Neighbors:")
-    print(neighbors)
+    if args.arch_target:
+        genotype_target = eval(f"genotypes.{args.arch_target}")
+        dict_target = darts.to_dict(genotype_target)
+        matrix_target = darts.genotype_to_adjacency_matrix(dict_target)
+        neighbors, num_differences = darts.sample_neighbors_path(matrix, matrix_target)
+        print("Number of differences:", num_differences)
+        print(len(neighbors))
+        # flatten the list
+        neighbors = [item for sublist in neighbors for item in sublist]
+        #add target genotype to end of the list
+        neighbors.append(dict_target)
+    else:
+        neighbors = darts.sample_neighbors(matrix, args.radius, args.samples)
+
+    # add baseline genotype at the top of the list
+    neighbors.insert(0, dict_) 
+
+    print("Len Neighbors:")
+    print(len(neighbors))
 
     #for id, neighbor in enumerate(neighbors):
     #logging.info(f"Evaluating config: {neighbor}")
@@ -213,5 +389,15 @@ if __name__ == "__main__":
 
     # Update the archive file after all trainings are complete
     update_archive_from_stats(args.save, archive_path)
+
+    # Read the validation accuracies from the archive file and plot the histogram
+
+    if args.arch_target:
+        accs = read_val_accs_path_from_archive(archive_path, num_differences)
+        plot_path = os.path.join(args.save, 'line_plot.png')
+        plot_line(accs, plot_path)
+    else:
+        accs, baseline = read_val_accs_from_archive(archive_path)
+        plot_histogram(accs, path=os.path.join(args.save, 'histogram.png'), baseline=baseline, dataset=args.dataset)
 
     logging.info("All configurations evaluated and results saved.")

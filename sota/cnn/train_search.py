@@ -1,8 +1,8 @@
 import os
 import sys
 
-from imagenet16 import ImageNet16
 sys.path.insert(0, '/u01/homes/fpittorino/workspace/darts-SAM')
+from imagenet16 import ImageNet16
 import time
 import glob
 import numpy as np
@@ -27,7 +27,7 @@ from copy import deepcopy
 from numpy import linalg as LA
 
 # from torch.utils.tensorboard import SummaryWriter
-from tensorboardX import SummaryWriter
+#from tensorboardX import SummaryWriter
 
 import wandb
 
@@ -63,7 +63,6 @@ parser.add_argument('--save', type=str, default='exp', help='experiment name')
 parser.add_argument('--seed', type=int, default=2, help='random seed')
 parser.add_argument('--grad_clip', type=float, default=5, help='gradient clipping')
 parser.add_argument('--train_portion', type=float, default=0.5, help='portion of training data')
-parser.add_argument('--unrolled', action='store_true', default=False, help='use one-step unrolled validation loss')
 parser.add_argument('--arch_learning_rate', type=float, default=3e-4, help='learning rate for arch encoding')
 parser.add_argument('--arch_weight_decay', type=float, default=1e-3, help='weight decay for arch encoding')
 parser.add_argument('--search_space', type=str, default='s5', help='searching space to choose from')
@@ -73,6 +72,7 @@ parser.add_argument('--wandb', type=str2bool, default=False, help='use one-step 
 parser.add_argument('--nasbench', action='store_true', default=False, help='use one-step unrolled validation loss')
 parser.add_argument('--betadecay', type=str2bool, default=False, help='use beta-darts regularization')
 parser.add_argument('--sam', type=str2bool, default=False, help='use sam update rule')
+parser.add_argument('--unrolled', type=str2bool, default=False, help='use one-step unrolled validation loss')
 parser.add_argument('--rho_alpha_sam', type=float, default=1e-2, help='rho alpha for SAM update')
 parser.add_argument('--epsilon_sam', type=float, default=1e-2, help='epsilon for SAM update')
 parser.add_argument('--data_aug', type=str2bool, default=True, help='use data augmentation on validation set')
@@ -106,7 +106,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO,
 fh = logging.FileHandler(os.path.join(args.save, 'log.txt'))
 fh.setFormatter(logging.Formatter(log_format))
 logging.getLogger().addHandler(fh)
-writer = SummaryWriter(args.save + '/runs')
+#writer = SummaryWriter(args.save + '/runs')
 
 if args.wandb:
     wandb.init(
@@ -186,7 +186,7 @@ def main():
         sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[:split]),
         pin_memory=True)
 
-    valid_queue = torch.utils.data.DataLoader(sh 
+    valid_queue = torch.utils.data.DataLoader( 
         train_data, batch_size=args.batch_size,
         sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[split:num_train]),
         pin_memory=True)
@@ -221,14 +221,14 @@ def main():
         train_acc, train_obj = train(train_queue, valid_queue, model, architect, criterion, optimizer, lr, 
                                          perturb_alpha, epsilon_alpha)
         logging.info('train_acc %f', train_acc)
-        writer.add_scalar('Acc/train', train_acc, epoch)
-        writer.add_scalar('Obj/train', train_obj, epoch)
+        #writer.add_scalar('Acc/train', train_acc, epoch)
+        #writer.add_scalar('Obj/train', train_obj, epoch)
 
         # validation
         valid_acc, valid_obj = infer(valid_queue, model, criterion)
         logging.info('valid_acc %f', valid_acc)
-        writer.add_scalar('Acc/valid', valid_acc, epoch)
-        writer.add_scalar('Obj/valid', valid_obj, epoch)
+        #writer.add_scalar('Acc/valid', valid_acc, epoch)
+        #writer.add_scalar('Obj/valid', valid_obj, epoch)
 
         if args.wandb:
             wandb.log({"metrics/train_acc": train_acc, 
@@ -240,7 +240,7 @@ def main():
 
         scheduler.step()
 
-    writer.close()
+    #writer.close()
 
 
 def train(train_queue, valid_queue, model, architect, criterion, optimizer, lr, perturb_alpha, epsilon_alpha):

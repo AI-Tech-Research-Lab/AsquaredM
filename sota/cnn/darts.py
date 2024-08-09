@@ -1,3 +1,4 @@
+from itertools import combinations
 import os
 import sys
 import numpy as np
@@ -236,6 +237,80 @@ class DARTS():
     
     def to_dict(self, genotype):
         return genotype._asdict()
+    
+    def sample_neighbors_path(self,init_config, target_config):
+        """
+        Generate a list of lists where each sublist contains all possible configurations with exactly K total differences,
+        for K ranging from 1 to max_possible_differences.
+
+        Args:
+        - init_config (tuple): A tuple containing two matrices (normal_matrix, reduce_matrix) representing the initial configuration.
+        - target_config (tuple): A tuple containing two matrices (normal_matrix, reduce_matrix) representing the target configuration.
+
+        Returns:
+        - configs_list (list of lists): A list of lists, where each sublist contains tuples of matrices representing the configurations.
+        
+        Number of combinations for each k is equal to the binomial coefficent (n,k) where n is the total number of differences
+        """
+        init_normal_matrix, init_reduce_matrix = init_config
+        target_normal_matrix, target_reduce_matrix = target_config
+
+        def get_differences(init_matrix, target_matrix):
+            """
+            Get the indices where init_matrix and target_matrix differ.
+            """
+            return np.argwhere(init_matrix != target_matrix)
+
+        def apply_changes(init_matrix, target_matrix, indices):
+            """
+            Apply changes to the init_matrix based on the indices to be changed.
+            """
+            new_matrix = init_matrix.copy()
+            for row, col in indices:
+                new_matrix[row, col] = target_matrix[row, col]
+            return new_matrix
+
+        def generate_configurations_for_k(init_matrix, target_matrix, k):
+            """
+            Generate all possible matrices with exactly k differences.
+            """
+            differences = get_differences(init_matrix, target_matrix)
+            configurations = []
+            for indices in combinations(differences, k):
+                modified_matrix = apply_changes(init_matrix, target_matrix, indices)
+                configurations.append(modified_matrix)
+            return configurations
+
+        # Get the differences for both matrices
+        normal_differences = get_differences(init_normal_matrix, target_normal_matrix)
+        reduce_differences = get_differences(init_reduce_matrix, target_reduce_matrix)
+        max_normal_changes = len(normal_differences)
+        max_reduce_changes = len(reduce_differences)
+
+        print("MAX NORMAL CHANGES: ", max_normal_changes)
+        print("MAX REDUCE CHANGES: ", max_reduce_changes)
+
+        # Compute all possible matrices for different values of K
+        all_configs = []
+        for k in range(1, max_normal_changes + max_reduce_changes):
+            configs_for_k = []
+            # Generate configurations for each distribution of K changes between normal and reduce matrices
+            for normal_changes in range(max(0, k - max_reduce_changes), min(k, max_normal_changes) + 1):
+                reduce_changes = k - normal_changes
+                if reduce_changes > max_reduce_changes:
+                    continue
+                
+                normal_configs_for_k = generate_configurations_for_k(init_normal_matrix, target_normal_matrix, normal_changes)
+                reduce_configs_for_k = generate_configurations_for_k(init_reduce_matrix, target_reduce_matrix, reduce_changes)
+                
+                for normal_matrix in normal_configs_for_k:
+                    for reduce_matrix in reduce_configs_for_k:
+                        #configs_for_k.append((normal_matrix, reduce_matrix))
+                        configs_for_k.append(self.adjacency_matrix_to_genotype((normal_matrix,reduce_matrix)))
+            
+            all_configs.append(configs_for_k)
+
+        return all_configs, max_normal_changes + max_reduce_changes
 
 '''
 darts = DARTS(2)
@@ -248,14 +323,14 @@ normal_matrix = np.array([
     [3, 3, 0, 0, 0],
     [0, 5, 2, 0, 0],
     [0, 0, 3, 1, 0],
-    [0, 0, 1, 0, 7]
+    [0, 0, 1, 0, 6]
 ])
 
 reduce_matrix = np.array([
     [2, 6, 0, 0, 0],
     [2, 0, 3, 0, 0],
     [5, 0, 5, 0, 0],
-    [0, 7, 0, 0, 4]
+    [0, 6, 0, 0, 4]
 ])
 
 print("Normal Matrix:")
@@ -266,6 +341,36 @@ print(reduce_matrix)
 
 matrix = (normal_matrix, reduce_matrix)
 
+normal_matrix = np.array([
+    [3, 4, 0, 0, 0], # difference in 2nd entry
+    [0, 5, 2, 0, 0],
+    [0, 0, 3, 1, 0],
+    [0, 0, 3, 0, 5] #difference in3rd entry
+])
+
+reduce_matrix = np.array([
+    [2, 6, 0, 0, 0],
+    [2, 0, 3, 0, 0],
+    [5, 0, 6, 0, 0], # difference in 3rd entry
+    [0, 2, 0, 0, 4]  # difference in 2nd entry
+])
+
+configs = darts.sample_neighbors_path(matrix, (normal_matrix, reduce_matrix))
+
+print("K=1")
+print(len(configs[0]))
+print(configs[0])
+
+print("K=2")
+print(len(configs[1]))
+print(configs[1])
+
+print("K=3")
+print(len(configs[2]))
+print(configs[2])
+'''
+
+'''
 gene = darts.adjacency_matrix_to_genotype(matrix)
 print("Gene:")
 print(gene)
