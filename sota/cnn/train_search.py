@@ -114,7 +114,7 @@ if args.wandb:
         entity='flatnas',
         # set the wandb project where this run will be logged
         project=f"FlatDARTS-{args.dataset}-nasbench{args.nasbench}-data_aug",
-        name=f"SAM_{args.sam}-BETADECAY_{args.betadecay}-UNROLLED_{args.unrolled}-DATA_AUG_{args.data_aug}-RHO_ALPHA_{args.rho_alpha_sam}",
+        name=f"SAM_{args.sam}-BETADECAY_{args.betadecay}-UNROLLED_{args.unrolled}-DATA_AUG_{args.data_aug}-RHO_ALPHA_{args.rho_alpha_sam}-SEED{args.seed}",
         # track hyperparameters and run metadata
         config={**vars(args)},
     )

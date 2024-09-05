@@ -64,20 +64,18 @@ class Architect(object):
         return aux_loss
     
     def mlc_loss(self, arch_param):
-        # This update is for the case of 2 sets of architecture parameters (like in DARTS)
-        
+
         '''
-        if isinstance(arch_param, list) and len(arch_param) == 2:
-            y_pred_neg_1, y_pred_neg_2 = arch_param
-            neg_loss_1 = torch.logsumexp(y_pred_neg_1, dim=-1)
-            neg_loss_2 = torch.logsumexp(y_pred_neg_2, dim=-1)
-            aux_loss_1 = torch.mean(neg_loss_1)
-            aux_loss_2 = torch.mean(neg_loss_2)
-            aux_loss = (aux_loss_1 + aux_loss_2) / 2
+        if isinstance(arch_param, list):
+            # Concatenate matrices along dimension 0
+            arch_param_concat = torch.cat(arch_param, dim=0)
         else:
+            # Handle the case where arch_param is not a list
+            arch_param_concat = arch_param
         '''
-        y_pred_neg = arch_param
-        neg_loss = torch.logsumexp(y_pred_neg, dim=-1)
+
+        # Compute the negative log-likelihood loss
+        neg_loss = torch.logsumexp(arch_param, dim=-1)
         aux_loss = torch.mean(neg_loss)
         
         return aux_loss
@@ -109,8 +107,14 @@ class Architect(object):
     def _backward_step(self, input_valid, target_valid, epoch):
         if self.betadecay:  # Beta-DARTS
             weights = 0 + 50 * epoch / 100
-            ssr_normal = self.mlc_loss(self.model._arch_parameters)
-            loss = self.model._loss(input_valid, target_valid) + weights * ssr_normal
+            if isinstance(self.model._arch_parameters, list): #DARTS
+                # STEP DARTS 
+                ssr_reduce = self.mlc_loss(self.model.alphas_reduce)
+                ssr_normal = self.mlc_loss(self.model.alphas_normal)
+                loss = self.model._loss(input_valid, target_valid) + weights*ssr_reduce + weights*ssr_normal
+            else:
+                ssr_normal = self.mlc_loss(self.model._arch_parameters)
+                loss = self.model._loss(input_valid, target_valid) + weights * ssr_normal
         else:  # original DARTS
             loss = self.model._loss(input_valid, target_valid)        
         loss.backward()

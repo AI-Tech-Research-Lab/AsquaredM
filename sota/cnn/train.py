@@ -77,7 +77,7 @@ if args.wandb:
         entity='flatnas',
         # set the wandb project where this run will be logged
         project=f"FlatDARTS-TRAIN-{args.dataset}",
-        name=f"TRAIN_ARCH_{args.arch}_seed_{args.seed}",
+        name=f"TRAIN_ARCH_{args.arch}",
         # track hyperparameters and run metadata
         config={**vars(args)},
     )

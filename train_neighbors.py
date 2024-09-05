@@ -327,7 +327,7 @@ if __name__ == "__main__":
                         help='location of the exp folder')
     parser.add_argument('--arch', type=str, default='GenotypeName',
                         help='initial config')
-    parser.add_argument('--arch_target', type=str, default='GenotypeName',
+    parser.add_argument('--arch_target', type=str, default=None,
                         help='target config for path')
     parser.add_argument('--radius', type=int, default=1,
                         help='radius')
