@@ -31,5 +31,5 @@
 module load cuda/12.3
 #conda activate timefs
 
-bash scripts/darts-search.sh
+bash darts-search.sh
 #bash scripts/train_neighbors.sh
