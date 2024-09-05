@@ -26,9 +26,10 @@
 # QOS long: long jobs (7 days max) on gnode0[1-4] (GPU)
 
 ### export PATH="/home/Pittorino/miniconda3/bin:$PATH"
-export PATH="/home/Pittorino/miniconda3:$PATH"
+#export PATH="/home/Pittorino/miniconda3:$PATH"
 
 module load cuda/12.3
 #conda activate timefs
 
-bash scripts/sam-nasbench-search.sh
+bash scripts/darts-search.sh
+#bash scripts/train_neighbors.sh
