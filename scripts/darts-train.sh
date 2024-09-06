@@ -9,7 +9,7 @@ seed=2
 base_save_dir="results/darts_train"
 
 # Define the architecture and seeds
-architectures=("DARTS")
+architectures=("SAM_exp1")
 seeds=(1 3 5 7)
 
 # Loop through each architecture
