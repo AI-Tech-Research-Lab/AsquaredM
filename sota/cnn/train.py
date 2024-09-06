@@ -1,7 +1,9 @@
 import json
 import os
 import sys
-sys.path.insert(0, '/u01/homes/fpittorino/workspace/darts-SAM')
+#sys.path.insert(0, '/u01/homes/fpittorino/workspace/darts-SAM')
+home_dir = os.path.expanduser('~')
+sys.path.insert(0, os.path.join(home_dir, 'workspace', 'darts-SAM'))
 from imagenet16 import ImageNet16
 
 import time
@@ -150,7 +152,7 @@ def main():
         valid_data = dset.SVHN(root=args.data, split='test', download=True, transform=valid_transform)
     elif args.dataset == 'ImageNet16':
         train_transform, valid_transform = utils._data_transforms_imagenet16(args)
-        train_data = ImageNet16(root=args.data, train=True, transform=train_transform, use_num_of_class_only=n_classes)
+        #train_data = ImageNet16(root=args.data, train=True, transform=train_transform, use_num_of_class_only=n_classes)
         valid_data = ImageNet16(root=args.data, train=True, transform=valid_transform, use_num_of_class_only=n_classes)
 
     train_queue = torch.utils.data.DataLoader(

@@ -2,7 +2,7 @@
 # SLURM script to be runned through `sbatch job.sh`
 # In the following slurm options, customize (if needed) only the ones with comments
 
-#SBATCH --job-name="DARTS"            #the job name
+#SBATCH --job-name="DARTS_TRAIN"            #the job name
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --ntasks=1
@@ -31,5 +31,5 @@
 module load cuda/12.3
 #conda activate timefs
 
-bash darts-search.sh
+bash scripts/darts-train.sh
 #bash scripts/train_neighbors.sh

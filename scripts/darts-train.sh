@@ -10,7 +10,7 @@ base_save_dir="results/darts_train"
 
 # Define the architecture and seeds
 architectures=("SAM_exp1")
-seeds=(1 3 5 7)
+seeds=(3 5 7)
 
 # Loop through each architecture
 for arch in "${architectures[@]}"; do
