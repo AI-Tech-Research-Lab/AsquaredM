@@ -29,9 +29,15 @@ class Architect(object):
         return model._loss(input, target)
     
     def _val_beta_loss(self, model, input, target, epoch):
-        weights = 0 + 50 * epoch / 100  
-        ssr_normal = self.mlc_loss(model._arch_parameters)
-        loss = model._loss(input, target) + weights * ssr_normal
+        weights = 0 + 50 * epoch / 100
+        if isinstance(self.model._arch_parameters, list): #DARTS
+            # STEP DARTS 
+            ssr_reduce = self.mlc_loss(self.model.alphas_reduce)
+            ssr_normal = self.mlc_loss(self.model.alphas_normal)
+            loss = self.model._loss(input, target) + weights*ssr_reduce + weights*ssr_normal
+        else:
+            ssr_normal = self.mlc_loss(self.model._arch_parameters)
+            loss = self.model._loss(input, target) + weights * ssr_normal
         return loss
         
     def _compute_unrolled_model(self, input, target, eta, network_optimizer):
