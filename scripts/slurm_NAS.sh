@@ -2,7 +2,7 @@
 # SLURM script to be runned through `sbatch job.sh`
 # In the following slurm options, customize (if needed) only the ones with comments
 
-#SBATCH --job-name="DARTS_TRAIN"            #the job name
+#SBATCH --job-name="DARTS_IMAGENET"            #the job name
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --ntasks=1
@@ -25,11 +25,12 @@
 # debug, timelimit 30 minutes, Nodes=cnode01,gnode04 (short test on either CPU or GPU)
 # QOS long: long jobs (7 days max) on gnode0[1-4] (GPU)
 
-### export PATH="/home/Pittorino/miniconda3/bin:$PATH"
+export PATH="/home/Pittorino/miniconda3/bin:$PATH"
 #export PATH="/home/Pittorino/miniconda3:$PATH"
 
 module load cuda/12.3
-#conda activate timefs
+conda init
+conda activate timefs
 
 bash scripts/darts-train.sh
 #bash scripts/train_neighbors.sh

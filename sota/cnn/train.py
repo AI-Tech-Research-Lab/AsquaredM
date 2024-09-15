@@ -152,7 +152,7 @@ def main():
         valid_data = dset.SVHN(root=args.data, split='test', download=True, transform=valid_transform)
     elif args.dataset == 'ImageNet16':
         train_transform, valid_transform = utils._data_transforms_imagenet16(args)
-        #train_data = ImageNet16(root=args.data, train=True, transform=train_transform, use_num_of_class_only=n_classes)
+        train_data = ImageNet16(root=args.data, train=True, transform=train_transform, use_num_of_class_only=n_classes)
         valid_data = ImageNet16(root=args.data, train=True, transform=valid_transform, use_num_of_class_only=n_classes)
 
     train_queue = torch.utils.data.DataLoader(

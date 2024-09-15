@@ -1,7 +1,8 @@
 import os
 import sys
 
-sys.path.insert(0, '/u01/homes/fpittorino/workspace/darts-SAM')
+sys.path.insert(0, os.path.expanduser('~/workspace/darts-SAM'))
+
 from imagenet16 import ImageNet16
 import time
 import glob
