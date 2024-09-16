@@ -76,6 +76,8 @@ parser.add_argument('--unrolled', type=str2bool, default=False, help='use one-st
 parser.add_argument('--rho_alpha_sam', type=float, default=1e-2, help='rho alpha for SAM update')
 parser.add_argument('--epsilon_sam', type=float, default=1e-2, help='epsilon for SAM update')
 parser.add_argument('--data_aug', type=str2bool, default=True, help='use data augmentation on validation set')
+parser.add_argument('--w_nor', type=float, default=0.5, help='epsilon for beta regularization normal component')
+
 
 args = parser.parse_args()
 
