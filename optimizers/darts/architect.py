@@ -22,7 +22,6 @@ class Architect(object):
         self.epsilon = args.epsilon_sam
         self.betadecay = args.betadecay
         self.w_nor = args.w_nor
-        print("wNOR: ", self.w_nor)
 
     def _train_loss(self, model, input, target):
         return model._loss(input, target)
@@ -36,7 +35,7 @@ class Architect(object):
             # STEP DARTS 
             ssr_reduce = self.mlc_loss(self.model.alphas_reduce)
             ssr_normal = self.mlc_loss(self.model.alphas_normal)
-            loss = self.model._loss(input, target) + weights*ssr_reduce + weights*ssr_normal
+            self.model._loss(input, target) + weights*((1-self.w_nor)*ssr_reduce + self.w_nor*ssr_normal)
         else:
             ssr_normal = self.mlc_loss(self.model._arch_parameters)
             loss = self.model._loss(input, target) + weights * ssr_normal

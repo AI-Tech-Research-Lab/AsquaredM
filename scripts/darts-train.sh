@@ -1,11 +1,15 @@
 #!/bin/bash
 
 # Define common parameters
+<<<<<<< HEAD
 dataset=cifar100    #"ImageNet16"
+=======
+dataset="ImageNet16"
+>>>>>>> 3298e94b328c0168e4ce59a15f18e2e83ccc3e05
 device=0
 optim="SGD"
 epochs=600
-seed=2
+#seed=2
 base_save_dir="results/darts_train"
 
 # Define the architecture and seeds
@@ -25,7 +29,7 @@ for arch in "${architectures[@]}"; do
             --save $save_dir \
             --epochs $epochs --momentum 0.9 --batch_size 96 \
             --drop_path_prob 0.2 --cutout --seed $seed \
-            --auxiliary --auxiliary_weight 0.4 --wandb
+            --auxiliary --auxiliary_weight 0.4 
     done
 done
 
