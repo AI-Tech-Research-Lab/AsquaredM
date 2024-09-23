@@ -4,18 +4,18 @@ dataset=cifar10
 rho=1e-1
 epsilon=1e-2
 sam=False
-wandb=False
+wandb=True
 betadecay=True
 unrolled=False
 epochs=50
 base_save_dir="results/darts_search"
 w_nor=0.8
-seeds=(1 2 3 5 7)
+seeds=(3 5)
 
 # Loop through the seeds and execute the command
 for seed in "${seeds[@]}"; do
     # Construct the save directory for each architecture
-    save_dir="${base_save_dir}_dataset${dataset}_betadecay${betadecay}_sam${sam}_seed${seed}"
+    save_dir="${base_save_dir}_dataset${dataset}_betadecay${betadecay}_wnor${w_nor}_sam${sam}_seed${seed}"
 
     python sota/cnn/train_search.py --save $save_dir \
                     --dataset $dataset --data ../datasets/$dataset --seed $seed \
