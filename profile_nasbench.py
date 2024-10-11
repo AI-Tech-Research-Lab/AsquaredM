@@ -6,6 +6,40 @@ import matplotlib.colors as mcolors
 import seaborn as sns
 import numpy as np
 
+def find_neighbors_with_similar_performance(bench, accuracy_min, accuracy_max, radius=3, tolerance=1):
+    val_dataset = bench.dataset
+    test_accs = bench.archive['test-acc'][val_dataset]
+    #architectures = bench.archive['architectures']
+
+    # Filter architectures within the given accuracy range
+    architectures_in_range = [(idx, acc) for idx, acc in enumerate(test_accs) if accuracy_min < acc < accuracy_max]
+
+    # Define possible values for each position in the architecture (assumed binary or categorical)
+    possible_values = [0, 1, 2, 3, 4]  # Adjust this based on your architecture's encoding scheme
+
+    # Loop over each architecture in the desired accuracy range
+    for idx, acc in architectures_in_range:
+        #vector = architectures[idx]  # The architecture vector (e.g., a binary or categorical encoding)
+        vector = bench.encode({'arch':bench.archive['str'][idx]})
+        N = len(vector)  # Length of the architecture vector
+        
+        # Find neighbors with radius 3
+        neighbors = neighbors_by_radius(N, possible_values, vector, radius)
+
+        # Loop over neighbors and check if any have a test accuracy within the tolerance (1%)
+        for neighbor in neighbors:
+            arch = bench.decode(neighbor)
+            neighbor_acc = bench.get_info_from_arch(arch)['test-acc']
+            neighbor_idx = bench.archive['str'].index(arch['arch'])
+
+            if abs(acc - neighbor_acc) <= tolerance:  # Check if the accuracy difference is within 1%
+                print(f"Found neighbor for architecture {idx} (accuracy: {acc:.2f}):")
+                print(f"Neighbor {neighbor_idx} with accuracy: {neighbor_acc:.2f}")
+                return idx, neighbor_idx, acc, neighbor_acc
+
+    print("No neighbor found with similar performance within the specified range and tolerance.")
+    return None
+
 def neighbors_by_radius(N, possible_values, vector, radius):
     neighbors = []
     for config in product(possible_values, repeat=N):
@@ -467,12 +501,10 @@ def get_2bad_archs(bench):
     print("ACC2: ", acc2)
     return config1, config2, acc1, acc2
 
-def path_bench(dataset):
+def path_bench(dataset,quality):
     print("DATASET: ", dataset)
     bench = NASBench201(dataset=dataset)
-    #config1, config2, acc1, acc2 = get_2good_archs(bench)
-    #config1, config2, acc1, acc2 = get_good_bad_archs(bench)
-    config1, config2, acc1, acc2 = get_2bad_archs(bench)
+    config1, config2, acc1, acc2 = get_archs(dataset, quality)
     # Find the paths between the two configurations
     paths = search_tree(config1, config2)
     #print("PATHS: ", paths)
@@ -491,7 +523,7 @@ def path_bench(dataset):
         avg, _, std = avg_test_acc(bench, configs)
         avg_test_accs.append(avg)
         std_test_accs.append(std)
-    path_accs= [acc1['test-acc']] + avg_test_accs + [acc2['test-acc']]
+    path_accs= [acc1] + avg_test_accs + [acc2]
     print("PATH ACCS: ", path_accs)
     print("STD VAL ACCS: ", std_test_accs)
     # Plot the path
@@ -512,8 +544,70 @@ def path_bench(dataset):
     plt.show()
 
     if not os.path.exists('../results/flatness_exp'):
-        os.makedirs('../results/flatness_exp', exist_ok=True)
-    plt.savefig('../results/flatness_exp/'+dataset+'/path_accs_2bad.png')
+        os.makedirs('results/flatness_exp', exist_ok=True)
+    plt.savefig('results/flatness_exp/'+dataset+'/path_accs_' + quality +'.png')
+
+def path_bench_qualities(dataset):
+    print("DATASET: ", dataset)
+    bench = NASBench201(dataset=dataset)
+
+    # Define qualities
+    qualities = ["high", "medium", "poor"]
+    paths_by_quality = {}
+    accs_by_quality = {}
+    std_by_quality = {}
+
+    for quality in qualities:
+        config1, config2, acc1, acc2 = get_archs(dataset, quality)
+        # Find the paths between the two configurations
+        paths = search_tree(config1, config2)
+        max_level = len(paths[0])-2
+        archs_by_level = [[] for _ in range(max_level)]
+        
+        # Collect architectures by level
+        for i in range(max_level):
+            for path in paths:
+                archs_by_level[i].append(path[i+1])
+
+        # Average validation accuracy by level
+        avg_test_accs = []
+        std_test_accs = []
+        for configs in archs_by_level:
+            avg, _, std = avg_test_acc(bench, configs)
+            avg_test_accs.append(avg)
+            std_test_accs.append(std)
+        
+        # Store path accuracies and standard deviations for this quality
+        path_accs = [acc1] + avg_test_accs + [acc2]
+        paths_by_quality[quality] = path_accs
+        std_by_quality[quality] = [0] + std_test_accs + [0]  # no std dev for acc1 and acc2
+        accs_by_quality[quality] = (acc1, acc2)
+
+        print(f"PATH ACCS for {quality}: ", path_accs)
+        print(f"STD VAL ACCS for {quality}: ", std_test_accs)
+
+    # Plot the paths for high, medium, and poor qualities
+    plt.figure(figsize=(10, 5))
+    x = list(range(4))  # 0, 1, 2, 3 representing the radius
+
+    for quality in qualities:
+        y = paths_by_quality[quality]
+        yerr = std_by_quality[quality]
+        plt.errorbar(x, y, yerr=yerr, fmt='-o', capsize=5, capthick=2, elinewidth=1, label=f'{quality.capitalize()} Quality')
+
+    # Customize plot
+    plt.xlabel('Radius')
+    plt.ylabel('Accuracy')
+    plt.title(f'Path Accuracies for {dataset}')
+    plt.xticks(x)
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+    # Save the plot to the results folder
+    if not os.path.exists(f'results/flatness_exp_{dataset}'):
+        os.makedirs(f'results/flatness_exp_{dataset}', exist_ok=True)
+    plt.savefig(f'results/flatness_exp_{dataset}/path_accs_all_qualities.png')
 
 def plot_histo_configs_radius1(dataset):
     bench=NASBench201(dataset=dataset)
@@ -523,12 +617,59 @@ def plot_histo_configs_radius1(dataset):
     # test_accs
     plot_histograms([accs[0],accs[1][0], accs[2][0], accs[3][0]], path=os.path.join(result_dir,'histogram_config'+'_'+dataset+'.png'), baselines=(sorted_test_accs)[::-1], dataset=dataset) 
 
+def get_archs(dataset, quality):
+    bench=NASBench201(dataset=dataset)
+    idx1,idx2=0,0
+    if dataset=='cifar10':
+        if quality=='high':
+            idx1=81
+            idx2=1459
+        elif quality=='medium':
+            idx1=0
+            idx2=163
+        elif quality=='poor':
+            idx1=40
+            idx2=12094
+    elif dataset=='cifar100':
+        if quality=='high':
+            idx1=81
+            idx2=11711
+        elif quality=='medium':
+            idx1=31
+            idx2=7680
+        elif quality=='poor':
+            idx1=146
+            idx2=4461
+    elif dataset=='ImageNet16-120':
+        if quality=='high':
+            idx1=65
+            idx2=2246
+        elif quality=='medium':
+            idx1=17
+            idx2=5845
+        elif quality=='poor':
+            idx1=2
+            idx2=348
+    return bench.encode({'arch':bench.archive['str'][idx1]}), bench.encode({'arch':bench.archive['str'][idx2]}), bench.get_info_from_arch({'arch':bench.archive['str'][idx1]})['test-acc'], bench.get_info_from_arch({'arch':bench.archive['str'][idx2]})['test-acc']
 
 
-path_bench('cifar10')
+'''
+dataset='ImageNet16-120' #
+bench=NASBench201(dataset=dataset)
+idx1, idx2, acc1, acc2 = find_neighbors_with_similar_performance(bench, 27, 28.5, radius=3, tolerance=0.1)
+print(idx1, idx2)
+print(acc1, acc2)
+print(bench.archive['str'][idx1])
+print(bench.archive['str'][idx2])
+'''
+
+
+path_bench_qualities('ImageNet16-120')
+
+'''
 path_bench('cifar100')
 path_bench('ImageNet16-120')
-
+'''
 
 
 #path_bench('cifar10')

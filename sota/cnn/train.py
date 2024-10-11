@@ -168,6 +168,8 @@ def main():
     best_valid_acc = 0.0  # Initialize the best validation accuracy as 0.0
     best_train_acc = 0.0  # Initialize the best training accuracy as 0.0
     best_train_obj = float('inf')  # Initialize the best training loss as infinity
+    patience = 100  # Patience for early stopping
+    counter=0
 
     for epoch in range(args.epochs):
         #scheduler.step()
@@ -205,6 +207,12 @@ def main():
             best_train_acc = train_acc
             best_train_obj = train_obj
             utils.save(model, os.path.join(args.save, 'best_weights.pt'))
+            counter = 0
+        else:
+            counter += 1
+            if counter >= patience:
+                logging.info('Validation loss has not improved in the last %d epochs. Stopping training.', patience)
+                break
 
         # Check if the training loss is below the threshold to stop training
         if train_obj < args.train_limit:
