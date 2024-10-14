@@ -24,7 +24,7 @@ for arch in "${architectures[@]}"; do
             --save $save_dir \
             --epochs $epochs --momentum 0.9 --batch_size 96 \
             --drop_path_prob 0.2 --cutout --seed $seed \
-            --auxiliary --auxiliary_weight 0.4 
+            --auxiliary --auxiliary_weight 0.4 --wandb 
     done
 done
 
