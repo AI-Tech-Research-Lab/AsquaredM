@@ -1,8 +1,8 @@
 #Beta-DARTS with flood weight regularization
 # imagenet16, cifar10, cifar100
 dataset=cifar10
-sam=True
-betadecay=False
+sam=False
+betadecay=True
 unrolled=False
 data_augs=(False True)
 data_aug=True

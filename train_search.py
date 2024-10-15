@@ -297,8 +297,14 @@ def main():
     logging.info('Best genotype: %s', best_genotype)
     logging.info('Best validation loss: %f', best_loss)
     logging.info('Best validation accuracy: %f', best_acc)
+    
+    if args.nasbench:
+            cell_encode = translate_genotype_to_encode(best_genotype)
+            decode = bench.decode(cell_encode)
+            info = bench.get_info_from_arch(decode)
+            logging.info('BEST NASBench201 val acc: %.2f, test acc: %.2f', info['val-acc'], info['test-acc'])
 
-    genotype_dict = genotype_to_dict(genotype)
+    genotype_dict = genotype_to_dict(best_genotype)
 
     # Save to a file
     with open(os.path.join(args.save,'genotype.json'), 'w') as f:
