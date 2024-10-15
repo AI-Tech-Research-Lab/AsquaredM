@@ -664,7 +664,7 @@ print(bench.archive['str'][idx2])
 '''
 
 
-path_bench_qualities('ImageNet16-120')
+#path_bench_qualities('ImageNet16-120')
 
 '''
 path_bench('cifar100')
