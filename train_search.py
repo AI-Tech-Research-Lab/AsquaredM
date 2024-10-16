@@ -301,8 +301,13 @@ def main():
     if args.nasbench:
             cell_encode = translate_genotype_to_encode(best_genotype)
             decode = bench.decode(cell_encode)
-            info = bench.get_info_from_arch(decode)
-            logging.info('BEST NASBench201 val acc: %.2f, test acc: %.2f', info['val-acc'], info['test-acc'])
+            datasets=['cifar10', 'cifar100', 'ImageNet16-120']
+            stats = {'best_genotype': str(best_genotype)}
+            for ds in datasets:
+                info = bench.get_info_from_arch(decode)
+                logging.info('BEST NASBench201 val acc: %.2f, test acc: %.2f', info['val-acc'], info['test-acc'])
+                stats[f'{ds}_val']=info['val-acc']
+                stats[f'{ds}_test']=info['test-acc']
 
     genotype_dict = genotype_to_dict(best_genotype)
 
@@ -310,7 +315,7 @@ def main():
     with open(os.path.join(args.save,'genotype.json'), 'w') as f:
         json.dump(genotype_dict, f, indent=4)
 
-    call_training_script(n_classes,args)
+    #call_training_script(n_classes,args)
 
 def call_training_script(n_classes,args):
     # Prepare the command to call train.py and save command script in the same directory

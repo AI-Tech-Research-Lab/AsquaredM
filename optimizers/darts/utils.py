@@ -212,7 +212,9 @@ def drop_path(x, drop_prob):
     return x
 
 def create_exp_dir(path, scripts_to_save=None):
-
+    
+    if not os.path.exists('results'):
+        os.mkdir('results')
     if not os.path.exists(path):
         os.mkdir(path)
     print('Experiment dir : {}'.format(path))
