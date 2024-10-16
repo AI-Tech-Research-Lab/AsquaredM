@@ -308,6 +308,9 @@ def main():
                 logging.info('BEST NASBench201 val acc: %.2f, test acc: %.2f', info['val-acc'], info['test-acc'])
                 stats[f'{ds}_val']=info['val-acc']
                 stats[f'{ds}_test']=info['test-acc']
+            
+            with open(os.path.join(args.save,'stats.json'), 'w') as f:
+                json.dump(stats, f, indent=4)
 
     genotype_dict = genotype_to_dict(best_genotype)
 
