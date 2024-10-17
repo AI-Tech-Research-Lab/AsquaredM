@@ -100,7 +100,7 @@ if args.wandb:
         entity='flatnas',
         # set the wandb project where this run will be logged
         project=f"FlatDARTS-{args.dataset}-nasbench{args.nasbench}-data_aug",
-        name=f"SAM_{args.sam}-BETADECAY_{args.betadecay}-UNROLLED_{args.unrolled}-DATA_AUG_{args.data_aug}-RHO_ALPHA_{args.rho_alpha_sam}",
+        name=f"SAM_{args.sam}-BETADECAY_{args.betadecay}-UNROLLED_{args.unrolled}-DATA_AUG_{args.data_aug}-RHO_ALPHA_{args.rho_alpha_sam}-SEED_{args.seed}",
         # track hyperparameters and run metadata
         config={**vars(args)},
     )
@@ -304,6 +304,7 @@ def main():
             datasets=['cifar10', 'cifar100', 'ImageNet16-120']
             stats = {'best_genotype': str(best_genotype)}
             for ds in datasets:
+                bench.dataset = ds
                 info = bench.get_info_from_arch(decode)
                 logging.info('BEST NASBench201 val acc: %.2f, test acc: %.2f', info['val-acc'], info['test-acc'])
                 stats[f'{ds}_val']=info['val-acc']
