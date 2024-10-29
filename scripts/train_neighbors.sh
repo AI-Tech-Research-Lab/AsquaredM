@@ -1,11 +1,11 @@
 dataset=cifar10 train_min=0.43 epochs=100
 #dataset=cifar100 train_min=1.0 epochs=150
 gpus="0"
-#arch=DARTS_seed3 seed=3
-arch=SAM_exp1_seed7 seed=7
+arch=DARTS_seed3 seed=3
+#arch=SAM_exp1_seed7 seed=7
 #arch_target=DARTS_TARGET
 
-radius=1
+radius=3
 samples=30
 
 python train_neighbors.py --dataset $dataset --arch $arch \

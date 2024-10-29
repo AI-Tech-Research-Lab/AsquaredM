@@ -258,7 +258,7 @@ def read_val_accs_path_from_archive(filename,n):
 
     return avg_array
 
-def plot_histogram(data, bins=100, path='', baseline=None, dataset='cifar10'):
+def plot_histogram(data, bins=100, path='', baseline=None, dataset='cifar10', radius=1):
     FONT_SIZE = 8
     FIGSIZE = (8, 4)
     
@@ -273,8 +273,8 @@ def plot_histogram(data, bins=100, path='', baseline=None, dataset='cifar10'):
         ax.axvline(baseline, color='red', linestyle='--', linewidth=1)
     
     # Set axis labels and title
-    ax.set_xlabel('Value', fontsize=FONT_SIZE)
-    ax.set_title('Histogram', fontsize=FONT_SIZE)
+    ax.set_xlabel('Accuracy', fontsize=FONT_SIZE)
+    ax.set_title('Locality in the neighborhood of radius '+ str(radius) + ' on ' + dataset, fontsize=FONT_SIZE)
     
     # Add grid and customize y-axis ticks
     ax.grid(True, axis='y', which='both', linestyle='--', linewidth=0.5)
@@ -398,6 +398,11 @@ if __name__ == "__main__":
         plot_line(accs, plot_path)
     else:
         accs, baseline = read_val_accs_from_archive(archive_path)
-        plot_histogram(accs, path=os.path.join(args.save, 'histogram.png'), baseline=baseline, dataset=args.dataset)
+        if 'DARTS' in args.arch:
+            model = 'darts'
+        else:
+            model = 'sam'
+        filename = 'histogram_' + model + '_neighbors_' + args.dataset + '_radius' + str(args.radius) + '.png'
+        plot_histogram(accs, path=os.path.join(args.save, filename), baseline=baseline, dataset=args.dataset, radius=args.radius)
 
     logging.info("All configurations evaluated and results saved.")
