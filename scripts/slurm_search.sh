@@ -9,7 +9,7 @@
 #SBATCH --cpus-per-task=1            # number of threads
 #SBATCH --time=72:00:00              # walltime limit
 #SBATCH --gpus=1                     # num gpus. If set to 0 change the partition to defq or compute
-#SBATCH --partition=gpu              # [gpu, defq, compute, debug, long]
+#SBATCH --partition=long_gpu             # [gpu, defq, compute, debug_gpu, long_gpu, medium_gpu]
 #SBATCH --account=pittorino
 #SBATCH --mail-type=NONE              #notify for NONE, BEGIN, END, FAIL, REQUEUE, ALL
 #SBATCH --mail-user=fabrizio.pittorino@unibocconi.it
@@ -19,11 +19,11 @@
 
 # PARTITIONS
 # If you have cpu job change partition to compute.
-# defq, timelimit 3 days, Nodes=cnode0[1-4] (CPU)
-# compute, timelimit 15 days, Nodes=cnode0[5-8] (CPU)
-# gpu, timelimit 3 days, Nodes=gnode0[1-4] (GPU)
-# debug, timelimit 30 minutes, Nodes=cnode01,gnode04 (short test on either CPU or GPU)
-# QOS long: long jobs (7 days max) on gnode0[1-4] (GPU)
+#partition_name / max job duration
+#long_gpu 3 days 
+#gpu 1 day
+#medium_gpu 3 hours
+#debug_gpu 15 minutes 
 
 export PATH="/home/Pittorino/miniconda3/bin:$PATH"
 #export PATH="/home/Pittorino/miniconda3:$PATH"
@@ -32,5 +32,5 @@ module load cuda/12.3
 conda init
 conda activate timefs
 
-bash scripts/darts-search.sh
-#bash scripts/train_neighbors.sh
+#bash scripts/darts-search.sh
+bash scripts/train_neighbors.sh
