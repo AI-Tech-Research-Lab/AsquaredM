@@ -1,5 +1,7 @@
 from itertools import combinations
+import itertools
 import os
+import random
 import sys
 import numpy as np
 sys.path.append('/u01/homes/fpittorino/workspace/darts-SAM')
@@ -237,7 +239,108 @@ class DARTS():
     
     def to_dict(self, genotype):
         return genotype._asdict()
+
+    def sample_neighbors_path(self, current_genotype, target_genotype, num_actions):
+        """
+        Returns all possible genotypes obtained from the current genotype by applying
+        up to num_actions changes to move closer to the target genotype.
+        """
+        modified_genotypes = []
+
+        #reorder target
+        # Reorder target genotype to match current genotype
+        for section in ['normal', 'reduce']:
+            for i in range(0, len(target_genotype[section]) - 1, 2):  # Step by 2 to check pairs 1&2, 3&4, etc.
+                # Check pairs of every two elements
+                first_op, first_node = target_genotype[section][i]
+                second_op, second_node = target_genotype[section][i + 1]
+                # Check if swapping improves correspondence with current genotype
+                if (first_op, first_node) == current_genotype[section][i + 1] :
+                    # Swap the operations to improve alignment with current genotype
+                    target_genotype[section][i], target_genotype[section][i + 1] = \
+                    target_genotype[section][i + 1], target_genotype[section][i]
+                elif (second_op, second_node) == current_genotype[section][i]:
+                        # Swap the operations to improve alignment with current genotype
+                        target_genotype[section][i], target_genotype[section][i + 1] = \
+                        target_genotype[section][i + 1], target_genotype[section][i]
+
+        # Collect differences between current and target genotype
+        differences = []
+        for section in ['normal', 'reduce']:
+            for i, (current_op, current_node) in enumerate(current_genotype[section]):
+                target_op, target_node = target_genotype[section][i]
+                if current_op != target_op or current_node != target_node:
+                    differences.append((section, i, current_op, current_node, target_op, target_node))
+
+        # Generate all combinations of changes up to num_actions
+        for r in range(1, num_actions + 1):
+            for changes in itertools.combinations(differences, r):
+                # Create a modified version of the current genotype
+                modified_genotype = {
+                    'normal': current_genotype['normal'][:],
+                    'normal_concat': current_genotype['normal_concat'][:],
+                    'reduce': current_genotype['reduce'][:],
+                    'reduce_concat': current_genotype['reduce_concat'][:]
+                }
+
+                for section, i, current_op, current_node, target_op, target_node in changes:
+                    if current_op != target_op:
+                        # Change the operation
+                        modified_genotype[section][i] = (target_op, current_node)
+                    elif current_node != target_node:
+                        # Change the node connection
+                        modified_genotype[section][i] = (current_op, target_node)
+
+                modified_genotypes.append(modified_genotype)
+
+        return modified_genotypes
     
+    '''
+    def sample_neighbors_path(self, current_genotype, target_genotype, num_actions):
+        """
+        Applies actions to modify the current genotype to move closer to the target genotype.
+        Each action changes an operation or connection based on the target genotype.
+        """
+        modified_genotype = {
+            'normal': current_genotype['normal'][:],
+            'normal_concat': current_genotype['normal_concat'][:],
+            'reduce': current_genotype['reduce'][:],
+            'reduce_concat': current_genotype['reduce_concat'][:]
+        }
+
+        # Collect differences between current and target genotype
+        differences = []
+        for section in ['normal', 'reduce']:
+            for i, (current_op, current_node) in enumerate(modified_genotype[section]):
+                target_op, target_node = target_genotype[section][i]
+                if current_op != target_op or current_node != target_node:
+                    differences.append((section, i, current_op, current_node, target_op, target_node))
+
+        # Apply actions up to the specified number
+        actions_applied = 0
+        while actions_applied < num_actions and differences:
+            # Select a random difference to apply
+            section, i, current_op, current_node, target_op, target_node = random.choice(differences)
+
+            # Apply the change to match the target configuration
+            if current_op != target_op:
+                # Change the operation
+                modified_genotype[section][i] = (target_op, current_node)
+            elif current_node != target_node:
+                # Change the node connection
+                modified_genotype[section][i] = (current_op, target_node)
+
+            # Remove the applied change from differences
+            differences = [(sec, idx, cur_op, cur_node, tar_op, tar_node)
+                           for sec, idx, cur_op, cur_node, tar_op, tar_node in differences
+                           if not (sec == section and idx == i)]
+
+            actions_applied += 1
+
+        return modified_genotype
+    '''
+    
+'''
     def sample_neighbors_path(self,init_config, target_config):
         """
         Generate a list of lists where each sublist contains all possible configurations with exactly K total differences,
@@ -312,6 +415,7 @@ class DARTS():
 
         return all_configs, max_normal_changes + max_reduce_changes
 
+'''
 '''
 darts = DARTS(2)
 #matrix = darts.sample(1)[0]

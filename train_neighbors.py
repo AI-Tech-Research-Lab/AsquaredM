@@ -203,6 +203,7 @@ def read_val_accs_from_archive(filename):
 
     return array, acc_baseline
 
+'''
 def read_val_accs_path_from_archive(filename,n):
     
     array=[]
@@ -210,7 +211,7 @@ def read_val_accs_path_from_archive(filename,n):
     baseline = True
     acc_baseline=0
     K=1
-    to_samples = math.comb(n,K) #number of samples to sample for level K (binomial coefficient)
+    to_samples = 3 #math.comb(n,K) #number of samples to sample for level K (binomial coefficient)
 
     with open(filename, 'r') as file:
         for line in file:
@@ -249,14 +250,62 @@ def read_val_accs_path_from_archive(filename,n):
                         if to_samples == 0:
                             #average the samples of array, append the value to avg_array, and clean the array, increase the level
                             avg_array.append(sum(array)/len(array))
+                            stds = np.std(array)
                             array.clear()
                             K+=1
-                            to_samples = math.comb(n,K)
+                            to_samples = 3 #math.comb(n,K)
     
     avg_array.insert(0, acc_baseline)
     avg_array.append(acc_target)
+    return avg_array, stds
+'''
 
-    return avg_array
+def read_val_accs_path_from_archive(filename, n):
+    """
+    Reads validation accuracies from an archive and averages samples for different levels,
+    calculating standard deviations for each level.
+    """
+    array = []
+    avg_array = []
+    std_array = []
+    K = 1
+    to_samples = 3  # Number of samples per level
+
+    with open(filename, 'r') as file:
+        for line in file:
+            if line.strip():  # Ensure the line is not empty
+                # Split the line into the architecture and metrics part
+                arch_part, metrics_part = line.split('}:')
+
+                # Parse the architecture part
+                architecture_json = arch_part + '}'
+                try:
+                    architecture = json.loads(architecture_json)
+                except json.JSONDecodeError as e:
+                    print(f"Failed to decode architecture JSON: {e}")
+                    continue
+
+                # Parse the metrics part
+                metrics_json = metrics_part.strip()
+                try:
+                    metrics = json.loads(metrics_json)
+                except json.JSONDecodeError as e:
+                    print(f"Failed to decode metrics JSON: {e}")
+                    continue
+
+                valid_acc = metrics.get("best_valid_acc", -float('inf'))
+
+                to_samples -= 1
+                array.append(valid_acc)
+                if to_samples == 0:
+                    # Average the samples in the array, append to avg_array, and calculate std deviation
+                    avg_array.append(sum(array) / len(array))
+                    std_array.append(np.std(array))
+                    array.clear()
+                    K += 1
+                    to_samples = 3  # Reset the number of samples per level
+
+    return avg_array, std_array
 
 def plot_histogram(data, bins=100, path='', baseline=None, dataset='cifar10', radius=1):
     FONT_SIZE = 8
@@ -287,7 +336,7 @@ def plot_histogram(data, bins=100, path='', baseline=None, dataset='cifar10', ra
     plt.savefig(path, bbox_inches='tight')
     plt.show()
 
-def plot_line(accuracies, output_path='test_accuracies_plot.png'):
+def plot_line(path_accs, std_test_accs, output_path, dataset):
     """
     Plot a line graph of test accuracies.
 
@@ -295,27 +344,21 @@ def plot_line(accuracies, output_path='test_accuracies_plot.png'):
     - accuracies (list): List of test accuracies to plot.
     - output_path (str): Path to save the plot image.
     """
-    # Check if accuracies list is empty
-    if not accuracies:
-        print("No accuracies to plot.")
-        return
-
-    # Create a list of x values (indices of accuracies)
-    x_values = range(len(accuracies))
-
-    # Create the plot
-    plt.figure(figsize=(10, 6))
-    plt.plot(x_values, accuracies, marker='o', linestyle='-', color='b', label='Test Accuracy')
-
-    # Add labels and title
-    plt.xlabel('Index')
+    x = list(range(4))  # 0, 1, 2, 3 representing the radius
+    y = path_accs
+    yerr = [0] + std_test_accs + [0]  # no std dev for acc1 and acc2
+    
+    plt.figure(figsize=(10, 5))
+    plt.errorbar(x, y, yerr=yerr, fmt='-o', capsize=5, capthick=2, elinewidth=1, label='Test Accuracy')
+    plt.xlabel('Radius')
     plt.ylabel('Accuracy')
-    plt.title('Path of neighbor accuracies')
+    plt.title(f'Path Accuracies for {dataset}')
+    plt.xticks(x)
     plt.legend()
-
-    # Save the plot
-    plt.savefig(output_path, bbox_inches='tight')
+    plt.grid(True)
     plt.show()
+
+    plt.savefig(output_path + '/path_accs.png')
 
 if __name__ == "__main__":
 
@@ -329,6 +372,10 @@ if __name__ == "__main__":
                         help='initial config')
     parser.add_argument('--arch_target', type=str, default=None,
                         help='target config for path')
+    parser.add_argument('--acc_ref', type=float, default=0.0,
+                        help='reference accuracy for the baseline')
+    parser.add_argument('--acc_target', type=float, default=0.0,
+                        help='reference accuracy for the baseline')
     parser.add_argument('--radius', type=int, default=1,
                         help='radius')
     parser.add_argument('--samples', type=int, default=1,
@@ -358,32 +405,20 @@ if __name__ == "__main__":
     if args.arch_target:
         genotype_target = eval(f"genotypes.{args.arch_target}")
         dict_target = darts.to_dict(genotype_target)
-        matrix_target = darts.genotype_to_adjacency_matrix(dict_target)
-        neighbors, num_differences = darts.sample_neighbors_path(matrix, matrix_target)
-        print("Number of differences:", num_differences)
-        print(len(neighbors))
+        #matrix_target = darts.genotype_to_adjacency_matrix(dict_target)
+        num_differences=3
+        neighbors = darts.sample_neighbors_path(dict_, dict_target, num_differences-1)
         # flatten the list
-        neighbors = [item for sublist in neighbors for item in sublist]
+        #neighbors = [item for sublist in neighbors for item in sublist]
         #add target genotype to end of the list
-        neighbors.append(dict_target)
+        #neighbors.append(dict_target)
     else:
         neighbors = darts.sample_neighbors(matrix, args.radius, args.samples)
-
-    # add baseline genotype at the top of the list
-    neighbors.insert(0, dict_) 
+        # add baseline genotype at the top of the list
+        neighbors.insert(0, dict_) 
 
     print("Len Neighbors:")
     print(len(neighbors))
-
-    #for id, neighbor in enumerate(neighbors):
-    #logging.info(f"Evaluating config: {neighbor}")
-
-        #already_evaluated, _ = check_if_evaluated(neighbor, args.save)
-        
-        #if already_evaluated:
-        #logging.info(f"Configuration {neighbor} already evaluated. Loading results from {archive_path}.")
-        #else:
-        # Use each GPU for training
 
     call_training_script(neighbors, args)
 
@@ -393,9 +428,10 @@ if __name__ == "__main__":
     # Read the validation accuracies from the archive file and plot the histogram
 
     if args.arch_target:
-        accs = read_val_accs_path_from_archive(archive_path, num_differences)
-        plot_path = os.path.join(args.save, 'line_plot.png')
-        plot_line(accs, plot_path)
+        accs, stds = read_val_accs_path_from_archive(archive_path, num_differences)
+        accs.insert(0, args.acc_ref)
+        accs.append(args.acc_target)
+        plot_line(accs, stds, args.save, args.dataset)
     else:
         accs, baseline = read_val_accs_from_archive(archive_path)
         if 'DARTS' in args.arch:
