@@ -1,16 +1,16 @@
 #!/bin/bash
 
 dataset=cifar10
-rho=1e-4
+rho=1e-1
 epsilon=1e-2
 sam=True
 wandb=True
-betadecay=False
+betadecay=True
 unrolled=False
 epochs=50
 base_save_dir="results/darts_search"
 w_nor=0.8
-seeds=(3 5 7)
+seeds=(1 2 3 5 7)
 
 # Loop through the seeds and execute the command
 for seed in "${seeds[@]}"; do

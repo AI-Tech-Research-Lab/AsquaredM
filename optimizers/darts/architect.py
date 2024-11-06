@@ -21,8 +21,8 @@ class Architect(object):
         self.rho_alpha = args.rho_alpha_sam
         self.epsilon = args.epsilon_sam
         self.betadecay = args.betadecay
-        if hasattr(args, 'w_nor'):
-            self.w_nor = args.w_nor
+        #if hasattr(args, 'w_nor'):
+        #    self.w_nor = args.w_nor
 
     def _train_loss(self, model, input, target):
         return model._loss(input, target)
@@ -36,7 +36,8 @@ class Architect(object):
             # STEP DARTS 
             ssr_reduce = self.mlc_loss(self.model.alphas_reduce)
             ssr_normal = self.mlc_loss(self.model.alphas_normal)
-            self.model._loss(input, target) + weights*((1-self.w_nor)*ssr_reduce + self.w_nor*ssr_normal)
+            #self.model._loss(input, target) + weights*((1-self.w_nor)*ssr_reduce + self.w_nor*ssr_normal)
+            self.model._loss(input, target) + weights*(ssr_reduce + ssr_normal)
         else:
             ssr_normal = self.mlc_loss(self.model._arch_parameters)
             loss = self.model._loss(input, target) + weights * ssr_normal
@@ -119,7 +120,8 @@ class Architect(object):
                 # STEP DARTS 
                 ssr_reduce = self.mlc_loss(self.model.alphas_reduce)
                 ssr_normal = self.mlc_loss(self.model.alphas_normal)
-                loss = self.model._loss(input_valid, target_valid) + weights*((1-self.w_nor)*ssr_reduce + self.w_nor*ssr_normal)
+                #loss = self.model._loss(input_valid, target_valid) + weights*((1-self.w_nor)*ssr_reduce + self.w_nor*ssr_normal)
+                loss = self.model._loss(input_valid, target_valid) + weights*(ssr_reduce + ssr_normal)
             else:
                 ssr_normal = self.mlc_loss(self.model._arch_parameters)
                 loss = self.model._loss(input_valid, target_valid) + weights * ssr_normal
