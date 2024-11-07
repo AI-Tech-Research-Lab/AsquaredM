@@ -545,14 +545,14 @@ def path_bench(dataset,quality):
 
     if not os.path.exists('../results/flatness_exp'):
         os.makedirs('results/flatness_exp', exist_ok=True)
-    plt.savefig('results/flatness_exp/'+dataset+'/path_accs_' + quality +'.png')
+    plt.savefig('results/flatness_exp/'+dataset+'/path_accs_' + quality +'.pdf', format='pdf', bbox_inches='tight', dpi=300)
 
 def path_bench_qualities(dataset):
     print("DATASET: ", dataset)
     bench = NASBench201(dataset=dataset)
 
     # Define qualities
-    qualities = ["high", "medium", "poor"]
+    qualities = ["Model A", "Model B", "Model C"]
     paths_by_quality = {}
     accs_by_quality = {}
     std_by_quality = {}
@@ -586,14 +586,14 @@ def path_bench_qualities(dataset):
         print(f"PATH ACCS for {quality}: ", path_accs)
         print(f"STD VAL ACCS for {quality}: ", std_test_accs)
 
-    # Plot the paths for high, medium, and poor qualities
+    # Plot the paths for Model A, Model B, and Model C qualities
     plt.figure(figsize=(10, 5))
     x = list(range(4))  # 0, 1, 2, 3 representing the radius
 
     for quality in qualities:
         y = paths_by_quality[quality]
         yerr = std_by_quality[quality]
-        plt.errorbar(x, y, yerr=yerr, fmt='-o', capsize=5, capthick=2, elinewidth=1, label=f'{quality.capitalize()} Quality')
+        plt.errorbar(x, y, yerr=yerr, fmt='-o', capsize=5, capthick=2, elinewidth=1, label=f'{quality}')
 
     # Customize plot
     plt.xlabel('Radius')
@@ -607,7 +607,8 @@ def path_bench_qualities(dataset):
     # Save the plot to the results folder
     if not os.path.exists(f'results/flatness_exp_{dataset}'):
         os.makedirs(f'results/flatness_exp_{dataset}', exist_ok=True)
-    plt.savefig(f'results/flatness_exp_{dataset}/path_accs_all_qualities.png')
+
+    plt.savefig(f'results/flatness_exp_{dataset}/path_accs_all_qualities.pdf', format='pdf', bbox_inches='tight', dpi=300)
 
 def plot_histo_configs_radius1(dataset):
     bench=NASBench201(dataset=dataset)
@@ -625,33 +626,33 @@ def get_archs(dataset, quality):
     bench=NASBench201(dataset=dataset)
     idx1,idx2=0,0
     if dataset=='cifar10':
-        if quality=='high':
+        if quality=='Model A':
             idx1=81
             idx2=1459
-        elif quality=='medium':
+        elif quality=='Model B':
             idx1=0
             idx2=163
-        elif quality=='poor':
+        elif quality=='Model C':
             idx1=40
             idx2=12094
     elif dataset=='cifar100':
-        if quality=='high':
+        if quality=='Model A':
             idx1=81
             idx2=11711
-        elif quality=='medium':
+        elif quality=='Model B':
             idx1=31
             idx2=7680
-        elif quality=='poor':
+        elif quality=='Model C':
             idx1=146
             idx2=4461
     elif dataset=='ImageNet16-120':
-        if quality=='high':
+        if quality=='Model A':
             idx1=65
             idx2=2246
-        elif quality=='medium':
+        elif quality=='Model B':
             idx1=17
             idx2=5845
-        elif quality=='poor':
+        elif quality=='Model C':
             idx1=2
             idx2=348
     return bench.encode({'arch':bench.archive['str'][idx1]}), bench.encode({'arch':bench.archive['str'][idx2]}), bench.get_info_from_arch({'arch':bench.archive['str'][idx1]})['test-acc'], bench.get_info_from_arch({'arch':bench.archive['str'][idx2]})['test-acc']
@@ -667,8 +668,9 @@ print(bench.archive['str'][idx1])
 print(bench.archive['str'][idx2])
 '''
 
-
-#path_bench_qualities('ImageNet16-120')
+path_bench_qualities('cifar10')
+path_bench_qualities('cifar100')
+path_bench_qualities('ImageNet16-120')
 
 '''
 path_bench('cifar100')
@@ -679,7 +681,7 @@ path_bench('ImageNet16-120')
 #path_bench('cifar10')
 #plot_histo_configs_radius1('cifar10')
 #plot_histo_configs_radius1('cifar100')
-plot_histo_configs_radius1('ImageNet16-120') 
+#plot_histo_configs_radius1('ImageNet16-120') 
 
 #compute_acc_by_radius('cifar10')
 #compute_acc_by_radius('cifar100')
