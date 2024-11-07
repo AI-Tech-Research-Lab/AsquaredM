@@ -333,7 +333,7 @@ def plot_histogram(data, bins=100, path='', baseline=None, dataset='cifar10', ra
     plt.tight_layout()
 
     # Save and show the plot
-    plt.savefig(path, bbox_inches='tight')
+    plt.savefig(path, format='pdf', bbox_inches='tight', dpi=300)
     plt.show()
 
 def plot_line(path_accs, std_test_accs, output_path, dataset):
@@ -357,8 +357,7 @@ def plot_line(path_accs, std_test_accs, output_path, dataset):
     plt.legend()
     plt.grid(True)
     plt.show()
-
-    plt.savefig(output_path + '/path_accs.png')
+    plt.savefig(output_path + '/path_accs.pdf', format='pdf', bbox_inches='tight', dpi=300)
 
 if __name__ == "__main__":
 
@@ -438,7 +437,7 @@ if __name__ == "__main__":
             model = 'darts'
         else:
             model = 'sam'
-        filename = 'histogram_' + model + '_neighbors_' + args.dataset + '_radius' + str(args.radius) + '.png'
+        filename = 'histogram_' + model + '_neighbors_' + args.dataset + '_radius' + str(args.radius) + '.pdf'
         plot_histogram(accs, path=os.path.join(args.save, filename), baseline=baseline, dataset=args.dataset, radius=args.radius)
 
     logging.info("All configurations evaluated and results saved.")
