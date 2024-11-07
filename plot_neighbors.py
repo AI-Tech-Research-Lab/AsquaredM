@@ -43,39 +43,74 @@ def read_best_valid_acc_from_file(filename):
 
     return array, acc_baseline
 
-def plot_histogram(data, bins=100, path='', baseline=None, dataset='cifar10'):
+def get_limits_plot(dataset):
+    if dataset == 'cifar10':
+        return 91, 94
+    elif dataset == 'cifar100':
+        return 70, 78
+
+def plot_histogram(data_array, bins=100, path='', baselines=None, dataset='cifar10'):
+
     FONT_SIZE = 8
-    FIGSIZE = (8, 4)
-    
-    # Set up the plot
-    fig, ax = plt.subplots(figsize=FIGSIZE)
+    FIGSIZE = (4, 5)
+    #COLORS = [mcolors.TABLEAU_COLORS[k] for k in mcolors.TABLEAU_COLORS.keys()]
+    titles = ['DARTS', 'SAM']
 
-    # Plot histogram and KDE
-    sns.histplot(data, bins=bins, color='darkblue', edgecolor='black', kde=True, line_kws={'linewidth': 1}, ax=ax, stat='density')
-    
-    # Add vertical line for baseline if provided
-    if baseline is not None:
-        ax.axvline(baseline, color='red', linestyle='--', linewidth=1)
-    
-    # Set axis labels and title
-    ax.set_xlabel('Value', fontsize=FONT_SIZE)
-    ax.set_title('Histogram', fontsize=FONT_SIZE)
-    
-    # Add grid and customize y-axis ticks
-    ax.grid(True, axis='y', which='both', linestyle='--', linewidth=0.5)
-    ax.set_yticks(np.arange(0, 0.9, 0.2))
+    num_plots = len(data_array) 
 
-    # Adjust layout to prevent clipping
+    # Set up subplots
+    fig, axs = plt.subplots(num_plots, 1, figsize=FIGSIZE, sharex=True)  # same scale x-axis
+
+    # Plot histograms and curves for each element in the array
+    for i, data in enumerate(data_array):
+        sns.histplot(data, bins=bins, color='darkblue', edgecolor='black', kde=True, line_kws={'linewidth': 1}, ax=axs[i], stat='density')
+        axs[i].tick_params(axis='y', which='both', left=False, right=False, labelleft=True)  # Hide y-axis values
+        min_val, max_val = get_limits_plot(dataset)
+        axs[i].set_ylim(0, 1.0)  # Set y-axis limits
+
+        axs[i].set_title(f"{titles[i]} (Test accuracy: {baselines[i]:.2f}%)")  # Adjust title as needed
+
+        # Plot baselines as vertical lines
+        if baselines:
+            axs[i].axvline(baselines[i], color='red', linestyle='--', linewidth=1)
+
+        # Add grid with custom interval
+        axs[i].grid(True, axis='y', which='both', linestyle='--', linewidth=0.5)
+        axs[i].set_yticks(np.arange(0, 0.9, 0.2))
+
+    # Apply common x-axis limits to all subplots
+    for ax in axs:
+        ax.set_xlim(min_val, max_val)
+
+    # Add common X-axis label
+    axs[-1].set_xlabel('Accuracy', fontsize=FONT_SIZE)
+
+    # Adjust layout to prevent clipping of titles and labels
     plt.tight_layout()
 
     # Save and show the plot
-    plt.savefig(path, bbox_inches='tight')
+    plt.savefig(path, format='pdf', bbox_inches='tight', dpi=300)
     plt.show()
 
+def plot_neighbors(folder, dataset='cifar10', radius=1, baselines=None):
+    models=['DARTS_seed3', 'SAM_exp1_seed7']
+    accs=[0,0]
+    folder1 = folder + '_arch' + models[0] + '_radius' + str(radius)
+    filename=os.path.join(folder1,'archive_darts.txt')
+    accs[0], _ = read_best_valid_acc_from_file(filename)
+    folder2 = folder + '_arch' + models[1] + '_radius' + str(radius)
+    filename=os.path.join(folder2,'archive_darts.txt')
+    accs[1], _ = read_best_valid_acc_from_file(filename)
+    plot_histogram(accs, bins=50, path=os.path.join(folder1,'histogram_darts_dataset' + dataset+'_radius' + str(radius) + '.pdf'), 
+                    dataset=dataset, baselines=baselines)
+
 # Usage
+plot_neighbors('results/darts_train_neighbors_datasetcifar100', dataset='cifar100', radius=1, baselines=[73.5, 74.7])
+'''
 folder = 'results/darts_train_neighbors_datasetcifar100_archBETADARTS'
 filename=os.path.join(folder,'archive_darts.txt')
 accs = read_best_valid_acc_from_file(filename)
 accs = accs[0] + [accs[1]]
 plot_histogram(accs, bins=100, path=os.path.join(folder,'plot.png'), 
                 dataset='cifar100', baseline=73.86)
+'''

@@ -251,6 +251,7 @@ def plot_histograms(data_array, bins=100, path='', baselines=None, dataset='cifa
     #FIGSIZE = (3.5, 3.0)
     FIGSIZE = (4,5)
     COLORS = [mcolors.TABLEAU_COLORS[k] for k in mcolors.TABLEAU_COLORS.keys()]
+    titles = ['Model A', 'Model B', 'Model C']
 
     num_plots = len(data_array) - 1 
 
@@ -263,21 +264,20 @@ def plot_histograms(data_array, bins=100, path='', baselines=None, dataset='cifa
     data_array = data_array[1:]
     # Plot histograms and curves for each element in the array
     for i, data in enumerate(data_array):
+        temp_bins=40
         print("DATA: ", data[:10])
         data = np.array(data)   
         data = data[data > 10]
         # Plot transparent curve behind histogram for the first element
         sns.histplot(all_dataset, bins=bins, color='green', edgecolor='black', kde=True, line_kws={'linewidth': 1, 'alpha': 0.2}, ax=axs[i], stat='density')
-        sns.histplot(data, bins=bins, color='darkblue', edgecolor='black', kde=True, line_kws={'linewidth': 1}, ax=axs[i], stat='density')
+        sns.histplot(data, bins=temp_bins, color='darkblue', edgecolor='black', kde=True, line_kws={'linewidth': 1}, ax=axs[i], stat='density')
         axs[i].tick_params(axis='y', which='both', left=False, right=False, labelleft=True)  # Hide y-axis values
-        #axs[i].set_xlim(60, 95)  # Set x-axis limits cifar10
-        #axs[i].set_xlim(40, 75) #cifar100
         max,min = get_limits_plot(dataset)
         axs[i].set_xlim(min, max)
-        #axs[i].set_xlim(10, 50)
         axs[i].set_ylim(0, 0.8)  # Set y-axis limits
         # Add title to each subplot
-        axs[i].set_title(f'Plot {i+1}')  # Adjust title as needed
+        axs[i].set_title(f"{titles[i]} (Test accuracy: {baselines[i]:.2f}%)")  # Adjust title as needed
+
         # Plot baselines as vertical lines
         if baselines:
                 axs[i].axvline(baselines[i], color='red', linestyle='--', linewidth=1)
@@ -287,13 +287,13 @@ def plot_histograms(data_array, bins=100, path='', baselines=None, dataset='cifa
         axs[i].set_yticks(np.arange(0, 0.9, 0.2))
 
     # Add common X-axis label
-    axs[-1].set_xlabel('Value', fontsize=FONT_SIZE)
+    axs[-1].set_xlabel('Accuracy', fontsize=FONT_SIZE)
 
     # Adjust layout to prevent clipping of titles and labels
     plt.tight_layout()
 
     # Save the plot to a file
-    plt.savefig(path, bbox_inches='tight')
+    plt.savefig(path, format='pdf', bbox_inches='tight', dpi=300)
 
     # Show the plot
     plt.show()
@@ -613,9 +613,13 @@ def plot_histo_configs_radius1(dataset):
     bench=NASBench201(dataset=dataset)
     sorted_test_accs, sorted_idxs = rank_by_test_acc(bench)
     accs = compute_acc_by_radius(dataset=dataset)
-    result_dir = os.path.join('../results/flatness_exp', dataset)
+    result_dir = f'results/flatness_exp_{dataset}'
+    # Save the plot to the results folder
+    if not os.path.exists(f'results/flatness_exp_{dataset}'):
+        os.makedirs(f'results/flatness_exp_{dataset}', exist_ok=True)
+    print(accs)
     # test_accs
-    plot_histograms([accs[0],accs[1][0], accs[2][0], accs[3][0]], path=os.path.join(result_dir,'histogram_config'+'_'+dataset+'.png'), baselines=(sorted_test_accs)[::-1], dataset=dataset) 
+    plot_histograms([accs[0],accs[1][0], accs[2][0], accs[3][0]], path=os.path.join(result_dir,'histogram_config'+'_'+dataset+'.pdf'), baselines=(sorted_test_accs)[::-1], dataset=dataset) 
 
 def get_archs(dataset, quality):
     bench=NASBench201(dataset=dataset)
@@ -652,8 +656,8 @@ def get_archs(dataset, quality):
             idx2=348
     return bench.encode({'arch':bench.archive['str'][idx1]}), bench.encode({'arch':bench.archive['str'][idx2]}), bench.get_info_from_arch({'arch':bench.archive['str'][idx1]})['test-acc'], bench.get_info_from_arch({'arch':bench.archive['str'][idx2]})['test-acc']
 
-
 '''
+
 dataset='ImageNet16-120' #
 bench=NASBench201(dataset=dataset)
 idx1, idx2, acc1, acc2 = find_neighbors_with_similar_performance(bench, 27, 28.5, radius=3, tolerance=0.1)
@@ -673,7 +677,9 @@ path_bench('ImageNet16-120')
 
 
 #path_bench('cifar10')
-#plot_histo_configs_radius1('ImageNet16-120') 
+#plot_histo_configs_radius1('cifar10')
+#plot_histo_configs_radius1('cifar100')
+plot_histo_configs_radius1('ImageNet16-120') 
 
 #compute_acc_by_radius('cifar10')
 #compute_acc_by_radius('cifar100')

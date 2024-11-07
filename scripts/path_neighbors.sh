@@ -1,12 +1,12 @@
 #dataset=cifar10 train_min=0.43 epochs=100
 dataset=cifar100 train_min=1.0 epochs=150
 gpus="0"
-#arch=DARTS_seed3 seed=3
-arch=SAM_exp1_seed7 seed=7
+arch=DARTS_seed3 seed=3
+#arch=SAM_exp1_seed7 seed=7
 #arch_target=DARTS_TARGET_CIFAR10 acc_ref=91.92 acc_target=91.73
-arch_target=SAM_TARGET_CIFAR100 acc_ref=92.77 acc_target=92.75
-#arch_target=SAM_TARGET_CIFAR10 acc_ref=74.7 acc_target=74.78
-
+arch_target=DARTS_TARGET_CIFAR100 acc_ref=73.5 acc_target=73.54
+#arch_target=SAM_TARGET_CIFAR10 acc_ref=92.77 acc_target=92.75
+#arch_target=SAM_TARGET_CIFAR100 acc_ref=74.7 acc_target=74.78
 radius=3
 samples=30
 

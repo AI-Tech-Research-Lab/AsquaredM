@@ -69,8 +69,12 @@ DARTS_seed1=Genotype(normal=[('skip_connect', 0), ('sep_conv_3x3', 1), ('skip_co
 DARTS_seed2=Genotype(normal=[('sep_conv_3x3', 1), ('skip_connect', 0), ('skip_connect', 0), ('dil_conv_3x3', 2), ('skip_connect', 0), ('sep_conv_3x3', 1), ('dil_conv_3x3', 3), ('skip_connect', 0)], normal_concat=range(2, 6), reduce=[('skip_connect', 1), ('max_pool_3x3', 0), ('avg_pool_3x3', 0), ('sep_conv_5x5', 2), ('max_pool_3x3', 0), ('skip_connect', 2), ('skip_connect', 2), ('dil_conv_3x3', 4)], reduce_concat=range(2, 6))
 #cifar10 acc: 97.17
 DARTS_seed3=Genotype(normal=[('sep_conv_3x3', 1), ('skip_connect', 0), ('skip_connect', 0), ('dil_conv_3x3', 2), ('skip_connect', 0), ('dil_conv_3x3', 1), ('dil_conv_5x5', 4), ('dil_conv_5x5', 3)], normal_concat=range(2, 6), reduce=[('avg_pool_3x3', 0), ('skip_connect', 1), ('skip_connect', 2), ('avg_pool_3x3', 0), ('skip_connect', 2), ('dil_conv_5x5', 3), ('sep_conv_5x5', 2), ('sep_conv_3x3', 1)], reduce_concat=range(2, 6))
+# cifar10 acc limit loss: 91.92
+# cifar100 acc limit loss: 73.5
 DARTS_TARGET_CIFAR10 = Genotype(normal=[['skip_connect', 0], ['sep_conv_3x3', 1], ['skip_connect', 0], ['dil_conv_3x3', 2], ['skip_connect', 0], ['dil_conv_3x3', 1], ['sep_conv_5x5', 3], ['dil_conv_5x5', 4]], normal_concat=[2, 3, 4, 5], reduce=[['sep_conv_5x5', 0], ['skip_connect', 1], ['avg_pool_3x3', 0], ['skip_connect', 1], ['skip_connect', 2], ['dil_conv_5x5', 3], ['sep_conv_3x3', 1], ['sep_conv_5x5', 2]], reduce_concat=[2, 3, 4, 5])
-
+# cifar10 acc limit loss: 91.73
+DARTS_TARGET_CIFAR100 = Genotype(normal=[['skip_connect', 0], ['dil_conv_3x3', 1], ['max_pool_3x3', 0], ['sep_conv_5x5', 2], ['skip_connect', 0], ['dil_conv_3x3', 1], ['dil_conv_5x5', 3], ['dil_conv_5x5', 4]], normal_concat=[2, 3, 4, 5], reduce=[['avg_pool_3x3', 0], ['skip_connect', 1], ['avg_pool_3x3', 0], ['skip_connect', 2], ['skip_connect', 2], ['dil_conv_5x5', 3], ['sep_conv_3x3', 1], ['sep_conv_5x5', 2]], reduce_concat=[2, 3, 4, 5])
+# cifar100 acc limit loss: 73.54
 #cifar10 acc: 96.91
 DARTS_seed5=Genotype(normal=[('sep_conv_3x3', 0), ('dil_conv_5x5', 1), ('skip_connect', 0), ('dil_conv_5x5', 2), ('dil_conv_3x3', 3), ('sep_conv_3x3', 0), ('dil_conv_3x3', 3), ('sep_conv_3x3', 2)], normal_concat=range(2, 6), reduce=[('avg_pool_3x3', 1), ('max_pool_3x3', 0), ('skip_connect', 2), ('avg_pool_3x3', 1), ('skip_connect', 2), ('skip_connect', 3), ('skip_connect', 2), ('skip_connect', 3)], reduce_concat=range(2, 6))
 #cifar10 acc: 97.24
