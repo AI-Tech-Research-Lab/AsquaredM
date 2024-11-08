@@ -549,6 +549,7 @@ def path_bench(dataset,quality):
 
 def path_bench_qualities(dataset):
     print("DATASET: ", dataset)
+    FONT_SIZE = 18
     bench = NASBench201(dataset=dataset)
 
     # Define qualities
@@ -596,18 +597,19 @@ def path_bench_qualities(dataset):
         plt.errorbar(x, y, yerr=yerr, fmt='-o', capsize=5, capthick=2, elinewidth=1, label=f'{quality.capitalize()} Quality')
 
     # Customize plot
-    plt.xlabel('Radius')
-    plt.ylabel('Accuracy')
-    plt.title(f'Path Accuracies for {dataset}')
-    plt.xticks(x)
-    plt.legend()
+    plt.xlabel('Radius', fontsize=FONT_SIZE+2)
+    plt.ylabel('Accuracy', fontsize=FONT_SIZE+2)
+    plt.title(f'Path Accuracies for {dataset}', fontsize=FONT_SIZE+4)
+    plt.xticks(x, fontsize=FONT_SIZE)
+    plt.yticks(fontsize=FONT_SIZE)
+    plt.legend(fontsize=FONT_SIZE)
     plt.grid(True)
     plt.show()
 
     # Save the plot to the results folder
     if not os.path.exists(f'results/flatness_exp_{dataset}'):
         os.makedirs(f'results/flatness_exp_{dataset}', exist_ok=True)
-    plt.savefig(f'results/flatness_exp_{dataset}/path_accs_all_qualities.png')
+    plt.savefig(f'results/flatness_exp_{dataset}/path_accs_all_qualities.pdf', format='pdf', bbox_inches='tight', dpi=300)
 
 def plot_histo_configs_radius1(dataset):
     bench=NASBench201(dataset=dataset)
@@ -668,7 +670,9 @@ print(bench.archive['str'][idx2])
 '''
 
 
-#path_bench_qualities('ImageNet16-120')
+path_bench_qualities('cifar10')
+path_bench_qualities('cifar100')
+path_bench_qualities('ImageNet16-120')
 
 '''
 path_bench('cifar100')
@@ -679,7 +683,7 @@ path_bench('ImageNet16-120')
 #path_bench('cifar10')
 #plot_histo_configs_radius1('cifar10')
 #plot_histo_configs_radius1('cifar100')
-plot_histo_configs_radius1('ImageNet16-120') 
+#plot_histo_configs_radius1('ImageNet16-120') 
 
 #compute_acc_by_radius('cifar10')
 #compute_acc_by_radius('cifar100')

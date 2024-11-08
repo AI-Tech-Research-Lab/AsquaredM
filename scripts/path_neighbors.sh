@@ -12,7 +12,7 @@ samples=30
 
 python train_neighbors.py --dataset $dataset --arch $arch \
     --data ../datasets/$dataset --gpus $gpus \
-    --save results/darts_path_neighbors_dataset${dataset}_arch${arch}_arch_target{$arch_target}_radius${radius} \
+    --save results/darts_path_neighbors_dataset${dataset}_arch${arch}_arch_target${arch_target}_radius${radius} \
     --epochs $epochs --seed $seed \
     --train_limit $train_min \
     --arch_target $arch_target \
