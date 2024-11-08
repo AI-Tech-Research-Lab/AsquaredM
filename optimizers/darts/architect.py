@@ -21,10 +21,11 @@ class Architect(object):
         self.rho_alpha = args.rho_alpha_sam
         self.epsilon = args.epsilon_sam
         self.betadecay = args.betadecay
-        self.w_nor = 2 * args.w_nor
-        self.w_red = 2 * (1 - args.w_nor)
-        print('w_nor:', self.w_nor)
-        print('w_red:', self.w_red)
+        if hasattr(args, 'w_nor'):
+            self.w_nor = 2 * args.w_nor
+            self.w_red = 2 * (1 - args.w_nor)
+            print('w_nor:', self.w_nor)
+            print('w_red:', self.w_red)
 
     def _train_loss(self, model, input, target):
         return model._loss(input, target)

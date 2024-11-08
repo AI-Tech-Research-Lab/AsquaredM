@@ -6,9 +6,9 @@ betadecay=True
 unrolled=False
 data_augs=(False True)
 data_aug=True
-rho_alpha_sams=(1e-2)
+rho_alpha_sams=(1e-4)
 seeds=(1 2 3 5 7)
-epsilon_sam=1e-2
+epsilon_sam=1e-1
 flood_level=0.0
 wandb=True
 
