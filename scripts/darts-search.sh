@@ -1,14 +1,14 @@
 #!/bin/bash
 
 dataset=cifar10
-rho=1e-4
+rho=1e-2
 epsilon=1e-2
 sam=True
 wandb=True
 betadecay=True
 unrolled=False
-epochs=2
-base_save_dir="results/prova_darts_search"
+epochs=50
+base_save_dir="results/darts_search"
 w_nor=0.5
 seeds=(1 2 3)
 
