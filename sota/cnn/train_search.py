@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 
@@ -198,6 +199,13 @@ def main():
 
     architect = Architect(model, args)
 
+    best_loss= float('inf')
+    best_epoch=0
+    best_acc=0
+    best_genotype=None
+
+    patience=10
+
     for epoch in range(args.epochs):
 
         lr = scheduler.get_last_lr()[0]
@@ -222,27 +230,68 @@ def main():
         # training
         train_acc, train_obj = train(train_queue, valid_queue, model, architect, criterion, optimizer, lr, 
                                          perturb_alpha, epsilon_alpha)
-        logging.info('train_acc %f', train_acc)
+        #logging.info('train_acc %f', train_acc)
         #writer.add_scalar('Acc/train', train_acc, epoch)
         #writer.add_scalar('Obj/train', train_obj, epoch)
 
         # validation
         valid_acc, valid_obj = infer(valid_queue, model, criterion)
-        logging.info('valid_acc %f', valid_acc)
+        #logging.info('valid_acc %f', valid_acc)
         #writer.add_scalar('Acc/valid', valid_acc, epoch)
         #writer.add_scalar('Obj/valid', valid_obj, epoch)
+        logging.info("Train acc: %.2f, Val acc: %.2f", train_acc, valid_acc)
+        logging.info("Train loss: %.2f, Val loss: %.2f", train_obj, valid_obj)
+
+        if valid_obj < best_loss:
+            logging.info('Best model found at epoch %d', epoch)
+            best_loss = valid_obj
+            best_epoch = epoch
+            best_acc = valid_acc
+            best_genotype = genotype
+            utils.save(model, os.path.join(args.save, 'weights.pt'))
+
+        # early stopping
+        if (epoch - best_epoch) > patience:
+            logging.info('Early stopping at epoch %d', epoch)
+            break
 
         if args.wandb:
             wandb.log({"metrics/train_acc": train_acc, 
                     "metrics/val_acc": valid_acc,
                     "metrics/train_loss": train_obj,
                     "metrics/val_loss": valid_obj})
-    
-        utils.save(model, os.path.join(args.save, 'weights.pt'))
 
         scheduler.step()
 
     #writer.close()
+    # Info about best searched model
+
+    logging.info('Best model found at epoch %s', best_epoch) 
+    logging.info('Best genotype: %s', best_genotype)
+    logging.info('Best validation loss: %f', best_loss)
+    logging.info('Best validation accuracy: %f', best_acc)
+
+    genotype_dict = genotype_to_dict(best_genotype)
+
+    # Save to a file
+    with open(os.path.join(args.save,'genotype.json'), 'w') as f:
+        json.dump(genotype_dict, f, indent=4)
+
+# Convert Genotype to a serializable dictionary
+def genotype_to_dict(genotype):
+    # Create a dictionary with mandatory fields
+    genotype_dict = {
+        'normal': genotype.normal,
+        'normal_concat': list(genotype.normal_concat)
+    }
+    
+    # Check if 'reduce' and 'reduce_concat' attributes exist
+    if hasattr(genotype, 'reduce'):
+        genotype_dict['reduce'] = genotype.reduce
+    if hasattr(genotype, 'reduce_concat'):
+        genotype_dict['reduce_concat'] = list(genotype.reduce_concat)
+    
+    return genotype_dict
 
 
 def train(train_queue, valid_queue, model, architect, criterion, optimizer, lr, perturb_alpha, epsilon_alpha):

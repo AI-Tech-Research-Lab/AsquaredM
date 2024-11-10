@@ -213,16 +213,16 @@ def drop_path(x, drop_prob):
 
 def create_exp_dir(path, scripts_to_save=None):
     
-    if not os.path.exists('results'):
-        os.mkdir('results')
     if not os.path.exists(path):
-        os.mkdir(path)
+        os.makedirs(path) 
     print('Experiment dir : {}'.format(path))
-    script_path = os.path.join(path, 'scripts')
-    if not os.path.exists(script_path) and scripts_to_save is not None:
-        os.mkdir(script_path)
+    if scripts_to_save:
+        script_path = os.path.join(path, 'scripts')
+        os.makedirs(script_path, exist_ok=True)
+        
+        # Copy each script to the 'scripts' folder within the experiment directory
         for script in scripts_to_save:
-            dst_file = os.path.join(path, 'scripts', os.path.basename(script))
+            dst_file = os.path.join(script_path, os.path.basename(script))
             shutil.copyfile(script, dst_file)
 
 
