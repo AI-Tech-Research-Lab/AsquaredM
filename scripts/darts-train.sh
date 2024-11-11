@@ -8,7 +8,7 @@ epochs=600
 base_save_dir="results/darts_train"
 
 # Define the architecture and seeds
-architectures=("BETASAM_exp1")
+architectures=("BETASAM_exp4")
 seeds=(1)
 
 # Loop through each architecture
