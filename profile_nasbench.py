@@ -245,7 +245,7 @@ def boxplot_acc_vs_radius():
     plt.savefig('accuracy_vs_radius_boxplot.png')
     plt.show()
 
-def plot_histograms(data_array, bins=100, path='', baselines=None, dataset='cifar10'):
+def plot_histograms(data_array, bins=100, path='', baselines=None, dataset='cifar10'): #add radius
 
     FONT_SIZE = 8
     #FIGSIZE = (3.5, 3.0)
@@ -264,17 +264,21 @@ def plot_histograms(data_array, bins=100, path='', baselines=None, dataset='cifa
     data_array = data_array[1:]
     # Plot histograms and curves for each element in the array
     for i, data in enumerate(data_array):
-        temp_bins=40
+        # create a get_bins(dataset, radius) function
+        if i==0:
+            temp_bins = 10
+        else:
+            temp_bins = bins
         print("DATA: ", data[:10])
         data = np.array(data)   
         data = data[data > 10]
         # Plot transparent curve behind histogram for the first element
         sns.histplot(all_dataset, bins=bins, color='green', edgecolor='black', kde=True, line_kws={'linewidth': 1, 'alpha': 0.2}, ax=axs[i], stat='density')
-        sns.histplot(data, bins=temp_bins, color='darkblue', edgecolor='black', kde=True, line_kws={'linewidth': 1}, ax=axs[i], stat='density')
+        sns.histplot(data, bins=temp_bins, color='darkblue', edgecolor='black', kde=True, line_kws={'linewidth': 2}, ax=axs[i], stat='density')
         axs[i].tick_params(axis='y', which='both', left=False, right=False, labelleft=True)  # Hide y-axis values
         max,min = get_limits_plot(dataset)
         axs[i].set_xlim(min, max)
-        axs[i].set_ylim(0, 0.8)  # Set y-axis limits
+        axs[i].set_ylim(0, 0.6)  # Set y-axis limits
         # Add title to each subplot
         axs[i].set_title(f"{titles[i]} (Test accuracy: {baselines[i]:.2f}%)")  # Adjust title as needed
 
@@ -658,6 +662,7 @@ def get_archs(dataset, quality):
             idx2=348
     return bench.encode({'arch':bench.archive['str'][idx1]}), bench.encode({'arch':bench.archive['str'][idx2]}), bench.get_info_from_arch({'arch':bench.archive['str'][idx1]})['test-acc'], bench.get_info_from_arch({'arch':bench.archive['str'][idx2]})['test-acc']
 
+
 '''
 
 dataset='ImageNet16-120' #
@@ -669,22 +674,20 @@ print(bench.archive['str'][idx1])
 print(bench.archive['str'][idx2])
 '''
 
-
+'''
 path_bench_qualities('cifar10')
 path_bench_qualities('cifar100')
 path_bench_qualities('ImageNet16-120')
+'''
 
 '''
 path_bench('cifar100')
 path_bench('ImageNet16-120')
 '''
 
-
-#path_bench('cifar10')
-#plot_histo_configs_radius1('cifar10')
-#plot_histo_configs_radius1('cifar100')
-#plot_histo_configs_radius1('ImageNet16-120') 
-#plot_histo_configs_radius1('ImageNet16-120') 
+plot_histo_configs_radius1('cifar10')
+plot_histo_configs_radius1('cifar100')
+plot_histo_configs_radius1('ImageNet16-120') 
 
 #compute_acc_by_radius('cifar10')
 #compute_acc_by_radius('cifar100')
