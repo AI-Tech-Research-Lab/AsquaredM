@@ -1,7 +1,7 @@
 #!/bin/bash
 
 dataset=cifar10
-rho=1e-2
+rho=1e-1
 epsilon=1e-2
 sam=True
 wandb=True

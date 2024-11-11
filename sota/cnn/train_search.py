@@ -271,11 +271,15 @@ def main():
     logging.info('Best validation loss: %f', best_loss)
     logging.info('Best validation accuracy: %f', best_acc)
 
-    genotype_dict = genotype_to_dict(best_genotype)
+    #genotype_dict = genotype_to_dict(best_genotype)
 
     # Save to a file
-    with open(os.path.join(args.save,'genotype.json'), 'w') as f:
-        json.dump(genotype_dict, f, indent=4)
+    #with open(os.path.join(args.save,'genotype.json'), 'w') as f:
+    #    json.dump(genotype_dict, f, indent=4)
+
+    stats = {'best_genotype': str(best_genotype), 'val-acc': best_acc, 'val-loss': best_loss, 'best_epoch': best_epoch}
+    with open(os.path.join(args.save, 'stats.json'), 'w') as f:
+        json.dump(stats, f, indent=4)
 
 # Convert Genotype to a serializable dictionary
 def genotype_to_dict(genotype):
