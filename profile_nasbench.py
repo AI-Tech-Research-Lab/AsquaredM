@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import seaborn as sns
 import numpy as np
+import math
 
 def find_neighbors_with_similar_performance(bench, accuracy_min, accuracy_max, radius=3, tolerance=1):
     val_dataset = bench.dataset
@@ -245,7 +246,31 @@ def boxplot_acc_vs_radius():
     plt.savefig('accuracy_vs_radius_boxplot.png')
     plt.show()
 
-def plot_histograms(data_array, bins=100, path='', baselines=None, dataset='cifar10'): #add radius
+def get_bins(dataset, radius):
+
+    if dataset == 'cifar10':
+        if radius == 1 :
+            return 10, 100, 100
+        elif radius == 2:
+            return 10, 100, 100
+        elif radius == 3:
+            return 90, 90, 90
+    elif dataset == 'cifar100':
+        if radius == 1:
+            return 10, 20, 30
+        elif radius == 2:
+            return 20, 40, 60
+        elif radius == 3:
+            return 60, 60, 60
+    elif dataset == 'ImageNet16-120':
+        if radius == 1 :
+            return 10, 20, 30
+        elif radius == 2:
+            return 20, 40, 60
+        elif radius == 3:
+            return 60, 60, 60
+
+def plot_histograms(data_array, bins=100, path='', baselines=None, dataset='cifar10', radius=1): #add radius
 
     FONT_SIZE = 8
     #FIGSIZE = (3.5, 3.0)
@@ -259,26 +284,31 @@ def plot_histograms(data_array, bins=100, path='', baselines=None, dataset='cifa
     fig, axs = plt.subplots(num_plots, 1, figsize=FIGSIZE, sharex=False)
 
     #print("DATA ARRAY: ", data_array)
-    print("ALL DATASET: ", data_array[0][:10])
+    #print("ALL DATASET: ", data_array[0][:10])
     all_dataset = data_array[0]
     data_array = data_array[1:]
     # Plot histograms and curves for each element in the array
     for i, data in enumerate(data_array):
-        # create a get_bins(dataset, radius) function
-        if i==0:
-            temp_bins = 10
-        else:
-            temp_bins = bins
-        print("DATA: ", data[:10])
+        temp_bins = get_bins(dataset, radius)[i]
+        print("TEMP BINS: ", temp_bins)
+        #print("DATA: ", data[:10])
         data = np.array(data)   
         data = data[data > 10]
+
         # Plot transparent curve behind histogram for the first element
         sns.histplot(all_dataset, bins=bins, color='green', edgecolor='black', kde=True, line_kws={'linewidth': 1, 'alpha': 0.2}, ax=axs[i], stat='density')
         sns.histplot(data, bins=temp_bins, color='darkblue', edgecolor='black', kde=True, line_kws={'linewidth': 2}, ax=axs[i], stat='density')
         axs[i].tick_params(axis='y', which='both', left=False, right=False, labelleft=True)  # Hide y-axis values
-        max,min = get_limits_plot(dataset)
-        axs[i].set_xlim(min, max)
-        axs[i].set_ylim(0, 0.6)  # Set y-axis limits
+        x_max,x_min = get_limits_plot(dataset)
+        axs[i].set_xlim(x_min, x_max)
+
+        # Set y-axis limits
+        y_values = [bar.get_height() for bar in axs[i].patches]
+        max_density = max(y_values) 
+        max_density = max_density if max_density < 0.8 else 0.8 # Limit the maximum density to 0.8
+        ymax = math.ceil(max_density * 10) / 10
+        axs[i].set_ylim(0, ymax)  
+
         # Add title to each subplot
         axs[i].set_title(f"{titles[i]} (Test accuracy: {baselines[i]:.2f}%)")  # Adjust title as needed
 
@@ -288,7 +318,7 @@ def plot_histograms(data_array, bins=100, path='', baselines=None, dataset='cifa
         
         # Add grid with custom interval
         axs[i].grid(True, axis='y', which='both', linestyle='--', linewidth=0.5)
-        axs[i].set_yticks(np.arange(0, 0.9, 0.2))
+        axs[i].set_yticks(np.arange(0, ymax, 0.2))
 
     # Add common X-axis label
     axs[-1].set_xlabel('Accuracy', fontsize=FONT_SIZE)
@@ -551,6 +581,13 @@ def path_bench(dataset,quality):
         os.makedirs('results/flatness_exp', exist_ok=True)
     plt.savefig('results/flatness_exp/'+dataset+'/path_accs_' + quality +'.pdf', format='pdf', bbox_inches='tight', dpi=300)
 
+     
+def compute_barrier(accs):
+    acc_a = accs[0]
+    acc_b = accs[1]
+    acc_min = min(accs)
+    return np.round(0.5 * (acc_a + acc_b) - acc_min,2)
+
 def path_bench_qualities(dataset):
     print("DATASET: ", dataset)
     FONT_SIZE = 18
@@ -561,6 +598,7 @@ def path_bench_qualities(dataset):
     paths_by_quality = {}
     accs_by_quality = {}
     std_by_quality = {}
+    barriers=[]
 
     for quality in qualities:
         config1, config2, acc1, acc2 = get_archs(dataset, quality)
@@ -587,6 +625,7 @@ def path_bench_qualities(dataset):
         paths_by_quality[quality] = path_accs
         std_by_quality[quality] = [0] + std_test_accs + [0]  # no std dev for acc1 and acc2
         accs_by_quality[quality] = (acc1, acc2)
+        barriers.append(compute_barrier(path_accs))
 
         print(f"PATH ACCS for {quality}: ", path_accs)
         print(f"STD VAL ACCS for {quality}: ", std_test_accs)
@@ -615,7 +654,12 @@ def path_bench_qualities(dataset):
         os.makedirs(f'results/flatness_exp_{dataset}', exist_ok=True)
     plt.savefig(f'results/flatness_exp_{dataset}/path_accs_all_qualities.pdf', format='pdf', bbox_inches='tight', dpi=300)
 
-def plot_histo_configs_radius1(dataset):
+    #save in a json the value of the barrier for each quality
+    import json
+    with open(f'results/flatness_exp_{dataset}/barriers.json', 'w') as f:
+        json.dump(barriers, f)
+
+def plot_histo_configs_radius1(dataset, radius=1):
     bench=NASBench201(dataset=dataset)
     sorted_test_accs, sorted_idxs = rank_by_test_acc(bench)
     accs = compute_acc_by_radius(dataset=dataset)
@@ -623,9 +667,8 @@ def plot_histo_configs_radius1(dataset):
     # Save the plot to the results folder
     if not os.path.exists(f'results/flatness_exp_{dataset}'):
         os.makedirs(f'results/flatness_exp_{dataset}', exist_ok=True)
-    print(accs)
     # test_accs
-    plot_histograms([accs[0],accs[1][0], accs[2][0], accs[3][0]], path=os.path.join(result_dir,'histogram_config'+'_'+dataset+'.pdf'), baselines=(sorted_test_accs)[::-1], dataset=dataset) 
+    plot_histograms([accs[0],accs[1][radius-1], accs[2][radius-1], accs[3][radius-1]], path=os.path.join(result_dir,'histogram_config'+'_'+dataset+'_radius' + str(radius)+'.pdf'), baselines=(sorted_test_accs)[::-1], dataset=dataset, radius=radius) 
 
 def get_archs(dataset, quality):
     bench=NASBench201(dataset=dataset)
@@ -674,20 +717,19 @@ print(bench.archive['str'][idx1])
 print(bench.archive['str'][idx2])
 '''
 
-'''
 path_bench_qualities('cifar10')
 path_bench_qualities('cifar100')
 path_bench_qualities('ImageNet16-120')
-'''
+
 
 '''
 path_bench('cifar100')
 path_bench('ImageNet16-120')
 '''
 
-plot_histo_configs_radius1('cifar10')
-plot_histo_configs_radius1('cifar100')
-plot_histo_configs_radius1('ImageNet16-120') 
+#plot_histo_configs_radius1('cifar10',1)
+#plot_histo_configs_radius1('cifar100',1)
+#plot_histo_configs_radius1('ImageNet16-120',1) 
 
 #compute_acc_by_radius('cifar10')
 #compute_acc_by_radius('cifar100')

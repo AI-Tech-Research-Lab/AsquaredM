@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 import matplotlib.colors as mcolors
+import math
 
 def read_best_valid_acc_from_file(filename):
     
@@ -45,9 +46,15 @@ def read_best_valid_acc_from_file(filename):
 
 def get_limits_plot(dataset):
     if dataset == 'cifar10':
-        return 91, 94
+        return 91, 95
     elif dataset == 'cifar100':
         return 70, 78
+
+def compute_barrier(accs):
+    acc_a = accs[0]
+    acc_b = accs[1]
+    acc_min = min(accs)
+    return np.round(0.5 * (acc_a + acc_b) - acc_min,2)
 
 def read_val_accs_path_from_archive(filename, n):
     """
@@ -96,7 +103,24 @@ def read_val_accs_path_from_archive(filename, n):
 
     return avg_array, std_array
 
-def plot_histogram(data_array, bins=100, path='', baselines=None, dataset='cifar10'):
+def get_bins(dataset, radius):
+
+    if dataset == 'cifar10':
+        if radius == 1 :
+            return 100, 100
+        elif radius == 2:
+            return 100, 100
+        elif radius == 3:
+            return 100, 100
+    elif dataset == 'cifar100':
+        if radius == 1:
+            return 100, 100
+        elif radius == 2:
+            return 100, 100
+        elif radius == 3:
+            return 100, 100
+
+def plot_histogram(data_array, bins=100, path='', baselines=None, dataset='cifar10', radius=1):
 
     FONT_SIZE = 8
     FIGSIZE = (4, 5)
@@ -110,10 +134,17 @@ def plot_histogram(data_array, bins=100, path='', baselines=None, dataset='cifar
 
     # Plot histograms and curves for each element in the array
     for i, data in enumerate(data_array):
-        sns.histplot(data, bins=bins, color='darkblue', edgecolor='black', kde=True, line_kws={'linewidth': 1}, ax=axs[i], stat='density')
+        temp_bins = get_bins(dataset, radius)[i]
+        sns.histplot(data, bins=bins, color='darkblue', edgecolor='black', kde=True, line_kws={'linewidth': 2}, ax=axs[i], stat='density')
         axs[i].tick_params(axis='y', which='both', left=False, right=False, labelleft=True)  # Hide y-axis values
         min_val, max_val = get_limits_plot(dataset)
-        axs[i].set_ylim(0, 1.0)  # Set y-axis limits
+        
+        # Set y-axis limits
+        y_values = [bar.get_height() for bar in axs[i].patches]
+        max_density = max(y_values) 
+        #max_density = max_density if max_density < 0.8 else 0.8 # Limit the maximum density to 0.8
+        ymax = math.ceil(max_density * 10) / 10
+        axs[i].set_ylim(0, ymax)  
 
         axs[i].set_title(f"{titles[i]} (Test accuracy: {baselines[i]:.2f}%)")  # Adjust title as needed
 
@@ -123,7 +154,7 @@ def plot_histogram(data_array, bins=100, path='', baselines=None, dataset='cifar
 
         # Add grid with custom interval
         axs[i].grid(True, axis='y', which='both', linestyle='--', linewidth=0.5)
-        axs[i].set_yticks(np.arange(0, 0.9, 0.2))
+        axs[i].set_yticks(np.arange(0, ymax, 0.2))
 
     # Apply common x-axis limits to all subplots
     for ax in axs:
@@ -149,7 +180,7 @@ def plot_neighbors(folder, dataset='cifar10', radius=1, baselines=None):
     filename=os.path.join(folder2,'archive_darts.txt')
     accs[1], _ = read_best_valid_acc_from_file(filename)
     plot_histogram(accs, bins=10, path=os.path.join(folder1,'histogram_darts_dataset' + dataset+'_radius' + str(radius) + '.pdf'), 
-                    dataset=dataset, baselines=baselines)
+                    dataset=dataset, baselines=baselines, radius=radius)
 
 def path_bench_qualities(path1, path2, dataset):
 
@@ -159,6 +190,7 @@ def path_bench_qualities(path1, path2, dataset):
     # Define qualities
     qualities = ["DARTS", "SAM"]
     paths = [path1, path2]
+    barriers = []
     paths_by_quality = {}
     accs_by_quality = {}
     std_by_quality = {}
@@ -175,7 +207,7 @@ def path_bench_qualities(path1, path2, dataset):
         paths_by_quality[quality] = path_accs
         std_by_quality[quality] = [0] + std_test_accs + [0]  # no std dev for acc1 and acc2
         accs_by_quality[quality] = (acc1, acc2)
-
+        barriers.append(compute_barrier(path_accs))
         print(f"PATH ACCS for {quality}: ", path_accs)
         print(f"STD VAL ACCS for {quality}: ", std_test_accs)
 
@@ -203,9 +235,17 @@ def path_bench_qualities(path1, path2, dataset):
 
     plt.savefig(f'results/flatness_exp_{dataset}/path_accs_all_qualities.pdf', format='pdf', bbox_inches='tight', dpi=300)
 
+    # save barriers in a json file
+    with open(f'results/flatness_exp_{dataset}/barriers.json', 'w') as file:
+        json.dump(barriers, file)
+
 # Usage
-#plot_neighbors('results/darts_train_neighbors_datasetcifar100', dataset='cifar100', radius=1, baselines=[73.5, 74.7])
-#plot_neighbors('results/darts_train_neighbors_datasetcifar10', dataset='cifar10', radius=1, baselines=[91.92, 92.77])
+plot_neighbors('results/darts_train_neighbors_datasetcifar100', dataset='cifar100', radius=1, baselines=[73.5, 74.7])
+plot_neighbors('results/darts_train_neighbors_datasetcifar100', dataset='cifar100', radius=2, baselines=[73.5, 74.7])
+plot_neighbors('results/darts_train_neighbors_datasetcifar100', dataset='cifar100', radius=3, baselines=[73.5, 74.7])
+plot_neighbors('results/darts_train_neighbors_datasetcifar10', dataset='cifar10', radius=1, baselines=[91.92, 92.77])
+plot_neighbors('results/darts_train_neighbors_datasetcifar10', dataset='cifar10', radius=2, baselines=[91.92, 92.77])
+plot_neighbors('results/darts_train_neighbors_datasetcifar10', dataset='cifar10', radius=3, baselines=[91.92, 92.77])
 
 '''
 folder = 'results/darts_train_neighbors_datasetcifar100_archBETADARTS'
