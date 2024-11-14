@@ -33,4 +33,5 @@ conda init
 conda activate timefs
 
 #bash scripts/darts-search.sh
-bash scripts/train_neighbors.sh
+#bash scripts/train_neighbors.sh
+bash scripts/darts-nasbench-search.sh
