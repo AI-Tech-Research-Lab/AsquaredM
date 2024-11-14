@@ -8,7 +8,7 @@ wandb=True
 betadecay=True
 unrolled=False
 epochs=50
-base_save_dir="results/darts_search"
+base_save_dir="results/prova_darts_search"
 w_nor=0.5
 seeds=(1 2 3)
 

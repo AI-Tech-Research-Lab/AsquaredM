@@ -230,17 +230,29 @@ def main():
         # training
         train_acc, train_obj = train(train_queue, valid_queue, model, architect, criterion, optimizer, lr, 
                                          perturb_alpha, epsilon_alpha)
-        #logging.info('train_acc %f', train_acc)
-        #writer.add_scalar('Acc/train', train_acc, epoch)
-        #writer.add_scalar('Obj/train', train_obj, epoch)
 
         # validation
         valid_acc, valid_obj = infer(valid_queue, model, criterion)
-        #logging.info('valid_acc %f', valid_acc)
-        #writer.add_scalar('Acc/valid', valid_acc, epoch)
-        #writer.add_scalar('Obj/valid', valid_obj, epoch)
+
+        if args.betadecay:
+            beta_loss = architect.beta_loss()        
+
+        if args.wandb:
+            if args.betadecay:
+                wandb.log({"metrics/train_acc": train_acc, 
+                        "metrics/val_acc": valid_acc,
+                        "metrics/train_loss": train_obj,
+                        "metrics/val_loss": valid_obj})
+            else:
+                wandb.log({"metrics/train_acc": train_acc, 
+                        "metrics/val_acc": valid_acc,
+                        "metrics/train_loss": train_obj,
+                        "metrics/val_loss": valid_obj,
+                        "metrics/beta_loss": beta_loss})
+            
         logging.info("Train acc: %.2f, Val acc: %.2f", train_acc, valid_acc)
         logging.info("Train loss: %.2f, Val loss: %.2f", train_obj, valid_obj)
+        logging.info("Beta loss: %.2f", beta_loss)
 
         if valid_obj < best_loss:
             logging.info('Best model found at epoch %d', epoch)

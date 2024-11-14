@@ -26,6 +26,8 @@ class Architect(object):
             self.w_red = 2 * (1 - args.w_nor)
             print('w_nor:', self.w_nor)
             print('w_red:', self.w_red)
+        self.tau = 1/4
+        self.w_init = 0
 
     def _train_loss(self, model, input, target):
         return model._loss(input, target)
@@ -33,13 +35,21 @@ class Architect(object):
     def _val_loss(self, model, input, target):
         return model._loss(input, target)
     
+    def _beta_loss(self):
+        ssr_reduce = self.mlc_loss(self.model.alphas_reduce)
+        ssr_normal = self.mlc_loss(self.model.alphas_normal)
+        return self.w_red*ssr_reduce + self.w_nor*ssr_normal
+    
     def _val_beta_loss(self, model, input, target, epoch):
-        weights = 0 + 50 * epoch / 100
+        weights = self.w_init + epoch * self.tau #0 + 50 * epoch / 100
         if isinstance(self.model._arch_parameters, list): #DARTS
             # STEP DARTS 
             ssr_reduce = self.mlc_loss(self.model.alphas_reduce)
             ssr_normal = self.mlc_loss(self.model.alphas_normal)
-            loss = self.model._loss(input, target) + weights*(self.w_red*ssr_reduce + self.w_nor*ssr_normal)
+            lval = self.model._loss(input, target) 
+            lbeta = self.w_red*ssr_reduce + self.w_nor*ssr_normal
+            loss = lval + weights*(lbeta)
+            #logging.info('val_loss: %.2f, beta_loss: %.2f', lval, lbeta)
             #loss = self.model._loss(input, target) + weights*(ssr_reduce + ssr_normal)
         else:
             ssr_normal = self.mlc_loss(self.model._arch_parameters)
@@ -67,6 +77,7 @@ class Architect(object):
                 self._backward_step_unrolled(input_train, target_train, input_valid, target_valid, eta, network_optimizer)
             else:
                 self._backward_step(input_valid, target_valid, epoch)
+        
         self.optimizer.step()
 
     def zero_hot(self, norm_weights):
@@ -118,7 +129,7 @@ class Architect(object):
 
     def _backward_step(self, input_valid, target_valid, epoch):
         if self.betadecay:  # Beta-DARTS
-            weights = 0 + 50 * epoch / 100
+            weights = self.w_init + epoch * self.tau # 0 + 50 * epoch / 100
             if isinstance(self.model._arch_parameters, list): #DARTS
                 # STEP DARTS 
                 ssr_reduce = self.mlc_loss(self.model.alphas_reduce)
@@ -129,7 +140,7 @@ class Architect(object):
                 ssr_normal = self.mlc_loss(self.model._arch_parameters)
                 loss = self.model._loss(input_valid, target_valid) + weights * ssr_normal
         else:  # original DARTS
-            loss = self.model._loss(input_valid, target_valid)        
+            loss = self.model._loss(input_valid, target_valid)    
         loss.backward()
 
     def _backward_step_unrolled(self, input_train, target_train, input_valid, target_valid, eta, network_optimizer):
