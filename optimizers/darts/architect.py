@@ -1,4 +1,5 @@
 import logging
+import math
 import torch
 import torch.nn.functional as F
 from torch.autograd import Variable
@@ -194,6 +195,80 @@ class Architect(object):
 
         return [(x - y).div_(2 * R) for x, y in zip(grads_p, grads_n)]
     
+    def compute_alpha_tilde(self, k, fast_alpha_size, dL_val_dalpha, input_val, target_val, epoch):
+        
+        #rho_alpha = 0.5
+        #k=5
+        #fast_alpha_size set by a MultiStepLR every 50 epochs [50,100,150]
+        #scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[50, 100, 150], gamma=0.1)
+        #lr=0.1
+
+        if k>1: #lookbehind SAM
+            # Save current architecture parameters as the "slow weights"
+            slow_alpha = [alpha.clone() for alpha in self.model.arch_parameters()]
+            fast_alpha = [alpha.clone() for alpha in self.model.arch_parameters()]
+            fast_alpha_init = [alpha.clone() for alpha in self.model.arch_parameters()]
+            fast_alpha_first = [alpha.clone() for alpha in self.model.arch_parameters()]
+
+            # Lookbehind-SAM: k-step perturbation
+            for step in range(k):
+
+                # Adaptive alpha
+                theta = ()
+
+                # Compute the perturbation (gradient ascent step)
+                tilde_alpha = [
+                    alpha + self.rho_alpha * dalpha
+                    for alpha, dalpha in zip(fast_alpha, dL_val_dalpha)
+                ]
+
+                with torch.no_grad():
+                    for param, alpha_p in zip(self.model.arch_parameters(), tilde_alpha):
+                        param.data.copy_(alpha_p)
+
+                # Compute the perturbed loss and gradients
+                if self.betadecay:
+                    val_loss_tilde = self._val_beta_loss(self.model, input_val, target_val, epoch)
+                else:
+                    val_loss_tilde = self._val_loss(self.model, input_val, target_val)
+
+                dL_val_dtilde_alpha = torch.autograd.grad(val_loss_tilde, self.model.arch_parameters())
+
+                # Perform gradient descent (update fast weights)
+                fast_alpha = [
+                    alpha - fast_alpha_size * dalpha
+                    for alpha, dalpha in zip(fast_alpha, dL_val_dtilde_alpha)
+                ]
+
+                if k==1:
+                    fast_alpha_first = fast_alpha
+                
+            # adaptive alpha according to gradients alignment
+            diff1=fast_alpha_first - fast_alpha_init
+            diffk=fast_alpha - fast_alpha_init
+            #theta = diff1*diffk/torch.norm(diff1,2)*torch.norm(diffk,2)
+            theta = torch.nn.CosineSimilarity(dim=0)(diff1.view(-1), diffk.view(-1))
+            slow_alpha_size = (math.cos(theta)+1)/2
+                
+            # Linear interpolation between slow and fast weights
+            tilde_alpha = [
+                slow + slow_alpha_size * (fast - slow)
+                for slow, fast in zip(slow_alpha, fast_alpha)
+            ]
+
+        else:
+            # Compute the perturbation (gradient ascent step)
+            tilde_alpha = [
+                alpha + self.rho_alpha * dalpha
+                for alpha, dalpha in zip(self.model.arch_parameters(), dL_val_dalpha)
+            ]
+
+        # Copy the final perturbed weights back
+        with torch.no_grad():
+            for param, alpha_tilde in zip(self.model.arch_parameters(), tilde_alpha):
+                param.data.copy_(alpha_tilde)
+        #return tilde_alpha 
+    
     def _backward_step_SAM(self, input_val, target_val, epoch):
 
         if self.betadecay:
@@ -203,21 +278,25 @@ class Architect(object):
             
         dL_val_dalpha = torch.autograd.grad(val_loss, self.model.arch_parameters())
 
-        tilde_alpha = [alpha + self.rho_alpha * dalpha for alpha, dalpha in zip(self.model.arch_parameters(), dL_val_dalpha)]
+        #tilde_alpha = [alpha + self.rho_alpha * dalpha for alpha, dalpha in zip(self.model.arch_parameters(), dL_val_dalpha)]
 
         current_alpha = [alpha.clone() for alpha in self.model.arch_parameters()]
 
+        self.compute_alpha_tilde(1, 0.1, 0.1, dL_val_dalpha, input_val, target_val, epoch)
+
+        '''
         with torch.no_grad():
             for param, alpha_p in zip(self.model.arch_parameters(), tilde_alpha):
                 param.data.copy_(alpha_p)
-
+        '''
+        
         if self.betadecay:
             val_loss_tilde = self._val_beta_loss(self.model, input_val, target_val, epoch)
         else:
             val_loss_tilde = self._val_loss(self.model, input_val, target_val)
         
         dL_val_dtilde_alpha = torch.autograd.grad(val_loss_tilde, self.model.arch_parameters())
-
+        
         alpha_plus = [alpha + self.epsilon * dalpha for alpha, dalpha in zip(self.model.arch_parameters(), dL_val_dtilde_alpha)]
         alpha_minus = [alpha - self.epsilon * dalpha for alpha, dalpha in zip(self.model.arch_parameters(), dL_val_dtilde_alpha)]
 
