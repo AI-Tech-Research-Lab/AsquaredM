@@ -1,5 +1,4 @@
 import logging
-import math
 import torch
 import torch.nn.functional as F
 from torch.autograd import Variable
@@ -212,9 +211,6 @@ class Architect(object):
 
             # Lookbehind-SAM: k-step perturbation
             for step in range(k):
-
-                # Adaptive alpha
-                theta = ()
 
                 # Compute the perturbation (gradient ascent step)
                 tilde_alpha = [
