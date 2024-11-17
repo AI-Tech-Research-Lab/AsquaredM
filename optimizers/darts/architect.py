@@ -15,6 +15,7 @@ class Architect(object):
         self.network_momentum = args.momentum
         self.network_weight_decay = args.weight_decay
         self.model = model
+        self.lr = args.arch_learning_rate
         self.optimizer = torch.optim.Adam(self.model.arch_parameters(),
                                           lr=args.arch_learning_rate, betas=(0.5, 0.999),
                                           weight_decay=args.arch_weight_decay)
@@ -33,7 +34,7 @@ class Architect(object):
         if args.k_sam > 1: #Lookbehind-SAM
             print("Using Lookbehind-SAM with k=", args.k_sam)   
             self.k = args.k_sam
-            self.scheduler = torch.optim.lr_scheduler.MultiStepLR(self.optimizer, milestones=[12, 24, 36], gamma=0.1)
+            #self.scheduler = torch.optim.lr_scheduler.MultiStepLR(self.optimizer, milestones=[12, 24, 36], gamma=0.1)
         else:
             self.k = 1
 
@@ -213,13 +214,13 @@ class Architect(object):
         #lr=0.1
 
         if self.k>1: #lookbehind SAM
-            fast_alpha_size = self.scheduler.get_last_lr()[0] #self.fast_epsilon
+            fast_alpha_size = self.lr #self.scheduler.get_last_lr()[0] #self.fast_epsilon
             # Save current architecture parameters as the "slow weights"
             slow_alpha = [alpha.clone() for alpha in self.model.arch_parameters()]
             fast_alpha = [alpha.clone() for alpha in self.model.arch_parameters()]
             tilde_alpha = [alpha.clone() for alpha in self.model.arch_parameters()]
             #fast_alpha_init = [alpha.clone() for alpha in self.model.arch_parameters()]
-            fast_alpha_first = [alpha.clone() for alpha in self.model.arch_parameters()]
+            #fast_alpha_first = [alpha.clone() for alpha in self.model.arch_parameters()]
 
             # Lookbehind-SAM: k-step perturbation
             for step in range(self.k):
@@ -248,9 +249,10 @@ class Architect(object):
                     for alpha, dalpha in zip(fast_alpha, dL_val_dtilde_alpha)
                 ]
 
-                if step==1:
-                    fast_alpha_first = fast_alpha
+                #if step==1: #for adaptive alpha
+                #    fast_alpha_first = fast_alpha
                 
+            '''    
             # adaptive alpha according to gradients alignment
             diff1=[v1 - v for v1,v in zip(fast_alpha_first, slow_alpha)] #fast_alpha_first - slow_alpha #fast_alpha_init
             diffk=[vk - v for vk,v in zip(fast_alpha, slow_alpha)] #fast_alpha_init
@@ -260,8 +262,7 @@ class Architect(object):
             theta = torch.nn.CosineSimilarity(dim=0)(diff1_tensor, diffk_tensor)
             slow_alpha_size = (math.cos(theta.item())+1)/2
             self.epsilon = slow_alpha_size # Between 0 and 1
-            
-            '''
+
             slow_alpha = [
                 slow + slow_alpha_size * (fast - slow)
                 for slow, fast in zip(slow_alpha, fast_alpha)
