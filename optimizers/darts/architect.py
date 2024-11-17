@@ -212,11 +212,8 @@ class Architect(object):
         #scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[50, 100, 150], gamma=0.1)
         #lr=0.1
 
-        # get the learning rate
-
-        fast_alpha_size = self.scheduler.get_last_lr()[0] #self.fast_epsilon
-
         if self.k>1: #lookbehind SAM
+            fast_alpha_size = self.scheduler.get_last_lr()[0] #self.fast_epsilon
             # Save current architecture parameters as the "slow weights"
             slow_alpha = [alpha.clone() for alpha in self.model.arch_parameters()]
             fast_alpha = [alpha.clone() for alpha in self.model.arch_parameters()]
