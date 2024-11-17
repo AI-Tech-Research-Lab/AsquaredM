@@ -68,7 +68,7 @@ parser.add_argument('--train_portion', type=float, default=0.5, help='portion of
 parser.add_argument('--arch_learning_rate', type=float, default=3e-4, help='learning rate for arch encoding')
 parser.add_argument('--arch_weight_decay', type=float, default=1e-3, help='weight decay for arch encoding')
 parser.add_argument('--search_space', type=str, default='s5', help='searching space to choose from')
-parser.add_argument('--perturb_alpha', type=str, default='random', help='perturb for alpha')
+parser.add_argument('--perturb_alpha', type=str, default='none', help='perturb for alpha')
 parser.add_argument('--epsilon_alpha', type=float, default=0.3, help='max epsilon for alpha')
 parser.add_argument('--wandb', type=str2bool, default=False, help='use one-step unrolled validation loss')
 parser.add_argument('--nasbench', action='store_true', default=False, help='use one-step unrolled validation loss')
