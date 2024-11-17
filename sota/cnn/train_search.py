@@ -79,6 +79,7 @@ parser.add_argument('--rho_alpha_sam', type=float, default=1e-2, help='rho alpha
 parser.add_argument('--epsilon_sam', type=float, default=1e-2, help='epsilon for SAM update')
 parser.add_argument('--data_aug', type=str2bool, default=True, help='use data augmentation on validation set')
 parser.add_argument('--w_nor', type=float, default=0.5, help='epsilon for beta regularization normal component')
+parser.add_argument('--k_sam', type=int, default=1, help='Number of ascent steps for SAM')
 
 args = parser.parse_args()
 
@@ -117,7 +118,7 @@ if args.wandb:
         entity='flatnas',
         # set the wandb project where this run will be logged
         project=f"FlatDARTS-{args.dataset}-nasbench{args.nasbench}-data_aug",
-        name=f"SAM_{args.sam}-BETADECAY_{args.betadecay}-WNOR_{args.w_nor}-UNROLLED_{args.unrolled}-DATA_AUG_{args.data_aug}-RHO_ALPHA_{args.rho_alpha_sam}-SEED{args.seed}",
+        name=f"SAM_{args.sam}-BETADECAY_{args.betadecay}-WNOR_{args.w_nor}-UNROLLED_{args.unrolled}-DATA_AUG_{args.data_aug}-RHO_ALPHA_{args.rho_alpha_sam}-K_SAM_{args.k_sam}-SEED{args.seed}",
         # track hyperparameters and run metadata
         config={**vars(args)},
     )
