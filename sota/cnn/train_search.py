@@ -243,13 +243,13 @@ def main():
                 wandb.log({"metrics/train_acc": train_acc, 
                         "metrics/val_acc": valid_acc,
                         "metrics/train_loss": train_obj,
-                        "metrics/val_loss": valid_obj})
+                        "metrics/val_loss": valid_obj,
+                        "metrics/beta_loss": beta_loss})
             else:
                 wandb.log({"metrics/train_acc": train_acc, 
                         "metrics/val_acc": valid_acc,
                         "metrics/train_loss": train_obj,
-                        "metrics/val_loss": valid_obj,
-                        "metrics/beta_loss": beta_loss})
+                        "metrics/val_loss": valid_obj})
             
         logging.info("Train acc: %.2f, Val acc: %.2f", train_acc, valid_acc)
         logging.info("Train loss: %.2f, Val loss: %.2f", train_obj, valid_obj)

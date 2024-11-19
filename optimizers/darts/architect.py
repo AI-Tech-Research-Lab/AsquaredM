@@ -88,8 +88,6 @@ class Architect(object):
                 self._backward_step(input_valid, target_valid, epoch)
         
         self.optimizer.step()
-        if self.k > 1:
-            self.scheduler.step()
 
     def zero_hot(self, norm_weights):
         valid_loss = torch.log(norm_weights)
