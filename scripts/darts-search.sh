@@ -11,7 +11,7 @@ epochs=50
 k_sam=5
 base_save_dir="results/darts_search"
 w_nor=0.5
-seeds=(1 2 3)
+seeds=(1)
 
 # Loop through the seeds and execute the command
 for seed in "${seeds[@]}"; do
@@ -24,5 +24,5 @@ for seed in "${seeds[@]}"; do
                     --learning_rate 0.025 --learning_rate_min 0.001 --init_channels 16 --grad_clip 5 \
                     --arch_learning_rate 3e-4 --arch_weight_decay 1e-3 --betadecay $betadecay \
                     --unrolled $unrolled --gpu 0 --wandb $wandb \
-                    --sam $sam --rho_alpha_sam $rho --w_nor $w_nor --k_sam $k_sam 
+                    --sam $sam --rho_alpha_sam $rho --w_nor $w_nor --k_sam $k_sam --sgd_alpha
 done

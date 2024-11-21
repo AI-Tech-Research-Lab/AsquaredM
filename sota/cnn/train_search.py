@@ -70,6 +70,8 @@ parser.add_argument('--arch_weight_decay', type=float, default=1e-3, help='weigh
 parser.add_argument('--search_space', type=str, default='s5', help='searching space to choose from')
 parser.add_argument('--perturb_alpha', type=str, default='none', help='perturb for alpha')
 parser.add_argument('--epsilon_alpha', type=float, default=0.3, help='max epsilon for alpha')
+
+# Our arguments
 parser.add_argument('--wandb', type=str2bool, default=False, help='use one-step unrolled validation loss')
 parser.add_argument('--nasbench', action='store_true', default=False, help='use one-step unrolled validation loss')
 parser.add_argument('--betadecay', type=str2bool, default=False, help='use beta-darts regularization')
@@ -80,6 +82,7 @@ parser.add_argument('--epsilon_sam', type=float, default=1e-2, help='epsilon for
 parser.add_argument('--data_aug', type=str2bool, default=True, help='use data augmentation on validation set')
 parser.add_argument('--w_nor', type=float, default=0.5, help='epsilon for beta regularization normal component')
 parser.add_argument('--k_sam', type=int, default=1, help='Number of ascent steps for SAM')
+parser.add_argument('--sgd_alpha', action='store_true', default=False, help='use sgd optim for arch encoding')
 
 args = parser.parse_args()
 
@@ -118,7 +121,7 @@ if args.wandb:
         entity='flatnas',
         # set the wandb project where this run will be logged
         project=f"FlatDARTS-{args.dataset}-nasbench{args.nasbench}-data_aug",
-        name=f"SAM_{args.sam}-BETADECAY_{args.betadecay}-WNOR_{args.w_nor}-UNROLLED_{args.unrolled}-DATA_AUG_{args.data_aug}-RHO_ALPHA_{args.rho_alpha_sam}-K_SAM_{args.k_sam}-SEED{args.seed}",
+        name=f"SAM_{args.sam}-BETADECAY_{args.betadecay}-WNOR_{args.w_nor}-UNROLLED_{args.unrolled}-DATA_AUG_{args.data_aug}-RHO_ALPHA_{args.rho_alpha_sam}-K_SAM_{args.k_sam}-SGD_ALPHA_{args.sgd_alpha}-SEED{args.seed}",
         # track hyperparameters and run metadata
         config={**vars(args)},
     )
@@ -231,6 +234,9 @@ def main():
         # training
         train_acc, train_obj = train(train_queue, valid_queue, model, architect, criterion, optimizer, lr, 
                                          perturb_alpha, epsilon_alpha)
+        
+        if args.sgd_alpha:
+            sam_alpha = architect.get_arch_lr()
 
         # validation
         valid_acc, valid_obj = infer(valid_queue, model, criterion)
@@ -239,22 +245,21 @@ def main():
             beta_loss = architect.beta_loss()        
 
         if args.wandb:
-            if args.betadecay:
-                wandb.log({"metrics/train_acc": train_acc, 
-                        "metrics/val_acc": valid_acc,
-                        "metrics/train_loss": train_obj,
-                        "metrics/val_loss": valid_obj,
-                        "metrics/beta_loss": beta_loss})
-            else:
-                wandb.log({"metrics/train_acc": train_acc, 
+            wandb.log({"metrics/train_acc": train_acc, 
                         "metrics/val_acc": valid_acc,
                         "metrics/train_loss": train_obj,
                         "metrics/val_loss": valid_obj})
+            if args.betadecay:
+                wandb.log({"metrics/beta_loss": beta_loss})
+            if args.sgd_alpha:
+                wandb.log({"metrics/arch_lr": sam_alpha})
             
         logging.info("Train acc: %.2f, Val acc: %.2f", train_acc, valid_acc)
         logging.info("Train loss: %.2f, Val loss: %.2f", train_obj, valid_obj)
         if args.betadecay:
             logging.info("Beta loss: %.2f", beta_loss)
+        if args.sgd_alpha:
+            logging.info("Arch lr: %.2f", sam_alpha)
 
         if valid_obj < best_loss:
             logging.info('Best model found at epoch %d', epoch)

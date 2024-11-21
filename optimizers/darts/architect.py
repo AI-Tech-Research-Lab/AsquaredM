@@ -16,7 +16,12 @@ class Architect(object):
         self.network_weight_decay = args.weight_decay
         self.model = model
         self.lr = args.arch_learning_rate
-        self.optimizer = torch.optim.Adam(self.model.arch_parameters(),
+        self.sgd_alpha=args.sgd_alpha
+    
+        if not args.sgd_alpha: #lookbehind optimizer
+            self.optimizer = torch.optim.SGD(self.model.arch_parameters(), lr=1)
+        else: #original optimizer of darts
+            self.optimizer = torch.optim.Adam(self.model.arch_parameters(),
                                           lr=args.arch_learning_rate, betas=(0.5, 0.999),
                                           weight_decay=args.arch_weight_decay)
         self.sam = args.sam
@@ -217,6 +222,7 @@ class Architect(object):
             slow_alpha = [alpha.clone() for alpha in self.model.arch_parameters()]
             fast_alpha = [alpha.clone() for alpha in self.model.arch_parameters()]
             tilde_alpha = [alpha.clone() for alpha in self.model.arch_parameters()]
+            dL_val_dtilde = dL_val_dalpha
             #fast_alpha_init = [alpha.clone() for alpha in self.model.arch_parameters()]
             #fast_alpha_first = [alpha.clone() for alpha in self.model.arch_parameters()]
 
@@ -226,7 +232,7 @@ class Architect(object):
                 # Compute the perturbation (gradient ascent step)
                 tilde_alpha = [
                     alpha + self.rho_alpha * dalpha
-                    for alpha, dalpha in zip(tilde_alpha, dL_val_dalpha)
+                    for alpha, dalpha in zip(tilde_alpha, dL_val_dtilde)
                 ]
 
                 with torch.no_grad():
@@ -239,36 +245,37 @@ class Architect(object):
                 else:
                     val_loss_tilde = self._val_loss(self.model, input_val, target_val)
 
-                dL_val_dtilde_alpha = torch.autograd.grad(val_loss_tilde, self.model.arch_parameters())
+                dL_val_dtilde = torch.autograd.grad(val_loss_tilde, self.model.arch_parameters())
 
                 # Perform gradient descent (update fast weights)
                 fast_alpha = [
                     alpha - fast_alpha_size * dalpha
-                    for alpha, dalpha in zip(fast_alpha, dL_val_dtilde_alpha)
+                    for alpha, dalpha in zip(fast_alpha,dL_val_dtilde) 
                 ]
 
-                #if step==1: #for adaptive alpha
-                #    fast_alpha_first = fast_alpha
+                if self.sgd_alpha and step==1: #for adaptive alpha
+                    fast_alpha_first = fast_alpha
                 
-            '''    
-            # adaptive alpha according to gradients alignment
-            diff1=[v1 - v for v1,v in zip(fast_alpha_first, slow_alpha)] #fast_alpha_first - slow_alpha #fast_alpha_init
-            diffk=[vk - v for vk,v in zip(fast_alpha, slow_alpha)] #fast_alpha_init
-            #theta = diff1*diffk/torch.norm(diff1,2)*torch.norm(diffk,2)
-            diff1_tensor = torch.cat([d.view(-1) for d in diff1])
-            diffk_tensor = torch.cat([d.view(-1) for d in diffk])
-            theta = torch.nn.CosineSimilarity(dim=0)(diff1_tensor, diffk_tensor)
-            slow_alpha_size = (math.cos(theta.item())+1)/2
-            self.epsilon = slow_alpha_size # Between 0 and 1
-
+            if self.sgd_alpha:
+                # adaptive alpha according to gradients alignment
+                diff1=[v1 - v for v1,v in zip(fast_alpha_first, slow_alpha)] #fast_alpha_first - slow_alpha #fast_alpha_init
+                diffk=[vk - v for vk,v in zip(fast_alpha, slow_alpha)] #fast_alpha_init
+                #theta = diff1*diffk/torch.norm(diff1,2)*torch.norm(diffk,2)
+                diff1_tensor = torch.cat([d.view(-1) for d in diff1])
+                diffk_tensor = torch.cat([d.view(-1) for d in diffk])
+                theta = torch.nn.CosineSimilarity(dim=0)(diff1_tensor, diffk_tensor)
+                slow_alpha_size = (math.cos(theta.item())+1)/2 #between 0 and 1
+                self.update_arch_lr(slow_alpha_size)
+            
+            '''
             slow_alpha = [
                 slow + slow_alpha_size * (fast - slow)
                 for slow, fast in zip(slow_alpha, fast_alpha)
             ]
             '''
-
-            dL_val_dtilde_alpha = [fast - slow for slow, fast in zip(slow_alpha, fast_alpha)]
-
+            
+            #dL_val_dtilde = [fast - slow for slow, fast in zip(slow_alpha, fast_alpha)]
+            dL_val_dtilde_alpha = [slow - fast for slow, fast in zip(slow_alpha, fast_alpha)] #reverts the gradient direction
         else:
             # Compute the perturbation (gradient ascent step)
             tilde_alpha = [
@@ -357,3 +364,9 @@ class Architect(object):
                 v.grad = Variable(g.data)
             else:
                 v.grad.data.copy_(g.data)
+    
+    def update_arch_lr(self, alpha):
+        self.optimizer.param_groups[0]['lr'] = alpha
+    
+    def get_arch_lr(self):
+        return self.optimizer.param_groups[0]['lr']
