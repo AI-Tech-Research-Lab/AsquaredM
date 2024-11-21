@@ -269,12 +269,6 @@ def main():
             logging.info('Early stopping at epoch %d', epoch)
             break
 
-        if args.wandb:
-            wandb.log({"metrics/train_acc": train_acc, 
-                    "metrics/val_acc": valid_acc,
-                    "metrics/train_loss": train_obj,
-                    "metrics/val_loss": valid_obj})
-
         scheduler.step()
 
     #writer.close()
