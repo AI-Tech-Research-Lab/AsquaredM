@@ -16,7 +16,7 @@ seeds=(1)
 # Loop through the seeds and execute the command
 for seed in "${seeds[@]}"; do
     # Construct the save directory for each architecture
-    save_dir="${base_save_dir}_dataset${dataset}_betadecay${betadecay}_wnor${w_nor}_sam${sam}_rho${rho}_k_sam${k_sam}_seed${seed}"
+    save_dir="${base_save_dir}_dataset${dataset}_betadecay${betadecay}_wnor${w_nor}_sam${sam}_rho${rho}_k_sam${k_sam}_perturb_seed${seed}"
 
     python sota/cnn/train_search.py --save $save_dir \
                     --dataset $dataset --data ../datasets/$dataset --seed $seed \
