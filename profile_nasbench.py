@@ -589,28 +589,33 @@ def compute_barrier(accs):
     return np.round(0.5 * (acc_a + acc_b) - acc_min,2)
 
 def path_bench_qualities(dataset):
+    import os
+    import json
+    import matplotlib.pyplot as plt
+
     print("DATASET: ", dataset)
     FONT_SIZE = 18
     bench = NASBench201(dataset=dataset)
 
-    # Define qualities
+    # Define qualities and their respective colors
     qualities = ["Model A", "Model B", "Model C"]
+    colors = ["purple", "orange", "green"]
     paths_by_quality = {}
     accs_by_quality = {}
     std_by_quality = {}
-    barriers=[]
+    barriers = []
 
     for quality in qualities:
         config1, config2, acc1, acc2 = get_archs(dataset, quality)
         # Find the paths between the two configurations
         paths = search_tree(config1, config2)
-        max_level = len(paths[0])-2
+        max_level = len(paths[0]) - 2
         archs_by_level = [[] for _ in range(max_level)]
         
         # Collect architectures by level
         for i in range(max_level):
             for path in paths:
-                archs_by_level[i].append(path[i+1])
+                archs_by_level[i].append(path[i + 1])
 
         # Average validation accuracy by level
         avg_test_accs = []
@@ -634,15 +639,27 @@ def path_bench_qualities(dataset):
     plt.figure(figsize=(10, 5))
     x = list(range(4))  # 0, 1, 2, 3 representing the radius
 
-    for quality in qualities:
+    for quality, color in zip(qualities, colors):
         y = paths_by_quality[quality]
         yerr = std_by_quality[quality]
-        plt.errorbar(x, y, yerr=yerr, fmt='-o', capsize=5, capthick=2, elinewidth=1, label=f'{quality}')
+        plt.errorbar(
+            x, y, yerr=yerr, fmt='-o', capsize=5, capthick=2, elinewidth=1, color=color, label=f'{quality}'
+        )
+        # Add squares for extreme points
+        plt.scatter([x[0], x[-1]], [y[0], y[-1]], color=color, s=80, marker='s', zorder=3)  # Squares
+        # Add circles for internal points
+        plt.scatter(x[1:-1], y[1:-1], color=color, s=80, marker='o', zorder=3)  # Circles
 
     # Customize plot
-    plt.xlabel('Radius', fontsize=FONT_SIZE+2)
-    plt.ylabel('Accuracy', fontsize=FONT_SIZE+2)
-    plt.title(f'Path Accuracies for {dataset}', fontsize=FONT_SIZE+4)
+    plt.xlabel('Radius', fontsize=FONT_SIZE + 2)
+    plt.ylabel('Accuracy', fontsize=FONT_SIZE + 2)
+    if dataset == 'cifar10': 
+        name = 'CIFAR-10'
+    elif dataset == 'cifar100':
+        name = 'CIFAR-100'
+    elif dataset == 'ImageNet16-120':
+        name = 'ImageNet16-120'
+    plt.title(f'Path Accuracies for {name}', fontsize=FONT_SIZE + 4)
     plt.xticks(x, fontsize=FONT_SIZE)
     plt.yticks(fontsize=FONT_SIZE)
     plt.legend(fontsize=FONT_SIZE)
@@ -650,14 +667,17 @@ def path_bench_qualities(dataset):
     plt.show()
 
     # Save the plot to the results folder
-    if not os.path.exists(f'results/flatness_exp_{dataset}'):
-        os.makedirs(f'results/flatness_exp_{dataset}', exist_ok=True)
-    plt.savefig(f'results/flatness_exp_{dataset}/path_accs_all_qualities.pdf', format='pdf', bbox_inches='tight', dpi=300)
+    results_dir = f'results/flatness_exp_{dataset}'
+    if not os.path.exists(results_dir):
+        os.makedirs(results_dir, exist_ok=True)
+    plot_path = f'{results_dir}/path_accs_all_qualities_'+dataset+'.pdf'
+    plt.savefig(plot_path, format='pdf', bbox_inches='tight', dpi=300)
 
-    #save in a json the value of the barrier for each quality
-    import json
-    with open(f'results/flatness_exp_{dataset}/barriers.json', 'w') as f:
+    # Save barriers in a JSON file
+    barriers_path = f'{results_dir}/barriers.json'
+    with open(barriers_path, 'w') as f:
         json.dump(barriers, f)
+
 
 def plot_histo_configs_radius1(dataset, radius=1):
     bench=NASBench201(dataset=dataset)

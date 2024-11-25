@@ -189,8 +189,20 @@ def path_bench_qualities(path1, path2, dataset):
     import numpy as np
     import matplotlib.pyplot as plt
 
-    acc_base = {'cifar10': 91.92, 'cifar100': 73.5}
-    acc_target = {'cifar10': 92.77, 'cifar100': 74.7}
+    FONT_SIZE=18
+
+    # Set font sizes
+    plt.rcParams.update({
+        'font.size': FONT_SIZE+2,         # General font size
+        'axes.titlesize': FONT_SIZE+4,    # Title font size
+        'axes.labelsize': FONT_SIZE+4,    # Axis label font size
+        'xtick.labelsize': FONT_SIZE,   # X-tick label font size
+        'ytick.labelsize': FONT_SIZE,   # Y-tick label font size
+        'legend.fontsize': FONT_SIZE+2,   # Legend font size
+    })
+
+    acc_base = {'DARTScifar10': 91.92, 'DARTScifar100': 73.5, 'SAMcifar10': 92.77, 'SAMcifar100': 74.7}
+    acc_target = {'DARTScifar10': 91.73, 'DARTScifar100': 73.54, 'SAMcifar10': 92.75, 'SAMcifar100': 74.78}
 
     # Define qualities
     qualities = ["DARTS", "SAM"]
@@ -203,8 +215,8 @@ def path_bench_qualities(path1, path2, dataset):
     # Process paths and compute barriers
     for i, quality in enumerate(qualities):
         avg_test_accs, std_test_accs = read_val_accs_path_from_archive(paths[i], 3)
-        acc1 = acc_base[dataset]
-        acc2 = acc_target[dataset]
+        acc1 = acc_base[quality+dataset]
+        acc2 = acc_target[quality+dataset]
         
         # Store path accuracies and standard deviations for this quality
         path_accs = [acc1] + avg_test_accs + [acc2]
@@ -234,7 +246,8 @@ def path_bench_qualities(path1, path2, dataset):
     # Customize plot
     plt.xlabel('Radius')
     plt.ylabel('Accuracy')
-    plt.title(f'Path Accuracies for {dataset}')
+    name = 'CIFAR-10' if dataset == 'cifar10' else 'CIFAR-100'
+    plt.title(f'Path Accuracies for {name}')
     plt.xticks(x)
     plt.legend()
     plt.grid(True)
@@ -244,7 +257,7 @@ def path_bench_qualities(path1, path2, dataset):
     if not os.path.exists(results_dir):
         os.makedirs(results_dir, exist_ok=True)
 
-    plot_path = f'{results_dir}/path_accs_all_qualities.pdf'
+    plot_path = f'{results_dir}/path_accs_darts_'+dataset+'.pdf'
     plt.savefig(plot_path, format='pdf', bbox_inches='tight', dpi=300)
     plt.show()
 
@@ -263,8 +276,8 @@ plot_neighbors('results/darts_train_neighbors_datasetcifar10', dataset='cifar10'
 plot_neighbors('results/darts_train_neighbors_datasetcifar10', dataset='cifar10', radius=3, baselines=[91.92, 92.77])
 '''
 
-path_bench_qualities
-
+path_bench_qualities('results/darts_path_neighbors_datasetcifar10_archDARTS_seed3_arch_target{DARTS_TARGET_CIFAR10}_radius3/archive_darts.txt', 'results/darts_path_neighbors_datasetcifar10_archSAM_exp1_seed7_arch_target{SAM_TARGET_CIFAR10}_radius3/archive_darts.txt', 'cifar10')
+path_bench_qualities('results/darts_path_neighbors_datasetcifar100_archDARTS_seed3_arch_target{DARTS_TARGET_CIFAR100}_radius3/archive_darts.txt', 'results/darts_path_neighbors_datasetcifar100_archSAM_exp1_seed7_arch_target{SAM_TARGET_CIFAR100}_radius3/archive_darts.txt', 'cifar100')
 '''
 folder = 'results/darts_train_neighbors_datasetcifar100_archBETADARTS'
 filename=os.path.join(folder,'archive_darts.txt')
