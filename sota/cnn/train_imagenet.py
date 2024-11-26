@@ -132,31 +132,27 @@ def main():
         momentum=args.momentum,
         weight_decay=args.weight_decay
         )
-
-    traindir = os.path.join(args.data, 'train')
-    validdir = os.path.join(args.data, 'val')
-    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    train_data = dset.ImageFolder(
-        traindir,
-        transforms.Compose([
-            transforms.RandomResizedCrop(224),
-            transforms.RandomHorizontalFlip(),
-            transforms.ColorJitter(
-                brightness=0.4,
-                contrast=0.4,
-                saturation=0.4,
-                hue=0.2),
-            transforms.ToTensor(),
-            normalize,
-        ]))
-    valid_data = dset.ImageFolder(
-        validdir,
-        transforms.Compose([
-            transforms.Resize(256),
-            transforms.CenterCrop(224),
-            transforms.ToTensor(),
-            normalize,
-        ]))
+    
+    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                     std=[0.229, 0.224, 0.225])
+    
+    train_transform = transforms.Compose([
+        transforms.RandomResizedCrop(224),  # Random crop with resizing to 224x224
+        transforms.RandomHorizontalFlip(),  # Random horizontal flip
+        transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.2),  # Augment brightness, contrast, etc.
+        transforms.ToTensor(),  # Convert to tensor
+        normalize,  # Normalize using ImageNet mean and std
+    ])
+    
+    valid_transform = transforms.Compose([
+        transforms.Resize(256),  # Resize shorter side to 256
+        transforms.CenterCrop(224),  # Center crop to 224x224
+        transforms.ToTensor(),  # Convert to tensor
+        normalize,  # Normalize using ImageNet mean and std
+    ])
+    
+    train_data = dset.ImageNet(root=args.data, split='train', transform=train_transform)
+    valid_data = dset.ImageNet(root=args.data, split='val', transform=valid_transform)
 
     train_queue = torch.utils.data.DataLoader(
         train_data, batch_size=args.batch_size, shuffle=True, pin_memory=True, num_workers=args.workers)
