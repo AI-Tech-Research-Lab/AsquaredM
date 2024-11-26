@@ -3,7 +3,9 @@ import argparse
 import glob
 import logging
 import sys
-sys.path.insert(0, '../../')
+import os
+home_dir = os.path.expanduser('~')
+sys.path.insert(0, os.path.join(home_dir, 'workspace', 'darts-SAM'))
 import time
 
 import numpy as np
@@ -19,9 +21,11 @@ from torch.autograd import Variable
 from optimizers.darts import utils
 from sota.cnn.model_imagenet import NetworkImageNet as Network
 import sota.cnn.genotypes as genotypes
+import wandb
 
 parser = argparse.ArgumentParser("imagenet")
 parser.add_argument('--workers', type=int, default=16, help='number of workers to load dataset')
+parser.add_argument('--dataset', type=str, default='cifar10', help='choose dataset')
 parser.add_argument('--data', type=str, default='/nfs/data/minhao', help='location of the data corpus')
 parser.add_argument('--batch_size', type=int, default=1024, help='batch size')
 parser.add_argument('--learning_rate', type=float, default=0.5, help='init learning rate')
@@ -43,6 +47,7 @@ parser.add_argument('--label_smooth', type=float, default=0.1, help='label smoot
 parser.add_argument('--lr_scheduler', type=str, default='linear', help='lr scheduler, linear or cosine')
 parser.add_argument('--gamma', type=float, default=0.97, help='learning rate decay')
 parser.add_argument('--decay_period', type=int, default=1, help='epochs between two learning rate decays')
+parser.add_argument('--wandb', action='store_true', default=False, help='use wandb')
 args, unparsed = parser.parse_known_args()
 
 args.save = '../../experiments/sota/imagenet/eval-{}-{}-{}-{}'.format(
@@ -59,6 +64,18 @@ fh = logging.FileHandler(os.path.join(args.save, 'log.txt'))
 fh.setFormatter(logging.Formatter(log_format))
 logging.getLogger().addHandler(fh)
 writer = SummaryWriter(args.save + '/runs')
+
+
+if args.wandb:
+    wandb.init(
+        # username or team name
+        entity='flatnas',
+        # set the wandb project where this run will be logged
+        project=f"FlatDARTS-TRAIN-{args.dataset}",
+        name=f"TRAIN_ARCH_{args.arch}",
+        # track hyperparameters and run metadata
+        config={**vars(args)},
+    )
 
 
 CLASSES = 1000
@@ -147,21 +164,14 @@ def main():
     valid_queue = torch.utils.data.DataLoader(
         valid_data, batch_size=args.batch_size, shuffle=False, pin_memory=True, num_workers=args.workers)
 
-#    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.decay_period, gamma=args.gamma)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, float(args.epochs))
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.decay_period, gamma=args.gamma)
+    #scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, float(args.epochs))
     best_acc_top1 = 0
     best_acc_top5 = 0
     lr = args.learning_rate
+    current_lr = lr
     for epoch in range(args.epochs):
-        if args.lr_scheduler == 'cosine':
-            scheduler.step()
-            current_lr = scheduler.get_lr()[0]
-        elif args.lr_scheduler == 'linear':
-            current_lr = adjust_lr(optimizer, epoch)
-        else:
-            print('Wrong lr type, exit')
-            sys.exit(1)
-        logging.info('Epoch: %d lr %e', epoch, current_lr)
+        logging.info('Epoch: %d lr %e', epoch, current_lr) 
         if epoch < 5 and args.batch_size > 256:
             for param_group in optimizer.param_groups:
                 param_group['lr'] = lr * (epoch + 1) / 5.0
@@ -176,6 +186,13 @@ def main():
 
         valid_acc_top1, valid_acc_top5, valid_obj = infer(valid_queue, model, criterion)
         logging.info('Valid_acc_top1: %f', valid_acc_top1)
+
+        if args.wandb:
+            wandb.log({"metrics/train_acc": train_acc, 
+                    "metrics/val_acc": valid_acc_top1,
+                    "metrics/train_loss": train_obj,
+                    "metrics/val_loss": valid_obj})
+
         logging.info('Valid_acc_top5: %f', valid_acc_top5)
         epoch_duration = time.time() - epoch_start
         logging.info('Epoch time: %ds.', epoch_duration)
@@ -192,7 +209,16 @@ def main():
             'state_dict': model.state_dict(),
             'best_acc_top1': best_acc_top1,
             'optimizer' : optimizer.state_dict(),
-            }, is_best, args.save)        
+            }, is_best, args.save)  
+
+        if args.lr_scheduler == 'cosine':
+            scheduler.step()
+            current_lr = scheduler.get_lr()[0]
+        elif args.lr_scheduler == 'linear':
+            current_lr = adjust_lr(optimizer, epoch)
+        else:
+            print('Wrong lr type, exit')
+            sys.exit(1)  
 
 
 def adjust_lr(optimizer, epoch):

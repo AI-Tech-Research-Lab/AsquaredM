@@ -155,6 +155,27 @@ def _data_transforms_imagenet16(args):
     
     return train_transform, valid_transform
 
+def _data_transforms_imagenet(args):
+    """
+    Define data transformations for ImageNet training and validation.
+    """
+    IMAGENET_MEAN = [0.485, 0.456, 0.406]
+    IMAGENET_STD = [0.229, 0.224, 0.225]
+
+    train_transform = transforms.Compose([
+        transforms.RandomResizedCrop(224),  # Resize and crop to 224x224
+        transforms.RandomHorizontalFlip(),  # Randomly flip images horizontally
+        transforms.ToTensor(),  # Convert PIL Image to tensor
+        transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),  # Normalize using ImageNet mean and std
+    ])
+
+    valid_transform = transforms.Compose([
+        transforms.ToTensor(),  # Convert PIL Image to tensor
+        transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),  # Normalize using ImageNet mean and std
+    ])
+
+    return train_transform, valid_transform
+
 def count_parameters_in_MB(model):
     return np.sum(np.prod(v.size()) for name, v in model.named_parameters() if "auxiliary" not in name) / 1e6
 
