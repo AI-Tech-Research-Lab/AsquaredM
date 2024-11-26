@@ -725,6 +725,60 @@ def get_archs(dataset, quality):
             idx2=348
     return bench.encode({'arch':bench.archive['str'][idx1]}), bench.encode({'arch':bench.archive['str'][idx2]}), bench.get_info_from_arch({'arch':bench.archive['str'][idx1]})['test-acc'], bench.get_info_from_arch({'arch':bench.archive['str'][idx2]})['test-acc']
 
+'''
+def get_idx_interval(acc, dataset):
+
+    if dataset == 'cifar10':
+        if acc < 94.37 and acc > 94.23:
+            return 0
+        elif acc < 85.7 and acc > 84.3:
+            return 1
+        elif acc < 75.7 and acc > 74.3:
+            return 2
+        else:
+            return -1
+    elif dataset == 'cifar100':
+        if acc < 74.3 and acc > 73.1 :
+            return 0
+        elif acc < 65.7 and acc > 64.3:
+            return 1
+        elif acc < 55.7 and acc > 54.3:
+            return 2
+        else:
+            return -1
+    elif dataset == 'ImageNet16-120':
+        if acc < 48 and acc > 46.6:
+            return 0
+        elif acc < 35.7 and acc > 34.3:
+            return 1
+        elif acc < 25.7 and acc > 24.3:
+            return 2
+        else:
+            return -1
+
+def distributions_nasbench(bench, dataset, radius):
+    test_accs = bench.archive['test-acc'][dataset]
+    dist = [ [] for _ in range(3)]
+    for id_net, acc in enumerate(test_accs):
+        idx = get_idx_interval(acc, dataset)
+        if idx==-1:
+            continue
+        config=bench.archive['str'][id_net]
+
+        # Calculate accs for each configuration
+        neighbors_config = neighbors_by_radius(bench.nvar, list(range(bench.num_operations)), config, radius)
+        acc_neighbors_config = avg_test_acc(bench, neighbors_config)[1]
+        accs = np.array(acc_neighbors_config)
+
+        dist[0][idx].append(accs)
+
+    # average the accs for each interval
+    avg_dist = []
+    for i in range(3):
+        avg_dist.append(np.mean(dist[0][i]))
+
+    plot_histograms(avg_dist, bins=100, path='', baselines=[], dataset=dataset, radius=radius): #add radius
+'''
 
 '''
 
