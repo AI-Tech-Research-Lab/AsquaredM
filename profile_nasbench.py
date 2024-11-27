@@ -725,11 +725,11 @@ def get_archs(dataset, quality):
             idx2=348
     return bench.encode({'arch':bench.archive['str'][idx1]}), bench.encode({'arch':bench.archive['str'][idx2]}), bench.get_info_from_arch({'arch':bench.archive['str'][idx1]})['test-acc'], bench.get_info_from_arch({'arch':bench.archive['str'][idx2]})['test-acc']
 
-'''
+
 def get_idx_interval(acc, dataset):
 
     if dataset == 'cifar10':
-        if acc < 94.37 and acc > 94.23:
+        if acc < 94.44 and acc > 94.3:
             return 0
         elif acc < 85.7 and acc > 84.3:
             return 1
@@ -738,7 +738,7 @@ def get_idx_interval(acc, dataset):
         else:
             return -1
     elif dataset == 'cifar100':
-        if acc < 74.3 and acc > 73.1 :
+        if acc < 74.2 and acc > 68.8 :
             return 0
         elif acc < 65.7 and acc > 64.3:
             return 1
@@ -756,29 +756,42 @@ def get_idx_interval(acc, dataset):
         else:
             return -1
 
-def distributions_nasbench(bench, dataset, radius):
+def get_baselines(dataset):
+    if dataset == 'cifar10':
+        return [94.37, 85, 75]
+    elif dataset == 'cifar100':
+        return [73.5, 65, 55]
+    elif dataset == 'ImageNet16-120':
+        return [47.3, 35, 25]
+
+def distributions_nasbench(bench, dataset, radius, dist_path='results/flatness_exp'):
     test_accs = bench.archive['test-acc'][dataset]
     dist = [ [] for _ in range(3)]
-    for id_net, acc in enumerate(test_accs):
-        idx = get_idx_interval(acc, dataset)
-        if idx==-1:
-            continue
-        config=bench.archive['str'][id_net]
+    file = os.path.join(dist_path, dataset, 'distributions')
+    if os.path.exists(file+'0.npy'):
+        for i in range(3):
+            dist[i] = np.load(file+str(i)+'.npy', allow_pickle=True)
+    else:
+        for id_net, acc in enumerate(test_accs):
+            idx = get_idx_interval(acc, dataset)
+            if idx==-1:
+                continue
+            config=bench.archive['str'][id_net]
+            # convert to vector
+            config = bench.encode({'arch':config})
+            # Calculate accs for each configuration
+            neighbors_config = neighbors_by_radius(bench.nvar, list(range(bench.num_operations)), config, radius)
+            acc_neighbors_config = avg_test_acc(bench, neighbors_config)[1]
+            accs = np.array(acc_neighbors_config)
+        
+            dist[idx].extend(accs)
+        for i in range(3):
+            np.save(file+str(i), dist[i])
 
-        # Calculate accs for each configuration
-        neighbors_config = neighbors_by_radius(bench.nvar, list(range(bench.num_operations)), config, radius)
-        acc_neighbors_config = avg_test_acc(bench, neighbors_config)[1]
-        accs = np.array(acc_neighbors_config)
+    plot_histograms(dist, bins=100, path='results/flatness_exp/histo_nasbench_' + dataset + '.pdf', baselines=get_baselines(dataset), dataset=dataset, radius=radius)
 
-        dist[0][idx].append(accs)
-
-    # average the accs for each interval
-    avg_dist = []
-    for i in range(3):
-        avg_dist.append(np.mean(dist[0][i]))
-
-    plot_histograms(avg_dist, bins=100, path='', baselines=[], dataset=dataset, radius=radius): #add radius
-'''
+bench = NASBench201(dataset='cifar10')
+distributions_nasbench(bench, 'cifar10', 1)
 
 '''
 
@@ -791,9 +804,11 @@ print(bench.archive['str'][idx1])
 print(bench.archive['str'][idx2])
 '''
 
+'''
 path_bench_qualities('cifar10')
 path_bench_qualities('cifar100')
 path_bench_qualities('ImageNet16-120')
+'''
 
 
 '''
