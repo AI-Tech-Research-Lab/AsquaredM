@@ -764,34 +764,66 @@ def get_baselines(dataset):
     elif dataset == 'ImageNet16-120':
         return [47.3, 35, 25]
 
-def distributions_nasbench(bench, dataset, radius, dist_path='results/flatness_exp'):
-    test_accs = bench.archive['test-acc'][dataset]
-    dist = [ [] for _ in range(3)]
-    file = os.path.join(dist_path, dataset, 'distributions')
-    if os.path.exists(file+'0.npy'):
-        for i in range(3):
-            dist[i] = np.load(file+str(i)+'.npy', allow_pickle=True)
-    else:
-        for id_net, acc in enumerate(test_accs):
-            idx = get_idx_interval(acc, dataset)
-            if idx==-1:
-                continue
-            config=bench.archive['str'][id_net]
-            # convert to vector
-            config = bench.encode({'arch':config})
-            # Calculate accs for each configuration
-            neighbors_config = neighbors_by_radius(bench.nvar, list(range(bench.num_operations)), config, radius)
-            acc_neighbors_config = avg_test_acc(bench, neighbors_config)[1]
-            accs = np.array(acc_neighbors_config)
-        
-            dist[idx].extend(accs)
-        for i in range(3):
-            np.save(file+str(i), dist[i])
+import os
+import numpy as np
 
-    plot_histograms(dist, bins=100, path='results/flatness_exp/histo_nasbench_' + dataset + '.pdf', baselines=get_baselines(dataset), dataset=dataset, radius=radius)
+def distributions_nasbench(bench, dataset, radius, dist_path='results/flatness_exp'):
+    # Retrieve test accuracies for the dataset
+    test_accs = bench.archive['test-acc'][dataset]
+    dist = [[] for _ in range(3)]  # Initialize distribution lists for 3 categories
+    file = os.path.join(dist_path, 'nasbenchdist', dataset, str(radius))
+
+    # Ensure the directory exists
+    os.makedirs(os.path.dirname(file), exist_ok=True)
+
+    # Check if precomputed distributions exist
+    if os.path.exists(file + '0.npy'):
+        for i in range(3):
+            dist[i] = np.load(file + str(i) + '.npy', allow_pickle=True)
+    else:
+        # Compute distributions
+        for id_net, acc in enumerate(test_accs):
+            dist_idx = get_idx_interval(acc, dataset)
+            if dist_idx == -1:
+                continue  # Skip if outside defined intervals
+
+            # Convert architecture to vector and compute neighbors
+            config = bench.archive['str'][id_net]
+            config_vector = bench.encode({'arch': config})
+            neighbors_config = neighbors_by_radius(
+                bench.nvar, list(range(bench.num_operations)), config_vector, radius
+            )
+
+            # Compute average accuracies of neighbors
+            acc_neighbors_config = avg_test_acc(bench, neighbors_config)[1]
+            dist[dist_idx].extend(acc_neighbors_config)
+
+        # Save computed distributions
+        for i in range(3):
+            np.save(file + str(i), dist[i])
+
+    # Plot histograms
+    plot_histograms(
+        dist, bins=100,
+        path=os.path.join('results/flatness_exp', f'histo_nasbench_{dataset}_{radius}.pdf'),
+        baselines=get_baselines(dataset),
+        dataset=dataset,
+        radius=radius
+    )
+
 
 bench = NASBench201(dataset='cifar10')
 distributions_nasbench(bench, 'cifar10', 1)
+distributions_nasbench(bench, 'cifar10', 2)
+distributions_nasbench(bench, 'cifar10', 3)
+bench = NASBench201(dataset='cifar100')
+distributions_nasbench(bench, 'cifar100', 1)
+distributions_nasbench(bench, 'cifar100', 2)
+distributions_nasbench(bench, 'cifar100', 3)
+bench = NASBench201(dataset='ImageNet16-120')
+distributions_nasbench(bench, 'ImageNet16-120', 1)
+distributions_nasbench(bench, 'ImageNet16-120', 2)
+distributions_nasbench(bench, 'ImageNet16-120', 3)
 
 '''
 
