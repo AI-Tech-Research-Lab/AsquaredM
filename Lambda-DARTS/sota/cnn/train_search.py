@@ -3,7 +3,7 @@ import sys
 # Construct the path
 home_dir = os.path.expanduser("~")  # Home directory
 workspace = "workspace"             # Your workspace folder
-repo_name = "Lambda-DARTS"             # Replace with the name of your repository
+repo_name = "darts-SAM/Lambda-DARTS"             # Replace with the name of your repository
 repo_path = os.path.join(home_dir, workspace, repo_name)
 # Insert the path into sys.path
 sys.path.insert(0, repo_path)
@@ -71,7 +71,7 @@ parser.add_argument('--wandb', action='store_true', default=False, help='use wan
 
 args = parser.parse_args()
 
-args.save = 'results/sota/{}/search-{}-{}-{}-{}'.format(
+args.save = '../results/lambdadarts/{}/search-{}-{}-{}-{}'.format(
     args.dataset, args.save, time.strftime("%Y%m%d-%H%M%S"), args.search_space, args.seed)
 
 if args.unrolled:

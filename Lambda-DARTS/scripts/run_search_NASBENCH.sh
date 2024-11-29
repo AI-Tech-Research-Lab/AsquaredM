@@ -12,6 +12,6 @@ seeds=(0 1 2 3)
 for seed in "${seeds[@]}"; do
     python exps/algos/DARTS-V1.py  --dataset $dataset --corr_regularization --lambda_ $lambda_ \
     --epsilon_0 $epsilon_0 --arch_learning_rate $arch_learning_rate --gpu $gpu  \
-    --search_space $search_space --data_path ../../datasets/$dataset --save_dir='../results/nasbench201' \
+    --search_space $search_space --data_path ../../../datasets/$dataset --save_dir='../../results/lambdanasbench201' \
     --channel 16 --num_cells 5 --max_nodes 4 --print_freq 200 --rand_seed $seed --arch_nas_dataset NAS-Bench-201-v1_0-e61699.pth
 done
