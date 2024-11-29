@@ -770,20 +770,25 @@ import numpy as np
 def distributions_nasbench(bench, dataset, radius, dist_path='results/flatness_exp'):
     # Retrieve test accuracies for the dataset
     test_accs = bench.archive['test-acc'][dataset]
-    dist = [[] for _ in range(3)]  # Initialize distribution lists for 3 categories
-    file = os.path.join(dist_path, 'nasbenchdist', dataset, str(radius))
+    print("LEN TEST ACCS: ", len(test_accs))
+    dist = [[] for _ in range(3)]  
+    dist.insert(0, test_accs)
+    folder = os.path.join(dist_path, 'nasbenchdist_' + dataset + '_radius' + str(radius))
 
     # Ensure the directory exists
-    os.makedirs(os.path.dirname(file), exist_ok=True)
+    os.makedirs(folder, exist_ok=True)
 
     # Check if precomputed distributions exist
-    if os.path.exists(file + '0.npy'):
+    if os.path.exists(os.path.join(folder,'neighborsnet_0.npy')):
         for i in range(3):
-            dist[i] = np.load(file + str(i) + '.npy', allow_pickle=True)
+            dist[i] = np.load(os.path.join(folder,'neighborsnet_' + str(i) + '.npy'), allow_pickle=True)
     else:
         # Compute distributions
-        for id_net, acc in enumerate(test_accs):
+        for id_net in range(len(test_accs)):
+
+            acc=test_accs[id_net]
             dist_idx = get_idx_interval(acc, dataset)
+            #print("DIST IDX: ", dist_idx)
             if dist_idx == -1:
                 continue  # Skip if outside defined intervals
 
@@ -800,12 +805,12 @@ def distributions_nasbench(bench, dataset, radius, dist_path='results/flatness_e
 
         # Save computed distributions
         for i in range(3):
-            np.save(file + str(i), dist[i])
+            np.save(os.path.join(folder, 'neighborsnet_' + str(i) + '.npy'), dist[i])
 
     # Plot histograms
     plot_histograms(
         dist, bins=100,
-        path=os.path.join('results/flatness_exp', f'histo_nasbench_{dataset}_{radius}.pdf'),
+        path=os.path.join(folder, f'histo_nasbench_{dataset}_{radius}.pdf'),
         baselines=get_baselines(dataset),
         dataset=dataset,
         radius=radius
