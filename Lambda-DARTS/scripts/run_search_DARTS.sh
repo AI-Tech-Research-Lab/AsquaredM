@@ -5,8 +5,8 @@ epochs=50
 search_space='s5'
 reg_type='signcorr'
 arch_learning_rate=0.0003
-
 seeds=(1 2 3)
+# inside Lambda-DARTS
 for seed in "${seeds[@]}"; do
     python sota/cnn/train_search.py --batch_size 96 --dataset $dataset --corr_regularization $reg_type --lambda_ $lambda_ \
     --epsilon_0 $epsilon_0 --epochs $epochs --arch_learning_rate $arch_learning_rate --gpu $gpu --seed $seed \
