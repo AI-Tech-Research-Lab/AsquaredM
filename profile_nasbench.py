@@ -276,6 +276,8 @@ def plot_histograms(data_array, bins=100, path='', baselines=None, dataset='cifa
     #FIGSIZE = (3.5, 3.0)
     FIGSIZE = (4,5)
     COLORS = [mcolors.TABLEAU_COLORS[k] for k in mcolors.TABLEAU_COLORS.keys()]
+    #acc_lim = get_acc_limits(dataset) 
+
     titles = ['Model A', 'Model B', 'Model C']
 
     num_plots = len(data_array) - 1 
@@ -310,7 +312,7 @@ def plot_histograms(data_array, bins=100, path='', baselines=None, dataset='cifa
         axs[i].set_ylim(0, ymax)  
 
         # Add title to each subplot
-        axs[i].set_title(f"{titles[i]} (Test accuracy: {baselines[i]:.2f}%)")  # Adjust title as needed
+        axs[i].set_title(f"{titles[i]} (Test accuracy: {baselines[i]:.2f}%)")  # Adjust title as needed  
 
         # Plot baselines as vertical lines
         if baselines:
@@ -755,6 +757,18 @@ def get_idx_interval(acc, dataset):
             return 2
         else:
             return -1
+        
+def get_acc_limits(dataset):
+    if dataset == 'cifar10':
+        # Return the min and max bounds of the accuracy ranges
+        return [94.3, 94.44], [84.3, 85.7], [74.3, 75.7]
+    elif dataset == 'cifar100':
+        return [68.8, 74.2], [64.3, 65.7], [54.3, 55.7]
+    elif dataset == 'ImageNet16-120':
+        return [46.6, 48], [34.3, 35.7], [24.3, 25.7]
+    else:
+        raise ValueError(f"Unsupported dataset: {dataset}")
+
 
 def get_baselines(dataset):
     if dataset == 'cifar10':
@@ -772,7 +786,7 @@ def distributions_nasbench(bench, dataset, radius, dist_path='results/flatness_e
     test_accs = bench.archive['test-acc'][dataset]
     print("LEN TEST ACCS: ", len(test_accs))
     dist = [[] for _ in range(3)]  
-    dist.insert(0, test_accs)
+    #dist.insert(0, test_accs)
     folder = os.path.join(dist_path, 'nasbenchdist_' + dataset + '_radius' + str(radius))
 
     # Ensure the directory exists
@@ -807,6 +821,8 @@ def distributions_nasbench(bench, dataset, radius, dist_path='results/flatness_e
         for i in range(3):
             np.save(os.path.join(folder, 'neighborsnet_' + str(i) + '.npy'), dist[i])
 
+    dist.insert(0, test_accs)
+     
     # Plot histograms
     plot_histograms(
         dist, bins=100,
