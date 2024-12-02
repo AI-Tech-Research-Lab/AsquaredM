@@ -1,7 +1,7 @@
 #!/bin/bash
 
 dataset=cifar10
-rho=10
+rho=1
 epsilon=1e-2
 sam=True
 wandb=True
@@ -11,7 +11,7 @@ epochs=50
 k_sam=1
 base_save_dir="results/darts_search"
 w_nor=0.5
-seeds=(1)
+seeds=(2 5 7)
 
 # Loop through the seeds and execute the command
 for seed in "${seeds[@]}"; do
