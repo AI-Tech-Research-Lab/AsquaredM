@@ -8,7 +8,7 @@ arch_learning_rate=1e-4
 
 seed=0
 #inside the NASBENCH201 folder
-seeds=(0 1 2 3)
+seeds=(1 2 3)
 for seed in "${seeds[@]}"; do
     python exps/algos/DARTS-V1.py  --dataset $dataset --corr_regularization --lambda_ $lambda_ \
     --epsilon_0 $epsilon_0 --arch_learning_rate $arch_learning_rate --gpu $gpu  \

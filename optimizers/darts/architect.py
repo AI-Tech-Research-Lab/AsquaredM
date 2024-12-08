@@ -18,7 +18,7 @@ class Architect(object):
         self.lr = args.arch_learning_rate
         self.sgd_alpha=args.sgd_alpha
     
-        if not args.sgd_alpha: #lookbehind optimizer
+        if args.sgd_alpha: #lookbehind optimizer
             self.optimizer = torch.optim.SGD(self.model.arch_parameters(), lr=1)
         else: #original optimizer of darts
             self.optimizer = torch.optim.Adam(self.model.arch_parameters(),
@@ -33,7 +33,7 @@ class Architect(object):
             self.w_red = 2 * (1 - args.w_nor)
             print('w_nor:', self.w_nor)
             print('w_red:', self.w_red)
-        self.tau = 1/4
+        self.tau = 1/2
         self.w_init = 0
 
         if args.k_sam > 1: #Lookbehind-SAM

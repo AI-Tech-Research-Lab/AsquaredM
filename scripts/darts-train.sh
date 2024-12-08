@@ -8,8 +8,8 @@ epochs=600
 base_save_dir="results/darts_train"
 
 # Define the architecture and seeds
-architectures=("RHO1")
-seeds=(2 5 7)
+architectures=("LAMBDA_SAM")
+seeds=(0 1 2 3)
 
 # Loop through each architecture
 for arch in "${architectures[@]}"; do

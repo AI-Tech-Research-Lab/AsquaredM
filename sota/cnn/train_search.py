@@ -242,7 +242,7 @@ def main():
         valid_acc, valid_obj = infer(valid_queue, model, criterion)
 
         if args.betadecay:
-            beta_loss = architect.beta_loss()        
+            beta_loss = architect._beta_loss()        
 
         if args.wandb:
             wandb.log({"metrics/train_acc": train_acc, 

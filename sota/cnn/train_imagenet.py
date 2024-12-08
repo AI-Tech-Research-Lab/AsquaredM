@@ -17,6 +17,8 @@ import torch.utils
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
 from torch.autograd import Variable
+from datasets import Dataset
+from datasets import load_dataset
 
 from optimizers.darts import utils
 from sota.cnn.model_imagenet import NetworkImageNet as Network
@@ -133,9 +135,14 @@ def main():
         weight_decay=args.weight_decay
         )
     
+    # Step 1: Load the ImageNet dataset
+    ds = load_dataset("imagenet-1k")
+
+    # Step 2: Define normalization and transformations
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
     
+    # Training data transformations
     train_transform = transforms.Compose([
         transforms.RandomResizedCrop(224),  # Random crop with resizing to 224x224
         transforms.RandomHorizontalFlip(),  # Random horizontal flip
@@ -151,8 +158,34 @@ def main():
         normalize,  # Normalize using ImageNet mean and std
     ])
     
-    train_data = dset.ImageNet(root=args.data, split='train', transform=train_transform)
-    valid_data = dset.ImageNet(root=args.data, split='val', transform=valid_transform)
+    # Step 3: Custom dataset loader to apply transformations
+    class ImageNetDataset(torch.utils.data.Dataset):
+        def __init__(self, dataset, transform=None):
+            self.dataset = dataset
+            self.transform = transform
+
+        def __len__(self):
+            return len(self.dataset)
+
+        def __getitem__(self, idx):
+            sample = self.dataset[idx]
+            image = sample["image"]
+            label = sample["label"]
+            
+            # Ensure the image is in RGB format
+            if image.mode != "RGB":
+                image = image.convert("RGB")
+            
+            if self.transform:
+                image = self.transform(image)
+            return image, label
+
+    # Wrap datasets with transformations
+    train_data = ImageNetDataset(ds["train"], transform=train_transform)
+    valid_data = ImageNetDataset(ds["validation"], transform=valid_transform)
+
+    #train_data = dset.ImageNet(root=args.data, split='train', transform=train_transform)
+    #valid_data = dset.ImageNet(root=args.data, split='val', transform=valid_transform)
 
     train_queue = torch.utils.data.DataLoader(
         train_data, batch_size=args.batch_size, shuffle=True, pin_memory=True, num_workers=args.workers)

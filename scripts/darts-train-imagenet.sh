@@ -20,7 +20,7 @@ for arch in "${architectures[@]}"; do
         
         # Run the training command
         python sota/cnn/train_imagenet.py --dataset $dataset --arch ${arch}_seed$seed \
-            --data ../datasets/$dataset --gpu $device \
+            --data ../datasets/$dataset --workers 8 --gpu $device \
             --save $save_dir \
             --epochs $epochs --momentum 0.9 --batch_size 128 --learning_rate 0.1 \
             --drop_path_prob 0.2 --cutout --seed $seed --lr_scheduler cosine \
