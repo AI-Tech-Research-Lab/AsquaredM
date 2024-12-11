@@ -3,9 +3,9 @@
 dataset=cifar10
 rho=1
 epsilon=1e-2
-sam=True
+sam=False
 wandb=True
-betadecay=True
+betadecay=False
 unrolled=False
 epochs=50
 k_sam=1
