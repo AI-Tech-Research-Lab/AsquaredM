@@ -270,69 +270,67 @@ def get_bins(dataset, radius):
         elif radius == 3:
             return 60, 60, 60
 
-def plot_histograms(data_array, bins=100, path='', baselines=None, dataset='cifar10', radius=1): #add radius
+def plot_histograms(data_array, bins=100, path='', baselines=None, dataset='cifar10', radius=1):  
+    FONT_SIZE = 8  
+    FIGSIZE = (4, 5)  
+    COLORS = [mcolors.TABLEAU_COLORS[k] for k in mcolors.TABLEAU_COLORS.keys()]  
+    titles = ['Model A', 'Model B', 'Model C']  
 
-    FONT_SIZE = 8
-    #FIGSIZE = (3.5, 3.0)
-    FIGSIZE = (4,5)
-    COLORS = [mcolors.TABLEAU_COLORS[k] for k in mcolors.TABLEAU_COLORS.keys()]
-    #acc_lim = get_acc_limits(dataset) 
+    num_plots = len(data_array) - 1  
 
-    titles = ['Model A', 'Model B', 'Model C']
+    # Set up subplots  
+    fig, axs = plt.subplots(num_plots, 1, figsize=FIGSIZE, sharex=False)  
 
-    num_plots = len(data_array) - 1 
+    all_dataset = data_array[0]  
+    data_array = data_array[1:]  
 
-    # Set up subplots
-    fig, axs = plt.subplots(num_plots, 1, figsize=FIGSIZE, sharex=False)
+    # Plot histograms and curves for each element in the array  
+    for i, data in enumerate(data_array):  
+        temp_bins = get_bins(dataset, radius)[i]  
+        data = np.array(data)  
+        data = data[data > 10]  
 
-    #print("DATA ARRAY: ", data_array)
-    #print("ALL DATASET: ", data_array[0][:10])
-    all_dataset = data_array[0]
-    data_array = data_array[1:]
-    # Plot histograms and curves for each element in the array
-    for i, data in enumerate(data_array):
-        temp_bins = get_bins(dataset, radius)[i]
-        print("TEMP BINS: ", temp_bins)
-        #print("DATA: ", data[:10])
-        data = np.array(data)   
-        data = data[data > 10]
+        # Plot transparent curve behind histogram for the first element  
+        sns.histplot(all_dataset, bins=bins, color='green', edgecolor='black', kde=True,  
+                     line_kws={'linewidth': 1, 'alpha': 0.2}, ax=axs[i], stat='density')  
+        sns.histplot(data, bins=temp_bins, color='darkblue', edgecolor='black', kde=True,  
+                     line_kws={'linewidth': 2}, ax=axs[i], stat='density')  
 
-        # Plot transparent curve behind histogram for the first element
-        sns.histplot(all_dataset, bins=bins, color='green', edgecolor='black', kde=True, line_kws={'linewidth': 1, 'alpha': 0.2}, ax=axs[i], stat='density')
-        sns.histplot(data, bins=temp_bins, color='darkblue', edgecolor='black', kde=True, line_kws={'linewidth': 2}, ax=axs[i], stat='density')
-        axs[i].tick_params(axis='y', which='both', left=False, right=False, labelleft=True)  # Hide y-axis values
-        x_max,x_min = get_limits_plot(dataset)
-        axs[i].set_xlim(x_min, x_max)
+        axs[i].tick_params(axis='y', which='both', left=False, right=False, labelleft=True)  
+        x_max, x_min = get_limits_plot(dataset)  
+        axs[i].set_xlim(x_min, x_max)  
 
-        # Set y-axis limits
-        y_values = [bar.get_height() for bar in axs[i].patches]
-        max_density = max(y_values) 
-        max_density = max_density if max_density < 0.8 else 0.8 # Limit the maximum density to 0.8
-        ymax = math.ceil(max_density * 10) / 10
+        # Set y-axis limits  
+        y_values = [bar.get_height() for bar in axs[i].patches]  
+        max_density = max(y_values)  
+        max_density = max_density if max_density < 0.8 else 0.8  # Limit the maximum density to 0.8  
+        ymax = math.ceil(max_density * 10) / 10  
         axs[i].set_ylim(0, ymax)  
 
-        # Add title to each subplot
-        axs[i].set_title(f"{titles[i]} (Test accuracy: {baselines[i]:.2f}%)")  # Adjust title as needed  
+        # Add title to each subplot  
+        axs[i].set_title(f"{titles[i]} (Test accuracy: {baselines[i][0]:.2f}%-{baselines[i][1]:.2f}%)")  
 
-        # Plot baselines as vertical lines
-        if baselines:
-                axs[i].axvline(baselines[i], color='red', linestyle='--', linewidth=1)
-        
-        # Add grid with custom interval
-        axs[i].grid(True, axis='y', which='both', linestyle='--', linewidth=0.5)
-        axs[i].set_yticks(np.arange(0, ymax, 0.2))
+        # Add light grey interval for baseline  
+        if baselines:  
+            min_val, max_val = baselines[i]  
+            axs[i].fill_betweenx([0, ymax], min_val, max_val, color='lightgrey', alpha=0.5, label='Baseline Interval')  
 
-    # Add common X-axis label
-    axs[-1].set_xlabel('Accuracy', fontsize=FONT_SIZE)
+        # Add grid with custom interval  
+        axs[i].grid(True, axis='y', which='both', linestyle='--', linewidth=0.5)  
+        axs[i].set_yticks(np.arange(0, ymax, 0.2))  
 
-    # Adjust layout to prevent clipping of titles and labels
-    plt.tight_layout()
+    # Add common X-axis label  
+    axs[-1].set_xlabel('Accuracy', fontsize=FONT_SIZE)  
 
-    # Save the plot to a file
-    plt.savefig(path, format='pdf', bbox_inches='tight', dpi=300)
+    # Adjust layout to prevent clipping of titles and labels  
+    plt.tight_layout()  
 
-    # Show the plot
+    # Save the plot to a file  
+    plt.savefig(path, format='pdf', bbox_inches='tight', dpi=300)  
+
+    # Show the plot  
     plt.show()
+
 
 def plot_simple_histograms(data_array, bins=36, path=''):
     FONT_SIZE = 8
@@ -761,11 +759,11 @@ def get_idx_interval(acc, dataset):
 def get_acc_limits(dataset):
     if dataset == 'cifar10':
         # Return the min and max bounds of the accuracy ranges
-        return [94.3, 94.44], [84.3, 85.7], [74.3, 75.7]
+        return [92.3, 93.7], [84.3, 85.7], [74.3, 75.7]
     elif dataset == 'cifar100':
-        return [68.8, 74.2], [64.3, 65.7], [54.3, 55.7]
+        return [68.1, 73.5], [64.3, 65.7], [54.3, 55.7]
     elif dataset == 'ImageNet16-120':
-        return [46.6, 48], [34.3, 35.7], [24.3, 25.7]
+        return [45.9, 47.3], [34.3, 35.7], [24.3, 25.7]
     else:
         raise ValueError(f"Unsupported dataset: {dataset}")
 
@@ -796,6 +794,7 @@ def distributions_nasbench(bench, dataset, radius, dist_path='results/flatness_e
     if os.path.exists(os.path.join(folder,'neighborsnet_0.npy')):
         for i in range(3):
             dist[i] = np.load(os.path.join(folder,'neighborsnet_' + str(i) + '.npy'), allow_pickle=True)
+
     else:
         # Compute distributions
         for id_net in range(len(test_accs)):
@@ -827,7 +826,7 @@ def distributions_nasbench(bench, dataset, radius, dist_path='results/flatness_e
     plot_histograms(
         dist, bins=100,
         path=os.path.join(folder, f'histo_nasbench_{dataset}_{radius}.pdf'),
-        baselines=get_baselines(dataset),
+        baselines=get_acc_limits(dataset),
         dataset=dataset,
         radius=radius
     )
@@ -859,9 +858,9 @@ def plot_rho_nasbench():
 
 
 #plot_rho_nasbench()
-'''
-#bench = NASBench201(dataset='cifar10')
-#distributions_nasbench(bench, 'cifar10', 1)
+
+bench = NASBench201(dataset='cifar10')
+distributions_nasbench(bench, 'cifar10', 1)
 #distributions_nasbench(bench, 'cifar10', 2)
 #distributions_nasbench(bench, 'cifar10', 3)
 '''
@@ -869,7 +868,7 @@ bench = NASBench201(dataset='cifar100')
 #distributions_nasbench(bench, 'cifar100', 1)
 #distributions_nasbench(bench, 'cifar100', 2)
 distributions_nasbench(bench, 'cifar100', 3)
-'''
+
 bench = NASBench201(dataset='ImageNet16-120')
 distributions_nasbench(bench, 'ImageNet16-120', 1)
 distributions_nasbench(bench, 'ImageNet16-120', 2)
