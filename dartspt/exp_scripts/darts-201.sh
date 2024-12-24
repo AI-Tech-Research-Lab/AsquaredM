@@ -16,6 +16,7 @@ done
 echo 'id:' $id 'seed:' $seed 'dataset:' $dataset
 echo 'gpu:' $gpu
 
+# move into exp_scripts
 cd ../nasbench201/
 python train_search.py \
     --method darts \
