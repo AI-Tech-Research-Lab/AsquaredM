@@ -1,0 +1,6 @@
+wandb
+nas-bench-201
+tensorboard
+torch
+torchvision
+torchaudio
