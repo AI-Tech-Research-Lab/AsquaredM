@@ -21,7 +21,7 @@ echo 'id:' $id 'seed:' $seed 'dataset:' $dataset
 echo 'resume_epoch:' $resume_epoch 'resume_expid' $resume_expid
 echo 'gpu:' $gpu
 
-cd ../../nasbench201/
+cd ../nasbench201/
 python train_search.py \
     --method darts-proj \
     --dataset $dataset \

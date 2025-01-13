@@ -391,7 +391,7 @@ def distill(result):
 
 
 def query(api, genotype, logging):
-    result = api.query_by_arch(genotype)
+    result = api.query_by_arch(genotype, hp="200")
     logging.info('{:}'.format(result))
     cifar10_train, cifar10_test, cifar100_train, cifar100_valid, \
         cifar100_test, imagenet16_train, imagenet16_valid, imagenet16_test = distill(result)
