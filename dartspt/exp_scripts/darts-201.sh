@@ -20,7 +20,7 @@ echo 'gpu:' $gpu
 cd ../nasbench201/
 python train_search.py \
     --method darts \
-    --dataset $dataset \
+    --dataset $dataset --epochs 50 --ckpt_interval 20 \
     --save $id --gpu $gpu --seed $seed \
     # --fast --expid_tag debug \
 
