@@ -1,15 +1,15 @@
 #!/bin/bash
 
 # Define common parameters
-dataset=cifar100
+dataset=cifar10
 device=0
 optim="SGD"
 epochs=600
 base_save_dir="results/darts_train"
 
 # Define the architecture and seeds
-architectures=("BETA_SAM")
-seeds=(1 2 3 5)
+architectures=("SAM_exp_bad")
+seeds=(1)
 
 # Loop through each architecture
 for arch in "${architectures[@]}"; do

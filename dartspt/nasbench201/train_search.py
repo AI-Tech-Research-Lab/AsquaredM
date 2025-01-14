@@ -65,6 +65,8 @@ parser.add_argument('--log_tag', type=str, default='', help='extra tag for log d
 parser.add_argument('--edge_decision', type=str, default='random', choices=['random'], help='which edge to be projected next')
 parser.add_argument('--proj_crit', type=str, default='acc', choices=['loss', 'acc'], help='criteria for projection')
 parser.add_argument('--proj_intv', type=int, default=5, help='fine tune epochs between two projections')
+#sam
+parser.add_argument('--rho_alpha', type=float, default=1e-2, help='rho_alpha for SAM')
 args = parser.parse_args()
 
 
@@ -73,7 +75,7 @@ args = parser.parse_args()
 
 #### args augment
 expid = args.save
-args.save = '../experiments/nasbench201/search-{}-{}'.format(args.save, args.seed)
+args.save = '../experiments/nasbench201/search-{}-{}-{}'.format(args.save, args.seed, args.method)
 if not args.dataset == 'cifar10':
     args.save += '-' + args.dataset
 if args.expid_tag != 'none': args.save += '-' + args.expid_tag
@@ -154,7 +156,7 @@ def main():
     #### model
     criterion = nn.CrossEntropyLoss()
     search_space = SearchSpaceNames[args.search_space]
-    if args.method in ['darts', 'blank']:
+    if args.method in ['darts', 'blank', 'darts-sam']:
         model = TinyNetworkDarts(C=args.init_channels, N=5, max_nodes=4, num_classes=n_classes, criterion=criterion, search_space=search_space, args=args)
     elif args.method in ['darts-proj', 'blank-proj']:
         model = TinyNetworkDartsProj(C=args.init_channels, N=5, max_nodes=4, num_classes=n_classes, criterion=criterion, search_space=search_space, args=args)

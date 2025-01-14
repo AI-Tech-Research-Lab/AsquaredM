@@ -153,16 +153,16 @@ BETASAM_exp4_seed2 = Genotype(normal=[('sep_conv_3x3', 1), ('sep_conv_5x5', 0), 
 
 SAM_exp_bad_seed1 = Genotype(
     normal=[
-        ('sep_conv_3x3', 0), ('skip_connect', 1), 
+        ('max_pool_3x3', 0), ('skip_connect', 1), 
         ('avg_pool_3x3', 2), ('skip_connect', 2), 
-        ('sep_conv_3x3', 3), ('avg_pool_3x3', 1), 
+        ('max_pool_3x3', 3), ('avg_pool_3x3', 1), 
         ('max_pool_3x3', 4), ('sep_conv_3x3', 3)
     ],
     normal_concat=range(2, 6),
     reduce=[
-        ('sep_conv_3x3', 0), ('max_pool_3x3', 1), 
+        ('max_pool_3x3', 0), ('max_pool_3x3', 1), 
         ('skip_connect', 2), ('avg_pool_3x3', 1), 
-        ('sep_conv_3x3', 2), ('skip_connect', 3), 
+        ('max_pool_3x3', 2), ('skip_connect', 3), 
         ('max_pool_3x3', 4), ('sep_conv_3x3', 3)
     ],
     reduce_concat=range(2, 6)
