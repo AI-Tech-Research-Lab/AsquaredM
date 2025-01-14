@@ -4,6 +4,7 @@ id=${script_name%.*}
 dataset=${dataset:-cifar10}
 seed=${seed:-0}
 gpu=${gpu:-"auto"}
+method=darts-sam #darts
 
 while [ $# -gt 0 ]; do
     if [[ $1 == *"--"* ]]; then
@@ -19,7 +20,7 @@ echo 'gpu:' $gpu
 # move into exp_scripts
 cd ../nasbench201/
 python train_search.py \
-    --method darts \
+    --method $method \
     --dataset $dataset --epochs 50 --ckpt_interval 10 \
     --save $id --gpu $gpu --seed $seed \
     # --fast --expid_tag debug \
