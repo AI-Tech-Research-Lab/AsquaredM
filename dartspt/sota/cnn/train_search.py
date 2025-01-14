@@ -97,8 +97,8 @@ if args.expid_tag != '':
     args.save += '-{}'.format(args.expid_tag)
 
 expid = args.save
-args.save = '../../experiments/sota/{}/search-{}-{}-{}'.format(
-    args.dataset, args.save, args.search_space, args.seed)
+args.save = '../../experiments/sota/{}/search-{}-{}-{}-{}'.format(
+    args.dataset, args.save, args.search_space, args.seed, args.method)
 
 if args.unrolled:
     args.save += '-unrolled'
