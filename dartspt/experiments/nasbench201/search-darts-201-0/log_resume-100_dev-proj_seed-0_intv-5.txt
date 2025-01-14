@@ -1,0 +1,15 @@
+2025-01-14 15:05:17,738 args = Namespace(data='../data', dataset='cifar10', method='darts-proj', search_space='nas-bench-201', batch_size=64, learning_rate=0.025, learning_rate_min=0.001, momentum=0.9, weight_decay=0.0003, report_freq=50, gpu='auto', epochs=100, init_channels=16, layers=8, model_path='saved_models', cutout=False, cutout_length=16, cutout_prob=1.0, save='../experiments/nasbench201/search-darts-201-0', seed=0, grad_clip=5, train_portion=0.5, arch_learning_rate=0.0003, arch_weight_decay=0.001, fast=False, resume_epoch=100, resume_expid='search-darts-201-0', dev='proj', ckpt_interval=20, expid_tag='none', log_tag='', edge_decision='random', proj_crit='acc', proj_intv=5, rho_alpha=0.01)
+2025-01-14 15:05:17,738 gpu device = 0
+2025-01-14 15:05:40,166 param size = 1.686106MB
+2025-01-14 15:05:41,656 loading checkpoint from darts-proj-201
+2025-01-14 15:05:41,656 epoch 0 lr 2.500000e-02
+2025-01-14 15:05:41,712 genotype = Structure(4 nodes with |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 15:05:41,718 tensor([[0.1998, 0.1996, 0.1998, 0.2004, 0.2004],
+        [0.1998, 0.2003, 0.2001, 0.1999, 0.2000],
+        [0.2004, 0.1999, 0.1999, 0.2000, 0.1997],
+        [0.2004, 0.1999, 0.1998, 0.2001, 0.1999],
+        [0.1999, 0.2002, 0.2000, 0.2000, 0.1999],
+        [0.2000, 0.2001, 0.2002, 0.2001, 0.1996]], device='cuda:0',
+       grad_fn=<SoftmaxBackward0>)
+2025-01-14 15:05:48,503 train 000 2.329907e+00 10.937500 56.250000
+2025-01-14 15:06:21,507 train 050 2.113148e+00 20.251226 71.200981
