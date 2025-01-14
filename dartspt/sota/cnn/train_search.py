@@ -84,6 +84,8 @@ parser.add_argument('--proj_crit_edge',   type=str, default='acc', choices=['los
 parser.add_argument('--proj_intv', type=int, default=10, help='interval between two projections')
 parser.add_argument('--proj_mode_edge', type=str, default='reg', choices=['reg'],
                     help='edge projection evaluation mode, reg: one edge at a time')
+#sam
+parser.add_argument('--rho_alpha', type=float, default=1e-1, help='rho for sam')
 
 args = parser.parse_args()
 

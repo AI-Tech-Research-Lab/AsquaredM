@@ -4,6 +4,7 @@ id=${script_name%.*}
 dataset=${dataset:-cifar10}
 seed=${seed:-2}
 gpu=${gpu:-"auto"}
+method=darts
 
 space=${space:-s5}
 
@@ -21,7 +22,7 @@ echo 'gpu:' $gpu
 
 cd ../sota/cnn
 python train_search.py \
-    --method darts \
+    --method $method \
     --search_space $space --dataset $dataset \
     --seed $seed --save $id --gpu $gpu \
     # --expid_tag debug --fast \
