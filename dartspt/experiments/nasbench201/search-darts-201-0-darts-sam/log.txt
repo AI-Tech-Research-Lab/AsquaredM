@@ -1,11 +1,1653 @@
-2025-01-14 14:10:03,409 args = Namespace(data='../data', dataset='cifar10', method='darts-sam', search_space='nas-bench-201', batch_size=64, learning_rate=0.025, learning_rate_min=0.001, momentum=0.9, weight_decay=0.0003, report_freq=50, gpu='auto', epochs=50, init_channels=16, layers=8, model_path='saved_models', cutout=False, cutout_length=16, cutout_prob=1.0, save='../experiments/nasbench201/search-darts-201-0-darts-sam', seed=0, grad_clip=5, train_portion=0.5, arch_learning_rate=0.0003, arch_weight_decay=0.001, fast=False, resume_epoch=0, resume_expid='', dev=None, ckpt_interval=10, expid_tag='none', log_tag='', edge_decision='random', proj_crit='acc', proj_intv=5, rho_alpha=0.01)
-2025-01-14 14:10:03,409 gpu device = 0
-2025-01-14 14:10:23,989 param size = 1.686106MB
-2025-01-14 14:10:25,458 epoch 0 lr 2.500000e-02
-2025-01-14 14:10:25,502 genotype = Structure(4 nodes with |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
-2025-01-14 14:10:25,513 tensor([[0.1998, 0.1996, 0.1998, 0.2004, 0.2004],
+2025-01-14 15:15:29,869 args = Namespace(data='../data', dataset='cifar10', method='darts-sam', search_space='nas-bench-201', batch_size=64, learning_rate=0.025, learning_rate_min=0.001, momentum=0.9, weight_decay=0.0003, report_freq=50, gpu='auto', epochs=50, init_channels=16, layers=8, model_path='saved_models', cutout=False, cutout_length=16, cutout_prob=1.0, save='../experiments/nasbench201/search-darts-201-0-darts-sam', seed=0, grad_clip=5, train_portion=0.5, arch_learning_rate=0.0003, arch_weight_decay=0.001, fast=False, resume_epoch=0, resume_expid='', dev=None, ckpt_interval=10, expid_tag='none', log_tag='', edge_decision='random', proj_crit='acc', proj_intv=5, rho_alpha=0.01)
+2025-01-14 15:15:29,870 gpu device = 0
+2025-01-14 15:15:54,443 param size = 1.686106MB
+2025-01-14 15:16:04,246 epoch 0 lr 2.500000e-02
+2025-01-14 15:16:04,277 genotype = Structure(4 nodes with |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 15:16:04,307 tensor([[0.1998, 0.1996, 0.1998, 0.2004, 0.2004],
         [0.1998, 0.2003, 0.2001, 0.1999, 0.2000],
         [0.2004, 0.1999, 0.1999, 0.2000, 0.1997],
         [0.2004, 0.1999, 0.1998, 0.2001, 0.1999],
         [0.1999, 0.2002, 0.2000, 0.2000, 0.1999],
         [0.2000, 0.2001, 0.2002, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 15:16:07,578 train 000 2.329854e+00 10.937500 56.250000
+2025-01-14 15:16:55,427 train 050 2.107612e+00 20.649511 71.844368
+2025-01-14 15:17:44,047 train 100 2.034256e+00 24.257425 76.454208
+2025-01-14 15:18:32,771 train 150 1.981209e+00 25.620861 78.797600
+2025-01-14 15:19:21,623 train 200 1.937980e+00 26.811256 80.371574
+2025-01-14 15:20:09,214 train 250 1.900108e+00 28.274403 81.754234
+2025-01-14 15:20:57,351 train 300 1.872935e+00 29.147633 82.677528
+2025-01-14 15:21:45,619 train 350 1.847304e+00 30.230591 83.426819
+2025-01-14 15:22:24,031 train_acc  30.970268
+2025-01-14 15:22:24,034 train_loss 1.827025
+2025-01-14 15:22:56,555 valid_acc  38.371998
+2025-01-14 15:22:56,555 valid_loss 1.669160
+2025-01-14 15:22:56,557 |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=9178
+cifar10-valid  FLOP= 11.72 M, Params=0.101 MB, latency=13.77 ms.
+cifar10-valid  train : [loss = 0.031, top1 = 99.35%], valid : [loss = 0.624, top1 = 85.40%]
+cifar10        FLOP= 11.72 M, Params=0.101 MB, latency=12.31 ms.
+cifar10        train : [loss = 0.071, top1 = 97.75%], test  : [loss = 0.405, top1 = 88.93%]
+cifar100       FLOP= 11.72 M, Params=0.107 MB, latency=11.05 ms.
+cifar100       train : [loss = 0.719, top1 = 79.09%], valid : [loss = 1.372, top1 = 63.28%], test : [loss = 1.367, top1 = 64.26%]
+ImageNet16-120 FLOP=  2.94 M, Params=0.108 MB, latency=12.49 ms.
+ImageNet16-120 train : [loss = 2.529, top1 = 36.16%], valid : [loss = 2.644, top1 = 33.63%], test : [loss = 2.684, top1 = 34.33%]
+2025-01-14 15:22:56,557 cifar10 train 97.750000 test 88.930000
+2025-01-14 15:22:56,557 cifar100 train 79.090000 valid 63.280000 test 64.260000
+2025-01-14 15:22:56,557 imagenet16 train 36.160000 valid 33.630000 test 34.330000
+2025-01-14 15:22:56,575 epoch 1 lr 2.495266e-02
+2025-01-14 15:22:56,576 genotype = Structure(4 nodes with |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 15:22:56,576 tensor([[0.1998, 0.1996, 0.1998, 0.2004, 0.2005],
+        [0.1997, 0.2003, 0.2001, 0.1999, 0.2000],
+        [0.2005, 0.1999, 0.1999, 0.2000, 0.1998],
+        [0.2003, 0.1999, 0.1997, 0.2001, 0.1999],
+        [0.1999, 0.2003, 0.1999, 0.2000, 0.2000],
+        [0.2000, 0.2001, 0.2002, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 15:22:57,613 train 000 1.711888e+00 35.937500 81.250000
+2025-01-14 15:23:46,051 train 050 1.643837e+00 38.388481 88.970589
+2025-01-14 15:24:34,124 train 100 1.652197e+00 38.258045 88.830444
+2025-01-14 15:25:22,281 train 150 1.638528e+00 38.907284 88.927979
+2025-01-14 15:26:10,360 train 200 1.621928e+00 39.435635 89.202423
+2025-01-14 15:26:57,631 train 250 1.604761e+00 40.164345 89.572960
+2025-01-14 15:27:45,847 train 300 1.591128e+00 40.578281 89.950165
+2025-01-14 15:28:34,133 train 350 1.580870e+00 40.954414 90.104164
+2025-01-14 15:29:12,910 train_acc  41.248402
+2025-01-14 15:29:12,912 train_loss 1.572789
+2025-01-14 15:29:44,867 valid_acc  41.371998
+2025-01-14 15:29:44,867 valid_loss 1.582381
+2025-01-14 15:29:44,869 |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=9178
+cifar10-valid  FLOP= 11.72 M, Params=0.101 MB, latency=13.77 ms.
+cifar10-valid  train : [loss = 0.031, top1 = 99.35%], valid : [loss = 0.624, top1 = 85.40%]
+cifar10        FLOP= 11.72 M, Params=0.101 MB, latency=12.31 ms.
+cifar10        train : [loss = 0.071, top1 = 97.75%], test  : [loss = 0.405, top1 = 88.93%]
+cifar100       FLOP= 11.72 M, Params=0.107 MB, latency=11.05 ms.
+cifar100       train : [loss = 0.719, top1 = 79.09%], valid : [loss = 1.372, top1 = 63.28%], test : [loss = 1.367, top1 = 64.26%]
+ImageNet16-120 FLOP=  2.94 M, Params=0.108 MB, latency=12.49 ms.
+ImageNet16-120 train : [loss = 2.529, top1 = 36.16%], valid : [loss = 2.644, top1 = 33.63%], test : [loss = 2.684, top1 = 34.33%]
+2025-01-14 15:29:44,869 cifar10 train 97.750000 test 88.930000
+2025-01-14 15:29:44,869 cifar100 train 79.090000 valid 63.280000 test 64.260000
+2025-01-14 15:29:44,869 imagenet16 train 36.160000 valid 33.630000 test 34.330000
+2025-01-14 15:29:44,882 epoch 2 lr 2.483464e-02
+2025-01-14 15:29:44,882 genotype = Structure(4 nodes with |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 15:29:44,883 tensor([[0.1998, 0.1996, 0.1997, 0.2004, 0.2005],
+        [0.1997, 0.2003, 0.2000, 0.2000, 0.2000],
+        [0.2004, 0.1999, 0.1999, 0.2001, 0.1997],
+        [0.2003, 0.1999, 0.1998, 0.2000, 0.1999],
+        [0.1999, 0.2003, 0.1999, 0.1999, 0.2000],
+        [0.2000, 0.2002, 0.2002, 0.2000, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 15:29:45,737 train 000 1.337807e+00 50.000000 96.875000
+2025-01-14 15:30:33,850 train 050 1.434951e+00 45.925247 92.371330
+2025-01-14 15:31:21,276 train 100 1.430912e+00 46.209778 92.558784
+2025-01-14 15:32:09,186 train 150 1.421684e+00 46.885349 92.601410
+2025-01-14 15:32:57,147 train 200 1.412795e+00 47.038246 92.723877
+2025-01-14 15:33:44,441 train 250 1.403674e+00 47.628239 92.866035
+2025-01-14 15:34:32,377 train 300 1.390970e+00 48.068935 93.049210
+2025-01-14 15:35:20,408 train 350 1.387307e+00 48.228275 93.100067
+2025-01-14 15:35:58,433 train_acc  48.485455
+2025-01-14 15:35:58,435 train_loss 1.384109
+2025-01-14 15:36:30,222 valid_acc  50.911999
+2025-01-14 15:36:30,222 valid_loss 1.344217
+2025-01-14 15:36:30,224 |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=14987
+cifar10-valid  FLOP= 47.10 M, Params=0.344 MB, latency=14.88 ms.
+cifar10-valid  train : [loss = 0.006, top1 = 99.94%], valid : [loss = 0.473, top1 = 89.09%]
+cifar10        FLOP= 47.10 M, Params=0.344 MB, latency=15.99 ms.
+cifar10        train : [loss = 0.013, top1 = 99.76%], test  : [loss = 0.307, top1 = 92.31%]
+cifar100       FLOP= 47.11 M, Params=0.350 MB, latency=15.28 ms.
+cifar100       train : [loss = 0.314, top1 = 91.57%], valid : [loss = 1.261, top1 = 67.95%], test : [loss = 1.243, top1 = 68.19%]
+ImageNet16-120 FLOP= 11.78 M, Params=0.351 MB, latency=13.10 ms.
+ImageNet16-120 train : [loss = 2.031, top1 = 46.79%], valid : [loss = 2.303, top1 = 40.93%], test : [loss = 2.318, top1 = 41.24%]
+2025-01-14 15:36:30,224 cifar10 train 99.760000 test 92.310000
+2025-01-14 15:36:30,224 cifar100 train 91.570000 valid 67.950000 test 68.190000
+2025-01-14 15:36:30,224 imagenet16 train 46.790000 valid 40.930000 test 41.240000
+2025-01-14 15:36:30,237 epoch 3 lr 2.467010e-02
+2025-01-14 15:36:30,238 genotype = Structure(4 nodes with |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 15:36:30,239 tensor([[0.1998, 0.1996, 0.1998, 0.2004, 0.2004],
+        [0.1997, 0.2003, 0.2001, 0.1999, 0.2000],
+        [0.2005, 0.1999, 0.1999, 0.1999, 0.1998],
+        [0.2003, 0.1999, 0.1998, 0.2001, 0.1999],
+        [0.1999, 0.2003, 0.1999, 0.2000, 0.2000],
+        [0.2000, 0.2001, 0.2002, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 15:36:31,098 train 000 1.418167e+00 51.562500 87.500000
+2025-01-14 15:37:19,105 train 050 1.307705e+00 51.868874 93.321083
+2025-01-14 15:38:06,765 train 100 1.286999e+00 52.908417 93.997520
+2025-01-14 15:38:54,543 train 150 1.281517e+00 53.062912 94.257034
+2025-01-14 15:39:42,446 train 200 1.273293e+00 53.498135 94.465172
+2025-01-14 15:40:30,506 train 250 1.260707e+00 53.847115 94.640190
+2025-01-14 15:41:17,845 train 300 1.258626e+00 54.012665 94.632469
+2025-01-14 15:42:05,564 train 350 1.249238e+00 54.282406 94.618057
+2025-01-14 15:42:44,226 train_acc  54.455723
+2025-01-14 15:42:44,228 train_loss 1.243088
+2025-01-14 15:43:15,743 valid_acc  56.571999
+2025-01-14 15:43:15,743 valid_loss 1.199587
+2025-01-14 15:43:15,745 |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=14987
+cifar10-valid  FLOP= 47.10 M, Params=0.344 MB, latency=14.88 ms.
+cifar10-valid  train : [loss = 0.006, top1 = 99.94%], valid : [loss = 0.473, top1 = 89.09%]
+cifar10        FLOP= 47.10 M, Params=0.344 MB, latency=15.99 ms.
+cifar10        train : [loss = 0.013, top1 = 99.76%], test  : [loss = 0.307, top1 = 92.31%]
+cifar100       FLOP= 47.11 M, Params=0.350 MB, latency=15.28 ms.
+cifar100       train : [loss = 0.314, top1 = 91.57%], valid : [loss = 1.261, top1 = 67.95%], test : [loss = 1.243, top1 = 68.19%]
+ImageNet16-120 FLOP= 11.78 M, Params=0.351 MB, latency=13.10 ms.
+ImageNet16-120 train : [loss = 2.031, top1 = 46.79%], valid : [loss = 2.303, top1 = 40.93%], test : [loss = 2.318, top1 = 41.24%]
+2025-01-14 15:43:15,745 cifar10 train 99.760000 test 92.310000
+2025-01-14 15:43:15,745 cifar100 train 91.570000 valid 67.950000 test 68.190000
+2025-01-14 15:43:15,745 imagenet16 train 46.790000 valid 40.930000 test 41.240000
+2025-01-14 15:43:15,757 epoch 4 lr 2.445969e-02
+2025-01-14 15:43:15,758 genotype = Structure(4 nodes with |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 15:43:15,758 tensor([[0.1998, 0.1995, 0.1999, 0.2005, 0.2003],
+        [0.1999, 0.2002, 0.2001, 0.2000, 0.1999],
+        [0.2004, 0.1998, 0.2000, 0.2001, 0.1997],
+        [0.2004, 0.1998, 0.1998, 0.2001, 0.1998],
+        [0.2000, 0.2002, 0.2000, 0.2000, 0.1999],
+        [0.2001, 0.2000, 0.2002, 0.2001, 0.1995]], grad_fn=<ToCopyBackward0>)
+2025-01-14 15:43:16,609 train 000 9.884844e-01 64.062500 100.000000
+2025-01-14 15:44:04,747 train 050 1.178013e+00 57.873775 95.189957
+2025-01-14 15:44:51,946 train 100 1.170742e+00 57.456684 95.358910
+2025-01-14 15:45:40,315 train 150 1.153721e+00 57.822849 95.571190
+2025-01-14 15:46:28,109 train 200 1.153628e+00 57.812500 95.646767
+2025-01-14 15:47:15,349 train 250 1.154712e+00 58.024155 95.654884
+2025-01-14 15:48:03,407 train 300 1.150103e+00 58.108387 95.675873
+2025-01-14 15:48:51,561 train 350 1.143086e+00 58.355591 95.726494
+2025-01-14 15:49:29,802 train_acc  58.587757
+2025-01-14 15:49:29,804 train_loss 1.137003
+2025-01-14 15:50:01,472 valid_acc  59.167999
+2025-01-14 15:50:01,473 valid_loss 1.131716
+2025-01-14 15:50:01,475 |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=14987
+cifar10-valid  FLOP= 47.10 M, Params=0.344 MB, latency=14.88 ms.
+cifar10-valid  train : [loss = 0.006, top1 = 99.94%], valid : [loss = 0.473, top1 = 89.09%]
+cifar10        FLOP= 47.10 M, Params=0.344 MB, latency=15.99 ms.
+cifar10        train : [loss = 0.013, top1 = 99.76%], test  : [loss = 0.307, top1 = 92.31%]
+cifar100       FLOP= 47.11 M, Params=0.350 MB, latency=15.28 ms.
+cifar100       train : [loss = 0.314, top1 = 91.57%], valid : [loss = 1.261, top1 = 67.95%], test : [loss = 1.243, top1 = 68.19%]
+ImageNet16-120 FLOP= 11.78 M, Params=0.351 MB, latency=13.10 ms.
+ImageNet16-120 train : [loss = 2.031, top1 = 46.79%], valid : [loss = 2.303, top1 = 40.93%], test : [loss = 2.318, top1 = 41.24%]
+2025-01-14 15:50:01,475 cifar10 train 99.760000 test 92.310000
+2025-01-14 15:50:01,475 cifar100 train 91.570000 valid 67.950000 test 68.190000
+2025-01-14 15:50:01,475 imagenet16 train 46.790000 valid 40.930000 test 41.240000
+2025-01-14 15:50:01,488 epoch 5 lr 2.420423e-02
+2025-01-14 15:50:01,489 genotype = Structure(4 nodes with |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 15:50:01,489 tensor([[0.1998, 0.1996, 0.1998, 0.2005, 0.2004],
+        [0.1997, 0.2003, 0.2000, 0.2000, 0.2000],
+        [0.2005, 0.1999, 0.1999, 0.2000, 0.1998],
+        [0.2003, 0.1999, 0.1998, 0.2001, 0.1999],
+        [0.1999, 0.2002, 0.2000, 0.1999, 0.1999],
+        [0.2000, 0.2001, 0.2002, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 15:50:02,417 train 000 1.132003e+00 56.250000 96.875000
+2025-01-14 15:50:51,006 train 050 1.101655e+00 59.987747 95.955887
+2025-01-14 15:51:39,528 train 100 1.103346e+00 60.272278 96.024132
+2025-01-14 15:52:27,965 train 150 1.093404e+00 60.533939 96.026489
+2025-01-14 15:53:15,814 train 200 1.077933e+00 61.287312 96.004349
+2025-01-14 15:54:04,106 train 250 1.071979e+00 61.516438 96.146667
+2025-01-14 15:54:51,473 train 300 1.069083e+00 61.503323 96.169014
+2025-01-14 15:55:39,584 train 350 1.067150e+00 61.551815 96.216171
+2025-01-14 15:56:18,673 train_acc  61.472984
+2025-01-14 15:56:18,675 train_loss 1.068518
+2025-01-14 15:56:50,505 valid_acc  62.683998
+2025-01-14 15:56:50,505 valid_loss 1.035692
+2025-01-14 15:56:50,507 |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=9178
+cifar10-valid  FLOP= 11.72 M, Params=0.101 MB, latency=13.77 ms.
+cifar10-valid  train : [loss = 0.031, top1 = 99.35%], valid : [loss = 0.624, top1 = 85.40%]
+cifar10        FLOP= 11.72 M, Params=0.101 MB, latency=12.31 ms.
+cifar10        train : [loss = 0.071, top1 = 97.75%], test  : [loss = 0.405, top1 = 88.93%]
+cifar100       FLOP= 11.72 M, Params=0.107 MB, latency=11.05 ms.
+cifar100       train : [loss = 0.719, top1 = 79.09%], valid : [loss = 1.372, top1 = 63.28%], test : [loss = 1.367, top1 = 64.26%]
+ImageNet16-120 FLOP=  2.94 M, Params=0.108 MB, latency=12.49 ms.
+ImageNet16-120 train : [loss = 2.529, top1 = 36.16%], valid : [loss = 2.644, top1 = 33.63%], test : [loss = 2.684, top1 = 34.33%]
+2025-01-14 15:56:50,507 cifar10 train 97.750000 test 88.930000
+2025-01-14 15:56:50,507 cifar100 train 79.090000 valid 63.280000 test 64.260000
+2025-01-14 15:56:50,507 imagenet16 train 36.160000 valid 33.630000 test 34.330000
+2025-01-14 15:56:50,520 epoch 6 lr 2.390474e-02
+2025-01-14 15:56:50,520 genotype = Structure(4 nodes with |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 15:56:50,520 tensor([[0.1997, 0.1996, 0.1998, 0.2004, 0.2004],
+        [0.1997, 0.2003, 0.2001, 0.1999, 0.2000],
+        [0.2005, 0.1999, 0.1999, 0.2000, 0.1998],
+        [0.2003, 0.1999, 0.1997, 0.2001, 0.1999],
+        [0.1999, 0.2003, 0.2000, 0.2000, 0.1999],
+        [0.2000, 0.2001, 0.2002, 0.2000, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 15:56:51,406 train 000 1.090717e+00 62.500000 96.875000
+2025-01-14 15:57:39,644 train 050 1.020634e+00 63.112747 96.783089
+2025-01-14 15:58:27,717 train 100 1.023203e+00 63.072399 96.642944
+2025-01-14 15:59:15,692 train 150 1.015711e+00 63.265728 96.647354
+2025-01-14 16:00:02,940 train 200 1.015590e+00 63.238495 96.727303
+2025-01-14 16:00:50,970 train 250 1.012292e+00 63.471119 96.657127
+2025-01-14 16:01:38,925 train 300 1.006121e+00 63.735462 96.708885
+2025-01-14 16:02:26,985 train 350 1.007223e+00 63.693020 96.688034
+2025-01-14 16:03:05,357 train_acc  63.842709
+2025-01-14 16:03:05,359 train_loss 1.003055
+2025-01-14 16:03:37,739 valid_acc  64.192001
+2025-01-14 16:03:37,739 valid_loss 1.013801
+2025-01-14 16:03:37,740 |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=9178
+cifar10-valid  FLOP= 11.72 M, Params=0.101 MB, latency=13.77 ms.
+cifar10-valid  train : [loss = 0.031, top1 = 99.35%], valid : [loss = 0.624, top1 = 85.40%]
+cifar10        FLOP= 11.72 M, Params=0.101 MB, latency=12.31 ms.
+cifar10        train : [loss = 0.071, top1 = 97.75%], test  : [loss = 0.405, top1 = 88.93%]
+cifar100       FLOP= 11.72 M, Params=0.107 MB, latency=11.05 ms.
+cifar100       train : [loss = 0.719, top1 = 79.09%], valid : [loss = 1.372, top1 = 63.28%], test : [loss = 1.367, top1 = 64.26%]
+ImageNet16-120 FLOP=  2.94 M, Params=0.108 MB, latency=12.49 ms.
+ImageNet16-120 train : [loss = 2.529, top1 = 36.16%], valid : [loss = 2.644, top1 = 33.63%], test : [loss = 2.684, top1 = 34.33%]
+2025-01-14 16:03:37,740 cifar10 train 97.750000 test 88.930000
+2025-01-14 16:03:37,741 cifar100 train 79.090000 valid 63.280000 test 64.260000
+2025-01-14 16:03:37,741 imagenet16 train 36.160000 valid 33.630000 test 34.330000
+2025-01-14 16:03:37,753 epoch 7 lr 2.356240e-02
+2025-01-14 16:03:37,754 genotype = Structure(4 nodes with |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 16:03:37,754 tensor([[0.1998, 0.1996, 0.1998, 0.2004, 0.2004],
+        [0.1998, 0.2003, 0.2000, 0.1999, 0.2000],
+        [0.2004, 0.1999, 0.1998, 0.2001, 0.1997],
+        [0.2004, 0.1999, 0.1998, 0.2001, 0.1999],
+        [0.1999, 0.2002, 0.2000, 0.2000, 0.1999],
+        [0.2001, 0.2001, 0.2001, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 16:03:38,620 train 000 7.375310e-01 75.000000 98.437500
+2025-01-14 16:04:25,894 train 050 9.819845e-01 64.736519 96.752457
+2025-01-14 16:05:13,801 train 100 9.616802e-01 65.872520 96.782173
+2025-01-14 16:06:01,960 train 150 9.679605e-01 65.531868 96.947433
+2025-01-14 16:06:49,210 train 200 9.709141e-01 65.617226 96.999374
+2025-01-14 16:07:37,182 train 250 9.653419e-01 65.500504 97.111557
+2025-01-14 16:08:25,416 train 300 9.660851e-01 65.432930 97.160507
+2025-01-14 16:09:13,961 train 350 9.598080e-01 65.722931 97.182159
+2025-01-14 16:09:52,332 train_acc  65.644981
+2025-01-14 16:09:52,334 train_loss 0.957790
+2025-01-14 16:10:24,075 valid_acc  63.584000
+2025-01-14 16:10:24,075 valid_loss 1.029528
+2025-01-14 16:10:24,076 |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=14987
+cifar10-valid  FLOP= 47.10 M, Params=0.344 MB, latency=14.88 ms.
+cifar10-valid  train : [loss = 0.006, top1 = 99.94%], valid : [loss = 0.473, top1 = 89.09%]
+cifar10        FLOP= 47.10 M, Params=0.344 MB, latency=15.99 ms.
+cifar10        train : [loss = 0.013, top1 = 99.76%], test  : [loss = 0.307, top1 = 92.31%]
+cifar100       FLOP= 47.11 M, Params=0.350 MB, latency=15.28 ms.
+cifar100       train : [loss = 0.314, top1 = 91.57%], valid : [loss = 1.261, top1 = 67.95%], test : [loss = 1.243, top1 = 68.19%]
+ImageNet16-120 FLOP= 11.78 M, Params=0.351 MB, latency=13.10 ms.
+ImageNet16-120 train : [loss = 2.031, top1 = 46.79%], valid : [loss = 2.303, top1 = 40.93%], test : [loss = 2.318, top1 = 41.24%]
+2025-01-14 16:10:24,077 cifar10 train 99.760000 test 92.310000
+2025-01-14 16:10:24,077 cifar100 train 91.570000 valid 67.950000 test 68.190000
+2025-01-14 16:10:24,077 imagenet16 train 46.790000 valid 40.930000 test 41.240000
+2025-01-14 16:10:24,089 epoch 8 lr 2.317856e-02
+2025-01-14 16:10:24,090 genotype = Structure(4 nodes with |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 16:10:24,090 tensor([[0.1998, 0.1996, 0.1998, 0.2005, 0.2004],
+        [0.1998, 0.2003, 0.2001, 0.1999, 0.2000],
+        [0.2005, 0.1999, 0.1999, 0.2000, 0.1997],
+        [0.2004, 0.1999, 0.1998, 0.2001, 0.1999],
+        [0.1999, 0.2002, 0.2000, 0.2000, 0.1999],
+        [0.2001, 0.2001, 0.2002, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 16:10:24,965 train 000 8.458596e-01 65.625000 98.437500
+2025-01-14 16:11:13,271 train 050 9.462265e-01 65.104172 97.120102
+2025-01-14 16:12:01,297 train 100 9.462126e-01 65.563118 97.199875
+2025-01-14 16:12:49,316 train 150 9.242722e-01 66.659767 97.475166
+2025-01-14 16:13:36,935 train 200 9.230800e-01 66.713310 97.504662
+2025-01-14 16:14:25,354 train 250 9.279064e-01 66.552544 97.429039
+2025-01-14 16:15:13,535 train 300 9.272212e-01 66.668396 97.414864
+2025-01-14 16:16:01,239 train 350 9.239599e-01 66.782410 97.329056
+2025-01-14 16:16:39,078 train_acc  66.871803
+2025-01-14 16:16:39,080 train_loss 0.923860
+2025-01-14 16:17:11,493 valid_acc  67.888000
+2025-01-14 16:17:11,493 valid_loss 0.908780
+2025-01-14 16:17:11,495 |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=14987
+cifar10-valid  FLOP= 47.10 M, Params=0.344 MB, latency=14.88 ms.
+cifar10-valid  train : [loss = 0.006, top1 = 99.94%], valid : [loss = 0.473, top1 = 89.09%]
+cifar10        FLOP= 47.10 M, Params=0.344 MB, latency=15.99 ms.
+cifar10        train : [loss = 0.013, top1 = 99.76%], test  : [loss = 0.307, top1 = 92.31%]
+cifar100       FLOP= 47.11 M, Params=0.350 MB, latency=15.28 ms.
+cifar100       train : [loss = 0.314, top1 = 91.57%], valid : [loss = 1.261, top1 = 67.95%], test : [loss = 1.243, top1 = 68.19%]
+ImageNet16-120 FLOP= 11.78 M, Params=0.351 MB, latency=13.10 ms.
+ImageNet16-120 train : [loss = 2.031, top1 = 46.79%], valid : [loss = 2.303, top1 = 40.93%], test : [loss = 2.318, top1 = 41.24%]
+2025-01-14 16:17:11,495 cifar10 train 99.760000 test 92.310000
+2025-01-14 16:17:11,495 cifar100 train 91.570000 valid 67.950000 test 68.190000
+2025-01-14 16:17:11,495 imagenet16 train 46.790000 valid 40.930000 test 41.240000
+2025-01-14 16:17:11,508 epoch 9 lr 2.275473e-02
+2025-01-14 16:17:11,509 genotype = Structure(4 nodes with |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 16:17:11,509 tensor([[0.1998, 0.1995, 0.1998, 0.2004, 0.2004],
+        [0.1998, 0.2003, 0.2001, 0.1999, 0.2000],
+        [0.2005, 0.1999, 0.1999, 0.2000, 0.1997],
+        [0.2004, 0.1999, 0.1998, 0.2001, 0.1999],
+        [0.1999, 0.2002, 0.2000, 0.2000, 0.1999],
+        [0.2001, 0.2001, 0.2002, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 16:17:12,362 train 000 8.729438e-01 70.312500 96.875000
+2025-01-14 16:18:00,068 train 050 9.012040e-01 68.137260 97.395836
+2025-01-14 16:18:47,288 train 100 9.196516e-01 67.435020 97.107056
+2025-01-14 16:19:35,947 train 150 9.027701e-01 67.725578 97.257866
+2025-01-14 16:20:24,391 train 200 8.983200e-01 67.887123 97.356964
+2025-01-14 16:21:12,174 train 250 8.890111e-01 68.270668 97.391685
+2025-01-14 16:21:59,815 train 300 8.836362e-01 68.625412 97.435631
+2025-01-14 16:22:47,635 train 350 8.802468e-01 68.816772 97.440346
+2025-01-14 16:23:26,079 train_acc  68.801949
+2025-01-14 16:23:26,081 train_loss 0.878704
+2025-01-14 16:23:57,445 valid_acc  67.484001
+2025-01-14 16:23:57,446 valid_loss 0.915606
+2025-01-14 16:23:57,447 |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=14987
+cifar10-valid  FLOP= 47.10 M, Params=0.344 MB, latency=14.88 ms.
+cifar10-valid  train : [loss = 0.006, top1 = 99.94%], valid : [loss = 0.473, top1 = 89.09%]
+cifar10        FLOP= 47.10 M, Params=0.344 MB, latency=15.99 ms.
+cifar10        train : [loss = 0.013, top1 = 99.76%], test  : [loss = 0.307, top1 = 92.31%]
+cifar100       FLOP= 47.11 M, Params=0.350 MB, latency=15.28 ms.
+cifar100       train : [loss = 0.314, top1 = 91.57%], valid : [loss = 1.261, top1 = 67.95%], test : [loss = 1.243, top1 = 68.19%]
+ImageNet16-120 FLOP= 11.78 M, Params=0.351 MB, latency=13.10 ms.
+ImageNet16-120 train : [loss = 2.031, top1 = 46.79%], valid : [loss = 2.303, top1 = 40.93%], test : [loss = 2.318, top1 = 41.24%]
+2025-01-14 16:23:57,447 cifar10 train 99.760000 test 92.310000
+2025-01-14 16:23:57,447 cifar100 train 91.570000 valid 67.950000 test 68.190000
+2025-01-14 16:23:57,447 imagenet16 train 46.790000 valid 40.930000 test 41.240000
+2025-01-14 16:23:57,552 epoch 10 lr 2.229259e-02
+2025-01-14 16:23:57,554 genotype = Structure(4 nodes with |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 16:23:57,554 tensor([[0.1998, 0.1996, 0.1998, 0.2004, 0.2004],
+        [0.1998, 0.2003, 0.2001, 0.1999, 0.1999],
+        [0.2005, 0.1999, 0.1999, 0.2000, 0.1997],
+        [0.2004, 0.1999, 0.1998, 0.2000, 0.1999],
+        [0.1999, 0.2002, 0.2001, 0.2000, 0.1999],
+        [0.2001, 0.2001, 0.2002, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 16:23:58,400 train 000 7.673497e-01 71.875000 96.875000
+2025-01-14 16:24:46,759 train 050 8.587831e-01 69.148285 97.640938
+2025-01-14 16:25:35,329 train 100 8.656167e-01 69.152229 97.540222
+2025-01-14 16:26:23,611 train 150 8.510067e-01 69.795113 97.692467
+2025-01-14 16:27:11,665 train 200 8.465425e-01 69.947136 97.613495
+2025-01-14 16:27:59,734 train 250 8.490837e-01 69.683769 97.659363
+2025-01-14 16:28:47,748 train 300 8.453703e-01 69.762253 97.695183
+2025-01-14 16:29:36,055 train 350 8.485199e-01 69.662567 97.711891
+2025-01-14 16:30:13,855 train_acc  69.681107
+2025-01-14 16:30:13,857 train_loss 0.846804
+2025-01-14 16:30:45,445 valid_acc  68.779999
+2025-01-14 16:30:45,445 valid_loss 0.874704
+2025-01-14 16:30:45,447 |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=14987
+cifar10-valid  FLOP= 47.10 M, Params=0.344 MB, latency=14.88 ms.
+cifar10-valid  train : [loss = 0.006, top1 = 99.94%], valid : [loss = 0.473, top1 = 89.09%]
+cifar10        FLOP= 47.10 M, Params=0.344 MB, latency=15.99 ms.
+cifar10        train : [loss = 0.013, top1 = 99.76%], test  : [loss = 0.307, top1 = 92.31%]
+cifar100       FLOP= 47.11 M, Params=0.350 MB, latency=15.28 ms.
+cifar100       train : [loss = 0.314, top1 = 91.57%], valid : [loss = 1.261, top1 = 67.95%], test : [loss = 1.243, top1 = 68.19%]
+ImageNet16-120 FLOP= 11.78 M, Params=0.351 MB, latency=13.10 ms.
+ImageNet16-120 train : [loss = 2.031, top1 = 46.79%], valid : [loss = 2.303, top1 = 40.93%], test : [loss = 2.318, top1 = 41.24%]
+2025-01-14 16:30:45,447 cifar10 train 99.760000 test 92.310000
+2025-01-14 16:30:45,448 cifar100 train 91.570000 valid 67.950000 test 68.190000
+2025-01-14 16:30:45,448 imagenet16 train 46.790000 valid 40.930000 test 41.240000
+2025-01-14 16:30:45,460 epoch 11 lr 2.179395e-02
+2025-01-14 16:30:45,461 genotype = Structure(4 nodes with |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 16:30:45,461 tensor([[0.1998, 0.1996, 0.1998, 0.2005, 0.2004],
+        [0.1997, 0.2003, 0.2001, 0.1999, 0.2000],
+        [0.2004, 0.1999, 0.1999, 0.2001, 0.1997],
+        [0.2004, 0.1999, 0.1998, 0.2000, 0.1999],
+        [0.1999, 0.2003, 0.2000, 0.1999, 0.1999],
+        [0.2000, 0.2001, 0.2002, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 16:30:46,296 train 000 7.834049e-01 70.312500 98.437500
+2025-01-14 16:31:34,761 train 050 8.429654e-01 69.883583 98.192406
+2025-01-14 16:32:22,412 train 100 8.355546e-01 70.173264 97.957916
+2025-01-14 16:33:10,275 train 150 8.315226e-01 70.095200 97.971855
+2025-01-14 16:33:57,900 train 200 8.334468e-01 70.017097 97.924438
+2025-01-14 16:34:45,806 train 250 8.294058e-01 70.150650 97.902145
+2025-01-14 16:35:33,685 train 300 8.289454e-01 70.276161 97.897629
+2025-01-14 16:36:20,744 train 350 8.214786e-01 70.775459 97.987892
+2025-01-14 16:36:59,264 train_acc  70.975861
+2025-01-14 16:36:59,266 train_loss 0.815725
+2025-01-14 16:37:30,845 valid_acc  68.699997
+2025-01-14 16:37:30,845 valid_loss 0.882445
+2025-01-14 16:37:30,846 |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=14987
+cifar10-valid  FLOP= 47.10 M, Params=0.344 MB, latency=14.88 ms.
+cifar10-valid  train : [loss = 0.006, top1 = 99.94%], valid : [loss = 0.473, top1 = 89.09%]
+cifar10        FLOP= 47.10 M, Params=0.344 MB, latency=15.99 ms.
+cifar10        train : [loss = 0.013, top1 = 99.76%], test  : [loss = 0.307, top1 = 92.31%]
+cifar100       FLOP= 47.11 M, Params=0.350 MB, latency=15.28 ms.
+cifar100       train : [loss = 0.314, top1 = 91.57%], valid : [loss = 1.261, top1 = 67.95%], test : [loss = 1.243, top1 = 68.19%]
+ImageNet16-120 FLOP= 11.78 M, Params=0.351 MB, latency=13.10 ms.
+ImageNet16-120 train : [loss = 2.031, top1 = 46.79%], valid : [loss = 2.303, top1 = 40.93%], test : [loss = 2.318, top1 = 41.24%]
+2025-01-14 16:37:30,847 cifar10 train 99.760000 test 92.310000
+2025-01-14 16:37:30,847 cifar100 train 91.570000 valid 67.950000 test 68.190000
+2025-01-14 16:37:30,847 imagenet16 train 46.790000 valid 40.930000 test 41.240000
+2025-01-14 16:37:30,859 epoch 12 lr 2.126079e-02
+2025-01-14 16:37:30,860 genotype = Structure(4 nodes with |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 16:37:30,860 tensor([[0.1998, 0.1995, 0.1998, 0.2005, 0.2004],
+        [0.1998, 0.2003, 0.2000, 0.2000, 0.2000],
+        [0.2004, 0.1999, 0.1999, 0.2001, 0.1997],
+        [0.2004, 0.1999, 0.1997, 0.2000, 0.1999],
+        [0.1999, 0.2003, 0.1999, 0.2000, 0.2000],
+        [0.2000, 0.2001, 0.2002, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 16:37:31,715 train 000 7.632502e-01 73.437500 100.000000
+2025-01-14 16:38:19,609 train 050 8.011681e-01 72.334564 98.223045
+2025-01-14 16:39:06,790 train 100 8.081796e-01 71.457298 98.298264
+2025-01-14 16:39:54,727 train 150 8.034608e-01 71.399010 98.220200
+2025-01-14 16:40:42,434 train 200 7.916418e-01 71.921638 98.204292
+2025-01-14 16:41:30,550 train 250 7.941403e-01 71.756721 98.070221
+2025-01-14 16:42:17,762 train 300 7.958454e-01 71.771179 98.105270
+2025-01-14 16:43:05,370 train 350 7.957692e-01 71.866096 98.188210
+2025-01-14 16:43:43,271 train_acc  71.914963
+2025-01-14 16:43:43,273 train_loss 0.794220
+2025-01-14 16:44:14,882 valid_acc  69.311996
+2025-01-14 16:44:14,882 valid_loss 0.876870
+2025-01-14 16:44:14,883 |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=9178
+cifar10-valid  FLOP= 11.72 M, Params=0.101 MB, latency=13.77 ms.
+cifar10-valid  train : [loss = 0.031, top1 = 99.35%], valid : [loss = 0.624, top1 = 85.40%]
+cifar10        FLOP= 11.72 M, Params=0.101 MB, latency=12.31 ms.
+cifar10        train : [loss = 0.071, top1 = 97.75%], test  : [loss = 0.405, top1 = 88.93%]
+cifar100       FLOP= 11.72 M, Params=0.107 MB, latency=11.05 ms.
+cifar100       train : [loss = 0.719, top1 = 79.09%], valid : [loss = 1.372, top1 = 63.28%], test : [loss = 1.367, top1 = 64.26%]
+ImageNet16-120 FLOP=  2.94 M, Params=0.108 MB, latency=12.49 ms.
+ImageNet16-120 train : [loss = 2.529, top1 = 36.16%], valid : [loss = 2.644, top1 = 33.63%], test : [loss = 2.684, top1 = 34.33%]
+2025-01-14 16:44:14,883 cifar10 train 97.750000 test 88.930000
+2025-01-14 16:44:14,884 cifar100 train 79.090000 valid 63.280000 test 64.260000
+2025-01-14 16:44:14,884 imagenet16 train 36.160000 valid 33.630000 test 34.330000
+2025-01-14 16:44:14,897 epoch 13 lr 2.069520e-02
+2025-01-14 16:44:14,898 genotype = Structure(4 nodes with |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 16:44:14,898 tensor([[0.1998, 0.1996, 0.1998, 0.2004, 0.2004],
+        [0.1997, 0.2003, 0.2001, 0.2000, 0.2000],
+        [0.2004, 0.1999, 0.1999, 0.2000, 0.1997],
+        [0.2003, 0.1999, 0.1998, 0.2000, 0.1999],
+        [0.1999, 0.2003, 0.1999, 0.1999, 0.2000],
+        [0.2000, 0.2001, 0.2002, 0.2000, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 16:44:15,747 train 000 8.572880e-01 71.875000 95.312500
+2025-01-14 16:45:03,439 train 050 7.737803e-01 73.529411 98.590691
+2025-01-14 16:45:50,986 train 100 7.742867e-01 73.019798 98.375618
+2025-01-14 16:46:39,323 train 150 7.733433e-01 72.878723 98.416801
+2025-01-14 16:47:27,409 train 200 7.745539e-01 72.939987 98.437500
+2025-01-14 16:48:15,537 train 250 7.754374e-01 72.808769 98.456177
+2025-01-14 16:49:03,523 train 300 7.742490e-01 72.799004 98.416733
+2025-01-14 16:49:51,568 train 350 7.755283e-01 72.805374 98.410789
+2025-01-14 16:50:30,229 train_acc  72.682228
+2025-01-14 16:50:30,231 train_loss 0.776082
+2025-01-14 16:51:01,822 valid_acc  72.220001
+2025-01-14 16:51:01,822 valid_loss 0.799278
+2025-01-14 16:51:01,824 |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=14987
+cifar10-valid  FLOP= 47.10 M, Params=0.344 MB, latency=14.88 ms.
+cifar10-valid  train : [loss = 0.006, top1 = 99.94%], valid : [loss = 0.473, top1 = 89.09%]
+cifar10        FLOP= 47.10 M, Params=0.344 MB, latency=15.99 ms.
+cifar10        train : [loss = 0.013, top1 = 99.76%], test  : [loss = 0.307, top1 = 92.31%]
+cifar100       FLOP= 47.11 M, Params=0.350 MB, latency=15.28 ms.
+cifar100       train : [loss = 0.314, top1 = 91.57%], valid : [loss = 1.261, top1 = 67.95%], test : [loss = 1.243, top1 = 68.19%]
+ImageNet16-120 FLOP= 11.78 M, Params=0.351 MB, latency=13.10 ms.
+ImageNet16-120 train : [loss = 2.031, top1 = 46.79%], valid : [loss = 2.303, top1 = 40.93%], test : [loss = 2.318, top1 = 41.24%]
+2025-01-14 16:51:01,824 cifar10 train 99.760000 test 92.310000
+2025-01-14 16:51:01,824 cifar100 train 91.570000 valid 67.950000 test 68.190000
+2025-01-14 16:51:01,824 imagenet16 train 46.790000 valid 40.930000 test 41.240000
+2025-01-14 16:51:01,842 epoch 14 lr 2.009943e-02
+2025-01-14 16:51:01,843 genotype = Structure(4 nodes with |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 16:51:01,843 tensor([[0.1998, 0.1995, 0.1998, 0.2005, 0.2004],
+        [0.1998, 0.2002, 0.2001, 0.2000, 0.2000],
+        [0.2005, 0.1999, 0.1999, 0.2000, 0.1998],
+        [0.2004, 0.1998, 0.1997, 0.2002, 0.1999],
+        [0.2000, 0.2002, 0.1999, 0.1999, 0.1999],
+        [0.2000, 0.2001, 0.2002, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 16:51:02,884 train 000 5.031159e-01 82.812500 98.437500
+2025-01-14 16:51:51,089 train 050 7.367168e-01 74.356621 98.253677
+2025-01-14 16:52:39,357 train 100 7.582582e-01 73.623146 98.329208
+2025-01-14 16:53:27,216 train 150 7.472600e-01 73.965233 98.344368
+2025-01-14 16:54:15,266 train 200 7.484369e-01 73.771767 98.336441
+2025-01-14 16:55:03,166 train 250 7.423928e-01 74.022659 98.331673
+2025-01-14 16:55:50,363 train 300 7.416491e-01 74.060425 98.370018
+2025-01-14 16:56:38,476 train 350 7.424023e-01 74.123039 98.286148
+2025-01-14 16:57:17,480 train_acc  74.164803
+2025-01-14 16:57:17,482 train_loss 0.741664
+2025-01-14 16:57:49,091 valid_acc  72.507996
+2025-01-14 16:57:49,091 valid_loss 0.784878
+2025-01-14 16:57:49,093 |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=14987
+cifar10-valid  FLOP= 47.10 M, Params=0.344 MB, latency=14.88 ms.
+cifar10-valid  train : [loss = 0.006, top1 = 99.94%], valid : [loss = 0.473, top1 = 89.09%]
+cifar10        FLOP= 47.10 M, Params=0.344 MB, latency=15.99 ms.
+cifar10        train : [loss = 0.013, top1 = 99.76%], test  : [loss = 0.307, top1 = 92.31%]
+cifar100       FLOP= 47.11 M, Params=0.350 MB, latency=15.28 ms.
+cifar100       train : [loss = 0.314, top1 = 91.57%], valid : [loss = 1.261, top1 = 67.95%], test : [loss = 1.243, top1 = 68.19%]
+ImageNet16-120 FLOP= 11.78 M, Params=0.351 MB, latency=13.10 ms.
+ImageNet16-120 train : [loss = 2.031, top1 = 46.79%], valid : [loss = 2.303, top1 = 40.93%], test : [loss = 2.318, top1 = 41.24%]
+2025-01-14 16:57:49,093 cifar10 train 99.760000 test 92.310000
+2025-01-14 16:57:49,093 cifar100 train 91.570000 valid 67.950000 test 68.190000
+2025-01-14 16:57:49,093 imagenet16 train 46.790000 valid 40.930000 test 41.240000
+2025-01-14 16:57:49,105 epoch 15 lr 1.947582e-02
+2025-01-14 16:57:49,106 genotype = Structure(4 nodes with |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 16:57:49,106 tensor([[0.1998, 0.1995, 0.1998, 0.2004, 0.2004],
+        [0.1998, 0.2002, 0.2002, 0.1999, 0.1999],
+        [0.2004, 0.1999, 0.2000, 0.2001, 0.1997],
+        [0.2004, 0.1999, 0.1998, 0.2000, 0.1999],
+        [0.1999, 0.2002, 0.2000, 0.2000, 0.1999],
+        [0.2001, 0.2001, 0.2002, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 16:57:49,961 train 000 7.573199e-01 67.187500 98.437500
+2025-01-14 16:58:38,255 train 050 7.452559e-01 73.253677 98.345589
+2025-01-14 16:59:26,708 train 100 7.201782e-01 74.195541 98.468437
+2025-01-14 17:00:14,724 train 150 7.232453e-01 74.048012 98.478889
+2025-01-14 17:01:02,045 train 200 7.221209e-01 74.121574 98.398628
+2025-01-14 17:01:50,118 train 250 7.251486e-01 74.078690 98.487305
+2025-01-14 17:02:38,449 train 300 7.201613e-01 74.340736 98.494598
+2025-01-14 17:03:26,566 train 350 7.124810e-01 74.643875 98.535431
+2025-01-14 17:04:05,198 train_acc  74.624359
+2025-01-14 17:04:05,200 train_loss 0.714350
+2025-01-14 17:04:37,732 valid_acc  73.615997
+2025-01-14 17:04:37,732 valid_loss 0.744404
+2025-01-14 17:04:37,734 |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=9178
+cifar10-valid  FLOP= 11.72 M, Params=0.101 MB, latency=13.77 ms.
+cifar10-valid  train : [loss = 0.031, top1 = 99.35%], valid : [loss = 0.624, top1 = 85.40%]
+cifar10        FLOP= 11.72 M, Params=0.101 MB, latency=12.31 ms.
+cifar10        train : [loss = 0.071, top1 = 97.75%], test  : [loss = 0.405, top1 = 88.93%]
+cifar100       FLOP= 11.72 M, Params=0.107 MB, latency=11.05 ms.
+cifar100       train : [loss = 0.719, top1 = 79.09%], valid : [loss = 1.372, top1 = 63.28%], test : [loss = 1.367, top1 = 64.26%]
+ImageNet16-120 FLOP=  2.94 M, Params=0.108 MB, latency=12.49 ms.
+ImageNet16-120 train : [loss = 2.529, top1 = 36.16%], valid : [loss = 2.644, top1 = 33.63%], test : [loss = 2.684, top1 = 34.33%]
+2025-01-14 17:04:37,734 cifar10 train 97.750000 test 88.930000
+2025-01-14 17:04:37,734 cifar100 train 79.090000 valid 63.280000 test 64.260000
+2025-01-14 17:04:37,734 imagenet16 train 36.160000 valid 33.630000 test 34.330000
+2025-01-14 17:04:37,748 epoch 16 lr 1.882682e-02
+2025-01-14 17:04:37,749 genotype = Structure(4 nodes with |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 17:04:37,749 tensor([[0.1998, 0.1996, 0.1998, 0.2004, 0.2004],
+        [0.1998, 0.2002, 0.2001, 0.1999, 0.1999],
+        [0.2005, 0.1999, 0.2000, 0.2000, 0.1997],
+        [0.2004, 0.1999, 0.1998, 0.2001, 0.1999],
+        [0.1999, 0.2002, 0.2000, 0.2000, 0.1999],
+        [0.2001, 0.2001, 0.2002, 0.2000, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 17:04:38,594 train 000 7.837493e-01 73.437500 98.437500
+2025-01-14 17:05:25,881 train 050 6.935933e-01 76.378677 98.529419
+2025-01-14 17:06:13,933 train 100 6.817369e-01 76.902847 98.422028
+2025-01-14 17:07:01,684 train 150 6.837381e-01 76.427979 98.530632
+2025-01-14 17:07:48,938 train 200 6.906050e-01 76.088310 98.624062
+2025-01-14 17:08:36,832 train 250 6.862675e-01 76.070717 98.692734
+2025-01-14 17:09:24,654 train 300 6.903311e-01 75.887665 98.676285
+2025-01-14 17:10:12,776 train 350 6.902454e-01 75.787926 98.691238
+2025-01-14 17:10:50,830 train_acc  75.835197
+2025-01-14 17:10:50,832 train_loss 0.688652
+2025-01-14 17:11:22,601 valid_acc  73.459999
+2025-01-14 17:11:22,602 valid_loss 0.765725
+2025-01-14 17:11:22,603 |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=14987
+cifar10-valid  FLOP= 47.10 M, Params=0.344 MB, latency=14.88 ms.
+cifar10-valid  train : [loss = 0.006, top1 = 99.94%], valid : [loss = 0.473, top1 = 89.09%]
+cifar10        FLOP= 47.10 M, Params=0.344 MB, latency=15.99 ms.
+cifar10        train : [loss = 0.013, top1 = 99.76%], test  : [loss = 0.307, top1 = 92.31%]
+cifar100       FLOP= 47.11 M, Params=0.350 MB, latency=15.28 ms.
+cifar100       train : [loss = 0.314, top1 = 91.57%], valid : [loss = 1.261, top1 = 67.95%], test : [loss = 1.243, top1 = 68.19%]
+ImageNet16-120 FLOP= 11.78 M, Params=0.351 MB, latency=13.10 ms.
+ImageNet16-120 train : [loss = 2.031, top1 = 46.79%], valid : [loss = 2.303, top1 = 40.93%], test : [loss = 2.318, top1 = 41.24%]
+2025-01-14 17:11:22,603 cifar10 train 99.760000 test 92.310000
+2025-01-14 17:11:22,604 cifar100 train 91.570000 valid 67.950000 test 68.190000
+2025-01-14 17:11:22,604 imagenet16 train 46.790000 valid 40.930000 test 41.240000
+2025-01-14 17:11:22,616 epoch 17 lr 1.815501e-02
+2025-01-14 17:11:22,617 genotype = Structure(4 nodes with |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 17:11:22,617 tensor([[0.1998, 0.1995, 0.1998, 0.2004, 0.2004],
+        [0.1998, 0.2003, 0.2001, 0.1999, 0.1999],
+        [0.2004, 0.1999, 0.1999, 0.2000, 0.1997],
+        [0.2004, 0.1999, 0.1998, 0.2001, 0.1999],
+        [0.1999, 0.2002, 0.2000, 0.1999, 0.1999],
+        [0.2000, 0.2001, 0.2002, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 17:11:23,471 train 000 6.565899e-01 79.687500 96.875000
+2025-01-14 17:12:11,390 train 050 6.349061e-01 77.787994 98.743874
+2025-01-14 17:12:59,195 train 100 6.631253e-01 76.918312 98.654083
+2025-01-14 17:13:47,361 train 150 6.702631e-01 76.552155 98.685844
+2025-01-14 17:14:34,548 train 200 6.693552e-01 76.655785 98.585197
+2025-01-14 17:15:22,405 train 250 6.710310e-01 76.550049 98.605583
+2025-01-14 17:16:10,457 train 300 6.659682e-01 76.801285 98.660713
+2025-01-14 17:16:58,439 train 350 6.648123e-01 76.749466 98.709045
+2025-01-14 17:17:36,430 train_acc  76.482574
+2025-01-14 17:17:36,432 train_loss 0.669868
+2025-01-14 17:18:08,686 valid_acc  75.295998
+2025-01-14 17:18:08,686 valid_loss 0.713821
+2025-01-14 17:18:08,687 |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=9178
+cifar10-valid  FLOP= 11.72 M, Params=0.101 MB, latency=13.77 ms.
+cifar10-valid  train : [loss = 0.031, top1 = 99.35%], valid : [loss = 0.624, top1 = 85.40%]
+cifar10        FLOP= 11.72 M, Params=0.101 MB, latency=12.31 ms.
+cifar10        train : [loss = 0.071, top1 = 97.75%], test  : [loss = 0.405, top1 = 88.93%]
+cifar100       FLOP= 11.72 M, Params=0.107 MB, latency=11.05 ms.
+cifar100       train : [loss = 0.719, top1 = 79.09%], valid : [loss = 1.372, top1 = 63.28%], test : [loss = 1.367, top1 = 64.26%]
+ImageNet16-120 FLOP=  2.94 M, Params=0.108 MB, latency=12.49 ms.
+ImageNet16-120 train : [loss = 2.529, top1 = 36.16%], valid : [loss = 2.644, top1 = 33.63%], test : [loss = 2.684, top1 = 34.33%]
+2025-01-14 17:18:08,688 cifar10 train 97.750000 test 88.930000
+2025-01-14 17:18:08,688 cifar100 train 79.090000 valid 63.280000 test 64.260000
+2025-01-14 17:18:08,688 imagenet16 train 36.160000 valid 33.630000 test 34.330000
+2025-01-14 17:18:08,701 epoch 18 lr 1.746303e-02
+2025-01-14 17:18:08,701 genotype = Structure(4 nodes with |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 17:18:08,702 tensor([[0.1998, 0.1996, 0.1997, 0.2004, 0.2005],
+        [0.1998, 0.2003, 0.2000, 0.1999, 0.2000],
+        [0.2004, 0.1999, 0.2000, 0.2000, 0.1998],
+        [0.2004, 0.1999, 0.1998, 0.2001, 0.1999],
+        [0.1999, 0.2002, 0.1999, 0.2000, 0.2000],
+        [0.2000, 0.2001, 0.2002, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 17:18:09,554 train 000 5.268397e-01 76.562500 98.437500
+2025-01-14 17:18:57,525 train 050 6.389540e-01 77.236519 98.713242
+2025-01-14 17:19:44,738 train 100 6.275738e-01 77.892944 98.824257
+2025-01-14 17:20:32,877 train 150 6.423152e-01 77.473099 98.685844
+2025-01-14 17:21:20,959 train 200 6.396390e-01 77.510880 98.709572
+2025-01-14 17:22:09,167 train 250 6.350585e-01 77.676796 98.779884
+2025-01-14 17:22:57,087 train 300 6.364204e-01 77.626656 98.821632
+2025-01-14 17:23:45,617 train 350 6.313108e-01 77.831200 98.847046
+2025-01-14 17:24:23,902 train_acc  77.733376
+2025-01-14 17:24:23,904 train_loss 0.635184
+2025-01-14 17:24:55,537 valid_acc  74.444000
+2025-01-14 17:24:55,537 valid_loss 0.733218
+2025-01-14 17:24:55,539 |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=14987
+cifar10-valid  FLOP= 47.10 M, Params=0.344 MB, latency=14.88 ms.
+cifar10-valid  train : [loss = 0.006, top1 = 99.94%], valid : [loss = 0.473, top1 = 89.09%]
+cifar10        FLOP= 47.10 M, Params=0.344 MB, latency=15.99 ms.
+cifar10        train : [loss = 0.013, top1 = 99.76%], test  : [loss = 0.307, top1 = 92.31%]
+cifar100       FLOP= 47.11 M, Params=0.350 MB, latency=15.28 ms.
+cifar100       train : [loss = 0.314, top1 = 91.57%], valid : [loss = 1.261, top1 = 67.95%], test : [loss = 1.243, top1 = 68.19%]
+ImageNet16-120 FLOP= 11.78 M, Params=0.351 MB, latency=13.10 ms.
+ImageNet16-120 train : [loss = 2.031, top1 = 46.79%], valid : [loss = 2.303, top1 = 40.93%], test : [loss = 2.318, top1 = 41.24%]
+2025-01-14 17:24:55,539 cifar10 train 99.760000 test 92.310000
+2025-01-14 17:24:55,539 cifar100 train 91.570000 valid 67.950000 test 68.190000
+2025-01-14 17:24:55,539 imagenet16 train 46.790000 valid 40.930000 test 41.240000
+2025-01-14 17:24:55,552 epoch 19 lr 1.675361e-02
+2025-01-14 17:24:55,552 genotype = Structure(4 nodes with |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 17:24:55,553 tensor([[0.1998, 0.1995, 0.1998, 0.2005, 0.2003],
+        [0.1998, 0.2002, 0.2001, 0.1999, 0.1999],
+        [0.2005, 0.1999, 0.1999, 0.2001, 0.1997],
+        [0.2004, 0.1999, 0.1998, 0.2001, 0.1998],
+        [0.1999, 0.2002, 0.1999, 0.2001, 0.1999],
+        [0.2001, 0.2001, 0.2002, 0.2001, 0.1995]], grad_fn=<ToCopyBackward0>)
+2025-01-14 17:24:56,403 train 000 5.618138e-01 76.562500 100.000000
+2025-01-14 17:25:44,462 train 050 6.519629e-01 76.746323 98.682602
+2025-01-14 17:26:32,241 train 100 6.445764e-01 77.042076 98.762375
+2025-01-14 17:27:20,125 train 150 6.432073e-01 77.328232 98.799667
+2025-01-14 17:28:08,101 train 200 6.333835e-01 77.782959 98.896141
+2025-01-14 17:28:56,152 train 250 6.234410e-01 78.050301 98.885712
+2025-01-14 17:29:44,513 train 300 6.289846e-01 77.777199 98.842400
+2025-01-14 17:30:32,713 train 350 6.254067e-01 78.009262 98.838142
+2025-01-14 17:31:10,941 train_acc  78.093033
+2025-01-14 17:31:10,943 train_loss 0.621939
+2025-01-14 17:31:42,742 valid_acc  75.584000
+2025-01-14 17:31:42,743 valid_loss 0.704282
+2025-01-14 17:31:42,744 |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=9178
+cifar10-valid  FLOP= 11.72 M, Params=0.101 MB, latency=13.77 ms.
+cifar10-valid  train : [loss = 0.031, top1 = 99.35%], valid : [loss = 0.624, top1 = 85.40%]
+cifar10        FLOP= 11.72 M, Params=0.101 MB, latency=12.31 ms.
+cifar10        train : [loss = 0.071, top1 = 97.75%], test  : [loss = 0.405, top1 = 88.93%]
+cifar100       FLOP= 11.72 M, Params=0.107 MB, latency=11.05 ms.
+cifar100       train : [loss = 0.719, top1 = 79.09%], valid : [loss = 1.372, top1 = 63.28%], test : [loss = 1.367, top1 = 64.26%]
+ImageNet16-120 FLOP=  2.94 M, Params=0.108 MB, latency=12.49 ms.
+ImageNet16-120 train : [loss = 2.529, top1 = 36.16%], valid : [loss = 2.644, top1 = 33.63%], test : [loss = 2.684, top1 = 34.33%]
+2025-01-14 17:31:42,745 cifar10 train 97.750000 test 88.930000
+2025-01-14 17:31:42,745 cifar100 train 79.090000 valid 63.280000 test 64.260000
+2025-01-14 17:31:42,745 imagenet16 train 36.160000 valid 33.630000 test 34.330000
+2025-01-14 17:31:42,848 epoch 20 lr 1.602956e-02
+2025-01-14 17:31:42,850 genotype = Structure(4 nodes with |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 17:31:42,850 tensor([[0.1998, 0.1996, 0.1998, 0.2003, 0.2005],
+        [0.1997, 0.2003, 0.2000, 0.1999, 0.2000],
+        [0.2005, 0.1999, 0.1999, 0.2000, 0.1998],
+        [0.2003, 0.1999, 0.1998, 0.2000, 0.1999],
+        [0.1998, 0.2002, 0.2001, 0.1999, 0.1999],
+        [0.2000, 0.2001, 0.2002, 0.2000, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 17:31:43,702 train 000 4.433613e-01 82.812500 100.000000
+2025-01-14 17:32:32,007 train 050 6.276007e-01 77.420349 99.080887
+2025-01-14 17:33:20,357 train 100 6.411085e-01 76.949257 99.056313
+2025-01-14 17:34:08,633 train 150 6.298552e-01 77.514488 99.037666
+2025-01-14 17:34:56,713 train 200 6.167797e-01 78.125000 99.036064
+2025-01-14 17:35:44,631 train 250 6.120746e-01 78.286858 98.960411
+2025-01-14 17:36:32,752 train 300 6.067943e-01 78.524704 99.008514
+2025-01-14 17:37:20,753 train 350 6.070712e-01 78.565704 99.029556
+2025-01-14 17:37:58,792 train_acc  78.696449
+2025-01-14 17:37:58,794 train_loss 0.603335
+2025-01-14 17:38:30,345 valid_acc  77.279999
+2025-01-14 17:38:30,346 valid_loss 0.659982
+2025-01-14 17:38:30,347 |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=14987
+cifar10-valid  FLOP= 47.10 M, Params=0.344 MB, latency=14.88 ms.
+cifar10-valid  train : [loss = 0.006, top1 = 99.94%], valid : [loss = 0.473, top1 = 89.09%]
+cifar10        FLOP= 47.10 M, Params=0.344 MB, latency=15.99 ms.
+cifar10        train : [loss = 0.013, top1 = 99.76%], test  : [loss = 0.307, top1 = 92.31%]
+cifar100       FLOP= 47.11 M, Params=0.350 MB, latency=15.28 ms.
+cifar100       train : [loss = 0.314, top1 = 91.57%], valid : [loss = 1.261, top1 = 67.95%], test : [loss = 1.243, top1 = 68.19%]
+ImageNet16-120 FLOP= 11.78 M, Params=0.351 MB, latency=13.10 ms.
+ImageNet16-120 train : [loss = 2.031, top1 = 46.79%], valid : [loss = 2.303, top1 = 40.93%], test : [loss = 2.318, top1 = 41.24%]
+2025-01-14 17:38:30,347 cifar10 train 99.760000 test 92.310000
+2025-01-14 17:38:30,347 cifar100 train 91.570000 valid 67.950000 test 68.190000
+2025-01-14 17:38:30,347 imagenet16 train 46.790000 valid 40.930000 test 41.240000
+2025-01-14 17:38:30,361 epoch 21 lr 1.529372e-02
+2025-01-14 17:38:30,362 genotype = Structure(4 nodes with |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 17:38:30,362 tensor([[0.1998, 0.1995, 0.1998, 0.2005, 0.2004],
+        [0.1998, 0.2003, 0.2001, 0.1999, 0.2000],
+        [0.2004, 0.1999, 0.1999, 0.2000, 0.1997],
+        [0.2004, 0.1999, 0.1998, 0.2000, 0.1999],
+        [0.1999, 0.2003, 0.1999, 0.2000, 0.1999],
+        [0.2001, 0.2001, 0.2001, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 17:38:31,391 train 000 5.961238e-01 78.125000 100.000000
+2025-01-14 17:39:19,512 train 050 5.741748e-01 79.258583 99.080887
+2025-01-14 17:40:07,954 train 100 5.672871e-01 80.043312 99.102722
+2025-01-14 17:40:56,141 train 150 5.700560e-01 79.956543 99.037666
+2025-01-14 17:41:44,146 train 200 5.721447e-01 79.967346 98.981651
+2025-01-14 17:42:32,435 train 250 5.733686e-01 79.936508 98.960411
+2025-01-14 17:43:20,284 train 300 5.738524e-01 80.050873 98.966980
+2025-01-14 17:44:07,504 train 350 5.743616e-01 79.981300 99.002846
+2025-01-14 17:44:46,621 train_acc  80.095108
+2025-01-14 17:44:46,623 train_loss 0.570776
+2025-01-14 17:45:18,320 valid_acc  77.360001
+2025-01-14 17:45:18,321 valid_loss 0.658636
+2025-01-14 17:45:18,322 |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=9178
+cifar10-valid  FLOP= 11.72 M, Params=0.101 MB, latency=13.77 ms.
+cifar10-valid  train : [loss = 0.031, top1 = 99.35%], valid : [loss = 0.624, top1 = 85.40%]
+cifar10        FLOP= 11.72 M, Params=0.101 MB, latency=12.31 ms.
+cifar10        train : [loss = 0.071, top1 = 97.75%], test  : [loss = 0.405, top1 = 88.93%]
+cifar100       FLOP= 11.72 M, Params=0.107 MB, latency=11.05 ms.
+cifar100       train : [loss = 0.719, top1 = 79.09%], valid : [loss = 1.372, top1 = 63.28%], test : [loss = 1.367, top1 = 64.26%]
+ImageNet16-120 FLOP=  2.94 M, Params=0.108 MB, latency=12.49 ms.
+ImageNet16-120 train : [loss = 2.529, top1 = 36.16%], valid : [loss = 2.644, top1 = 33.63%], test : [loss = 2.684, top1 = 34.33%]
+2025-01-14 17:45:18,322 cifar10 train 97.750000 test 88.930000
+2025-01-14 17:45:18,322 cifar100 train 79.090000 valid 63.280000 test 64.260000
+2025-01-14 17:45:18,323 imagenet16 train 36.160000 valid 33.630000 test 34.330000
+2025-01-14 17:45:18,335 epoch 22 lr 1.454899e-02
+2025-01-14 17:45:18,336 genotype = Structure(4 nodes with |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 17:45:18,336 tensor([[0.1998, 0.1996, 0.1998, 0.2004, 0.2005],
+        [0.1997, 0.2003, 0.2001, 0.1999, 0.2000],
+        [0.2005, 0.1999, 0.1999, 0.2000, 0.1998],
+        [0.2003, 0.1999, 0.1999, 0.2001, 0.1999],
+        [0.1999, 0.2003, 0.1999, 0.1999, 0.2000],
+        [0.2001, 0.2002, 0.2002, 0.2000, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 17:45:19,177 train 000 3.937001e-01 87.500000 100.000000
+2025-01-14 17:46:07,220 train 050 5.768514e-01 79.626228 99.172798
+2025-01-14 17:46:54,155 train 100 5.605221e-01 80.321777 99.257423
+2025-01-14 17:47:42,161 train 150 5.634634e-01 80.256622 99.358444
+2025-01-14 17:48:30,155 train 200 5.660195e-01 80.192787 99.315918
+2025-01-14 17:49:17,261 train 250 5.659971e-01 80.278885 99.271667
+2025-01-14 17:50:05,383 train 300 5.574820e-01 80.538826 99.283638
+2025-01-14 17:50:53,242 train 350 5.572438e-01 80.555557 99.252136
+2025-01-14 17:51:31,601 train_acc  80.438782
+2025-01-14 17:51:31,603 train_loss 0.559772
+2025-01-14 17:52:03,051 valid_acc  78.040001
+2025-01-14 17:52:03,052 valid_loss 0.651597
+2025-01-14 17:52:03,053 |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=9178
+cifar10-valid  FLOP= 11.72 M, Params=0.101 MB, latency=13.77 ms.
+cifar10-valid  train : [loss = 0.031, top1 = 99.35%], valid : [loss = 0.624, top1 = 85.40%]
+cifar10        FLOP= 11.72 M, Params=0.101 MB, latency=12.31 ms.
+cifar10        train : [loss = 0.071, top1 = 97.75%], test  : [loss = 0.405, top1 = 88.93%]
+cifar100       FLOP= 11.72 M, Params=0.107 MB, latency=11.05 ms.
+cifar100       train : [loss = 0.719, top1 = 79.09%], valid : [loss = 1.372, top1 = 63.28%], test : [loss = 1.367, top1 = 64.26%]
+ImageNet16-120 FLOP=  2.94 M, Params=0.108 MB, latency=12.49 ms.
+ImageNet16-120 train : [loss = 2.529, top1 = 36.16%], valid : [loss = 2.644, top1 = 33.63%], test : [loss = 2.684, top1 = 34.33%]
+2025-01-14 17:52:03,053 cifar10 train 97.750000 test 88.930000
+2025-01-14 17:52:03,053 cifar100 train 79.090000 valid 63.280000 test 64.260000
+2025-01-14 17:52:03,054 imagenet16 train 36.160000 valid 33.630000 test 34.330000
+2025-01-14 17:52:03,068 epoch 23 lr 1.379833e-02
+2025-01-14 17:52:03,068 genotype = Structure(4 nodes with |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 17:52:03,069 tensor([[0.1998, 0.1996, 0.1998, 0.2004, 0.2005],
+        [0.1997, 0.2004, 0.2000, 0.1998, 0.2001],
+        [0.2004, 0.1999, 0.1999, 0.2000, 0.1998],
+        [0.2003, 0.1999, 0.1998, 0.2000, 0.1999],
+        [0.1999, 0.2003, 0.2000, 0.1999, 0.1999],
+        [0.2000, 0.2002, 0.2002, 0.2000, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 17:52:04,092 train 000 5.439057e-01 73.437500 100.000000
+2025-01-14 17:52:52,102 train 050 5.553769e-01 80.729172 98.897064
+2025-01-14 17:53:40,595 train 100 5.624977e-01 80.662125 98.994431
+2025-01-14 17:54:28,707 train 150 5.430607e-01 81.322433 99.141144
+2025-01-14 17:55:16,783 train 200 5.420753e-01 81.304413 99.137123
+2025-01-14 17:56:04,971 train 250 5.453541e-01 81.281128 99.116035
+2025-01-14 17:56:52,608 train 300 5.403978e-01 81.379776 99.122711
+2025-01-14 17:57:40,172 train 350 5.380105e-01 81.441414 99.145302
+2025-01-14 17:58:19,239 train_acc  81.253998
+2025-01-14 17:58:19,241 train_loss 0.542324
+2025-01-14 17:58:50,989 valid_acc  77.835999
+2025-01-14 17:58:50,990 valid_loss 0.649401
+2025-01-14 17:58:50,991 |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=14987
+cifar10-valid  FLOP= 47.10 M, Params=0.344 MB, latency=14.88 ms.
+cifar10-valid  train : [loss = 0.006, top1 = 99.94%], valid : [loss = 0.473, top1 = 89.09%]
+cifar10        FLOP= 47.10 M, Params=0.344 MB, latency=15.99 ms.
+cifar10        train : [loss = 0.013, top1 = 99.76%], test  : [loss = 0.307, top1 = 92.31%]
+cifar100       FLOP= 47.11 M, Params=0.350 MB, latency=15.28 ms.
+cifar100       train : [loss = 0.314, top1 = 91.57%], valid : [loss = 1.261, top1 = 67.95%], test : [loss = 1.243, top1 = 68.19%]
+ImageNet16-120 FLOP= 11.78 M, Params=0.351 MB, latency=13.10 ms.
+ImageNet16-120 train : [loss = 2.031, top1 = 46.79%], valid : [loss = 2.303, top1 = 40.93%], test : [loss = 2.318, top1 = 41.24%]
+2025-01-14 17:58:50,991 cifar10 train 99.760000 test 92.310000
+2025-01-14 17:58:50,991 cifar100 train 91.570000 valid 67.950000 test 68.190000
+2025-01-14 17:58:50,991 imagenet16 train 46.790000 valid 40.930000 test 41.240000
+2025-01-14 17:58:51,004 epoch 24 lr 1.304468e-02
+2025-01-14 17:58:51,005 genotype = Structure(4 nodes with |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 17:58:51,005 tensor([[0.1998, 0.1995, 0.1998, 0.2005, 0.2004],
+        [0.1998, 0.2002, 0.2001, 0.1999, 0.1999],
+        [0.2004, 0.1999, 0.1999, 0.2001, 0.1997],
+        [0.2004, 0.1999, 0.1997, 0.2001, 0.1999],
+        [0.1999, 0.2002, 0.1999, 0.2000, 0.1999],
+        [0.2000, 0.2001, 0.2002, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 17:58:51,840 train 000 4.564096e-01 85.937500 100.000000
+2025-01-14 17:59:39,788 train 050 5.383625e-01 81.219368 98.866425
+2025-01-14 18:00:27,161 train 100 5.464332e-01 80.754951 99.056313
+2025-01-14 18:01:15,499 train 150 5.443791e-01 81.032700 99.068710
+2025-01-14 18:02:03,738 train 200 5.438871e-01 81.016792 99.121574
+2025-01-14 18:02:52,140 train 250 5.363120e-01 81.362053 99.091141
+2025-01-14 18:03:39,557 train 300 5.326117e-01 81.405731 99.148666
+2025-01-14 18:04:27,797 train 350 5.309187e-01 81.477028 99.145302
+2025-01-14 18:05:06,007 train_acc  81.693573
+2025-01-14 18:05:06,009 train_loss 0.524614
+2025-01-14 18:05:37,718 valid_acc  77.844002
+2025-01-14 18:05:37,718 valid_loss 0.634798
+2025-01-14 18:05:37,719 |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=14987
+cifar10-valid  FLOP= 47.10 M, Params=0.344 MB, latency=14.88 ms.
+cifar10-valid  train : [loss = 0.006, top1 = 99.94%], valid : [loss = 0.473, top1 = 89.09%]
+cifar10        FLOP= 47.10 M, Params=0.344 MB, latency=15.99 ms.
+cifar10        train : [loss = 0.013, top1 = 99.76%], test  : [loss = 0.307, top1 = 92.31%]
+cifar100       FLOP= 47.11 M, Params=0.350 MB, latency=15.28 ms.
+cifar100       train : [loss = 0.314, top1 = 91.57%], valid : [loss = 1.261, top1 = 67.95%], test : [loss = 1.243, top1 = 68.19%]
+ImageNet16-120 FLOP= 11.78 M, Params=0.351 MB, latency=13.10 ms.
+ImageNet16-120 train : [loss = 2.031, top1 = 46.79%], valid : [loss = 2.303, top1 = 40.93%], test : [loss = 2.318, top1 = 41.24%]
+2025-01-14 18:05:37,720 cifar10 train 99.760000 test 92.310000
+2025-01-14 18:05:37,720 cifar100 train 91.570000 valid 67.950000 test 68.190000
+2025-01-14 18:05:37,720 imagenet16 train 46.790000 valid 40.930000 test 41.240000
+2025-01-14 18:05:37,733 epoch 25 lr 1.229103e-02
+2025-01-14 18:05:37,733 genotype = Structure(4 nodes with |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 18:05:37,734 tensor([[0.1998, 0.1996, 0.1998, 0.2004, 0.2004],
+        [0.1998, 0.2002, 0.2001, 0.1999, 0.1999],
+        [0.2004, 0.1999, 0.2000, 0.2001, 0.1997],
+        [0.2004, 0.1999, 0.1998, 0.2000, 0.1999],
+        [0.1999, 0.2002, 0.2000, 0.2000, 0.1999],
+        [0.2000, 0.2001, 0.2003, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 18:05:38,586 train 000 6.947669e-01 76.562500 96.875000
+2025-01-14 18:06:26,643 train 050 4.978697e-01 83.026962 99.172798
+2025-01-14 18:07:14,719 train 100 5.042412e-01 83.121902 99.195541
+2025-01-14 18:08:02,594 train 150 5.085289e-01 82.750412 99.192879
+2025-01-14 18:08:50,462 train 200 5.046015e-01 82.719215 99.191544
+2025-01-14 18:09:38,421 train 250 5.048508e-01 82.688004 99.259216
+2025-01-14 18:10:26,364 train 300 5.058770e-01 82.687912 99.268059
+2025-01-14 18:11:14,513 train 350 5.057563e-01 82.661148 99.301102
+2025-01-14 18:11:52,678 train_acc  82.556747
+2025-01-14 18:11:52,680 train_loss 0.507463
+2025-01-14 18:12:24,232 valid_acc  78.680000
+2025-01-14 18:12:24,233 valid_loss 0.622574
+2025-01-14 18:12:24,234 |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|skip_connect~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=240
+cifar10-valid  FLOP=  7.78 M, Params=0.073 MB, latency=9.48 ms.
+cifar10-valid  train : [loss = 0.498, top1 = 82.72%], valid : [loss = 0.654, top1 = 77.96%]
+cifar10        FLOP=  7.78 M, Params=0.073 MB, latency=9.73 ms.
+cifar10        train : [loss = 0.520, top1 = 81.94%], test  : [loss = 0.594, top1 = 79.79%]
+cifar100       FLOP=  7.79 M, Params=0.079 MB, latency=9.10 ms.
+cifar100       train : [loss = 1.696, top1 = 53.99%], valid : [loss = 1.855, top1 = 50.47%], test : [loss = 1.873, top1 = 50.55%]
+ImageNet16-120 FLOP=  1.95 M, Params=0.080 MB, latency=8.67 ms.
+ImageNet16-120 train : [loss = 3.326, top1 = 21.27%], valid : [loss = 3.313, top1 = 21.61%], test : [loss = 3.350, top1 = 20.77%]
+2025-01-14 18:12:24,235 cifar10 train 81.940000 test 79.790000
+2025-01-14 18:12:24,235 cifar100 train 53.990000 valid 50.470000 test 50.550000
+2025-01-14 18:12:24,235 imagenet16 train 21.270000 valid 21.610000 test 20.770000
+2025-01-14 18:12:24,248 epoch 26 lr 1.154034e-02
+2025-01-14 18:12:24,248 genotype = Structure(4 nodes with |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|skip_connect~2|)
+2025-01-14 18:12:24,248 tensor([[0.1998, 0.1996, 0.1998, 0.2004, 0.2004],
+        [0.1997, 0.2003, 0.2001, 0.1999, 0.2000],
+        [0.2004, 0.1999, 0.1999, 0.2000, 0.1997],
+        [0.2004, 0.1999, 0.1997, 0.2001, 0.1999],
+        [0.1999, 0.2003, 0.1999, 0.2000, 0.2000],
+        [0.2000, 0.2002, 0.2001, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 18:12:25,088 train 000 5.648960e-01 82.812500 98.437500
+2025-01-14 18:13:13,151 train 050 4.613713e-01 84.007355 99.356621
+2025-01-14 18:14:00,976 train 100 4.622827e-01 84.220299 99.381187
+2025-01-14 18:14:49,507 train 150 4.805788e-01 83.402321 99.213577
+2025-01-14 18:15:37,391 train 200 4.778321e-01 83.372200 99.253731
+2025-01-14 18:16:25,406 train 250 4.790198e-01 83.459915 99.271667
+2025-01-14 18:17:12,869 train 300 4.805955e-01 83.352364 99.268059
+2025-01-14 18:18:00,637 train 350 4.809865e-01 83.315529 99.256584
+2025-01-14 18:18:39,310 train_acc  83.395943
+2025-01-14 18:18:39,312 train_loss 0.480600
+2025-01-14 18:19:11,073 valid_acc  80.000000
+2025-01-14 18:19:11,074 valid_loss 0.587788
+2025-01-14 18:19:11,075 |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=9178
+cifar10-valid  FLOP= 11.72 M, Params=0.101 MB, latency=13.77 ms.
+cifar10-valid  train : [loss = 0.031, top1 = 99.35%], valid : [loss = 0.624, top1 = 85.40%]
+cifar10        FLOP= 11.72 M, Params=0.101 MB, latency=12.31 ms.
+cifar10        train : [loss = 0.071, top1 = 97.75%], test  : [loss = 0.405, top1 = 88.93%]
+cifar100       FLOP= 11.72 M, Params=0.107 MB, latency=11.05 ms.
+cifar100       train : [loss = 0.719, top1 = 79.09%], valid : [loss = 1.372, top1 = 63.28%], test : [loss = 1.367, top1 = 64.26%]
+ImageNet16-120 FLOP=  2.94 M, Params=0.108 MB, latency=12.49 ms.
+ImageNet16-120 train : [loss = 2.529, top1 = 36.16%], valid : [loss = 2.644, top1 = 33.63%], test : [loss = 2.684, top1 = 34.33%]
+2025-01-14 18:19:11,075 cifar10 train 97.750000 test 88.930000
+2025-01-14 18:19:11,075 cifar100 train 79.090000 valid 63.280000 test 64.260000
+2025-01-14 18:19:11,075 imagenet16 train 36.160000 valid 33.630000 test 34.330000
+2025-01-14 18:19:11,088 epoch 27 lr 1.079557e-02
+2025-01-14 18:19:11,089 genotype = Structure(4 nodes with |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 18:19:11,089 tensor([[0.1997, 0.1997, 0.1997, 0.2004, 0.2005],
+        [0.1997, 0.2003, 0.2000, 0.1999, 0.2001],
+        [0.2004, 0.1999, 0.1999, 0.2000, 0.1998],
+        [0.2003, 0.2000, 0.1997, 0.2000, 0.2000],
+        [0.1998, 0.2003, 0.1999, 0.1999, 0.2000],
+        [0.1999, 0.2002, 0.2002, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 18:19:11,929 train 000 6.041585e-01 78.125000 96.875000
+2025-01-14 18:19:59,869 train 050 4.755358e-01 83.670349 99.142159
+2025-01-14 18:20:47,543 train 100 4.903847e-01 83.090965 99.226486
+2025-01-14 18:21:34,477 train 150 4.925935e-01 82.915977 99.234268
+2025-01-14 18:22:22,464 train 200 4.859055e-01 83.107895 99.323692
+2025-01-14 18:23:10,365 train 250 4.773124e-01 83.540840 99.340141
+2025-01-14 18:23:57,271 train 300 4.773014e-01 83.596344 99.356308
+2025-01-14 18:24:45,209 train 350 4.705960e-01 83.796295 99.358971
+2025-01-14 18:25:23,652 train_acc  83.743607
+2025-01-14 18:25:23,654 train_loss 0.470703
+2025-01-14 18:25:55,103 valid_acc  79.619995
+2025-01-14 18:25:55,104 valid_loss 0.592409
+2025-01-14 18:25:55,105 |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=14987
+cifar10-valid  FLOP= 47.10 M, Params=0.344 MB, latency=14.88 ms.
+cifar10-valid  train : [loss = 0.006, top1 = 99.94%], valid : [loss = 0.473, top1 = 89.09%]
+cifar10        FLOP= 47.10 M, Params=0.344 MB, latency=15.99 ms.
+cifar10        train : [loss = 0.013, top1 = 99.76%], test  : [loss = 0.307, top1 = 92.31%]
+cifar100       FLOP= 47.11 M, Params=0.350 MB, latency=15.28 ms.
+cifar100       train : [loss = 0.314, top1 = 91.57%], valid : [loss = 1.261, top1 = 67.95%], test : [loss = 1.243, top1 = 68.19%]
+ImageNet16-120 FLOP= 11.78 M, Params=0.351 MB, latency=13.10 ms.
+ImageNet16-120 train : [loss = 2.031, top1 = 46.79%], valid : [loss = 2.303, top1 = 40.93%], test : [loss = 2.318, top1 = 41.24%]
+2025-01-14 18:25:55,105 cifar10 train 99.760000 test 92.310000
+2025-01-14 18:25:55,105 cifar100 train 91.570000 valid 67.950000 test 68.190000
+2025-01-14 18:25:55,105 imagenet16 train 46.790000 valid 40.930000 test 41.240000
+2025-01-14 18:25:55,118 epoch 28 lr 1.005967e-02
+2025-01-14 18:25:55,119 genotype = Structure(4 nodes with |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 18:25:55,119 tensor([[0.1998, 0.1995, 0.1998, 0.2005, 0.2004],
+        [0.1998, 0.2002, 0.2001, 0.1999, 0.1999],
+        [0.2004, 0.1999, 0.1999, 0.2000, 0.1997],
+        [0.2004, 0.1999, 0.1998, 0.2000, 0.1999],
+        [0.1999, 0.2003, 0.2000, 0.1999, 0.1999],
+        [0.2001, 0.2001, 0.2002, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 18:25:55,949 train 000 5.100862e-01 82.812500 100.000000
+2025-01-14 18:26:43,823 train 050 4.534400e-01 84.129906 99.540443
+2025-01-14 18:27:32,130 train 100 4.603147e-01 83.941833 99.474007
+2025-01-14 18:28:20,518 train 150 4.479716e-01 84.168045 99.492966
+2025-01-14 18:29:09,012 train 200 4.534065e-01 84.102921 99.440300
+2025-01-14 18:29:56,581 train 250 4.528019e-01 84.169571 99.439743
+2025-01-14 18:30:44,803 train 300 4.503262e-01 84.317894 99.439369
+2025-01-14 18:31:32,864 train 350 4.532136e-01 84.107903 99.465813
+2025-01-14 18:32:10,961 train_acc  84.075287
+2025-01-14 18:32:10,963 train_loss 0.454236
+2025-01-14 18:32:42,462 valid_acc  80.720001
+2025-01-14 18:32:42,462 valid_loss 0.571920
+2025-01-14 18:32:42,464 |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=9178
+cifar10-valid  FLOP= 11.72 M, Params=0.101 MB, latency=13.77 ms.
+cifar10-valid  train : [loss = 0.031, top1 = 99.35%], valid : [loss = 0.624, top1 = 85.40%]
+cifar10        FLOP= 11.72 M, Params=0.101 MB, latency=12.31 ms.
+cifar10        train : [loss = 0.071, top1 = 97.75%], test  : [loss = 0.405, top1 = 88.93%]
+cifar100       FLOP= 11.72 M, Params=0.107 MB, latency=11.05 ms.
+cifar100       train : [loss = 0.719, top1 = 79.09%], valid : [loss = 1.372, top1 = 63.28%], test : [loss = 1.367, top1 = 64.26%]
+ImageNet16-120 FLOP=  2.94 M, Params=0.108 MB, latency=12.49 ms.
+ImageNet16-120 train : [loss = 2.529, top1 = 36.16%], valid : [loss = 2.644, top1 = 33.63%], test : [loss = 2.684, top1 = 34.33%]
+2025-01-14 18:32:42,464 cifar10 train 97.750000 test 88.930000
+2025-01-14 18:32:42,464 cifar100 train 79.090000 valid 63.280000 test 64.260000
+2025-01-14 18:32:42,464 imagenet16 train 36.160000 valid 33.630000 test 34.330000
+2025-01-14 18:32:42,477 epoch 29 lr 9.335524e-03
+2025-01-14 18:32:42,478 genotype = Structure(4 nodes with |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 18:32:42,478 tensor([[0.1998, 0.1996, 0.1998, 0.2004, 0.2004],
+        [0.1998, 0.2003, 0.2001, 0.1999, 0.2000],
+        [0.2004, 0.1999, 0.2000, 0.2000, 0.1997],
+        [0.2004, 0.1999, 0.1997, 0.2001, 0.1999],
+        [0.1999, 0.2002, 0.2000, 0.2000, 0.1999],
+        [0.2000, 0.2001, 0.2002, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 18:32:43,328 train 000 4.637364e-01 89.062500 98.437500
+2025-01-14 18:33:31,109 train 050 4.536974e-01 83.609070 99.325981
+2025-01-14 18:34:18,815 train 100 4.455656e-01 84.235764 99.350243
+2025-01-14 18:35:06,747 train 150 4.394668e-01 84.623344 99.410179
+2025-01-14 18:35:54,722 train 200 4.337280e-01 84.771454 99.424751
+2025-01-14 18:36:42,674 train 250 4.336432e-01 84.897911 99.470871
+2025-01-14 18:37:30,589 train 300 4.336439e-01 84.748749 99.480896
+2025-01-14 18:38:17,640 train 350 4.404160e-01 84.566414 99.470261
+2025-01-14 18:38:56,298 train_acc  84.642746
+2025-01-14 18:38:56,300 train_loss 0.437282
+2025-01-14 18:39:27,933 valid_acc  81.099998
+2025-01-14 18:39:27,933 valid_loss 0.567592
+2025-01-14 18:39:27,934 |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=9178
+cifar10-valid  FLOP= 11.72 M, Params=0.101 MB, latency=13.77 ms.
+cifar10-valid  train : [loss = 0.031, top1 = 99.35%], valid : [loss = 0.624, top1 = 85.40%]
+cifar10        FLOP= 11.72 M, Params=0.101 MB, latency=12.31 ms.
+cifar10        train : [loss = 0.071, top1 = 97.75%], test  : [loss = 0.405, top1 = 88.93%]
+cifar100       FLOP= 11.72 M, Params=0.107 MB, latency=11.05 ms.
+cifar100       train : [loss = 0.719, top1 = 79.09%], valid : [loss = 1.372, top1 = 63.28%], test : [loss = 1.367, top1 = 64.26%]
+ImageNet16-120 FLOP=  2.94 M, Params=0.108 MB, latency=12.49 ms.
+ImageNet16-120 train : [loss = 2.529, top1 = 36.16%], valid : [loss = 2.644, top1 = 33.63%], test : [loss = 2.684, top1 = 34.33%]
+2025-01-14 18:39:27,934 cifar10 train 97.750000 test 88.930000
+2025-01-14 18:39:27,935 cifar100 train 79.090000 valid 63.280000 test 64.260000
+2025-01-14 18:39:27,935 imagenet16 train 36.160000 valid 33.630000 test 34.330000
+2025-01-14 18:39:28,040 epoch 30 lr 8.625999e-03
+2025-01-14 18:39:28,041 genotype = Structure(4 nodes with |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 18:39:28,041 tensor([[0.1998, 0.1997, 0.1997, 0.2004, 0.2005],
+        [0.1997, 0.2004, 0.2000, 0.1998, 0.2001],
+        [0.2005, 0.2000, 0.1999, 0.1999, 0.1998],
+        [0.2003, 0.1999, 0.1998, 0.2001, 0.1999],
+        [0.1999, 0.2003, 0.2000, 0.2000, 0.1999],
+        [0.2000, 0.2001, 0.2002, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 18:39:28,893 train 000 3.016734e-01 93.750000 100.000000
+2025-01-14 18:40:16,417 train 050 4.165259e-01 85.386032 99.509804
+2025-01-14 18:41:04,501 train 100 4.143699e-01 85.504333 99.520416
+2025-01-14 18:41:52,485 train 150 4.221689e-01 85.120033 99.544701
+2025-01-14 18:42:40,833 train 200 4.276385e-01 85.051308 99.549126
+2025-01-14 18:43:28,818 train 250 4.276552e-01 85.097115 99.520668
+2025-01-14 18:44:15,985 train 300 4.232751e-01 85.252281 99.537994
+2025-01-14 18:45:03,905 train 350 4.184785e-01 85.483437 99.572647
+2025-01-14 18:45:42,900 train_acc  85.481934
+2025-01-14 18:45:42,902 train_loss 0.417421
+2025-01-14 18:46:14,470 valid_acc  81.059998
+2025-01-14 18:46:14,470 valid_loss 0.565764
+2025-01-14 18:46:14,471 |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=9178
+cifar10-valid  FLOP= 11.72 M, Params=0.101 MB, latency=13.77 ms.
+cifar10-valid  train : [loss = 0.031, top1 = 99.35%], valid : [loss = 0.624, top1 = 85.40%]
+cifar10        FLOP= 11.72 M, Params=0.101 MB, latency=12.31 ms.
+cifar10        train : [loss = 0.071, top1 = 97.75%], test  : [loss = 0.405, top1 = 88.93%]
+cifar100       FLOP= 11.72 M, Params=0.107 MB, latency=11.05 ms.
+cifar100       train : [loss = 0.719, top1 = 79.09%], valid : [loss = 1.372, top1 = 63.28%], test : [loss = 1.367, top1 = 64.26%]
+ImageNet16-120 FLOP=  2.94 M, Params=0.108 MB, latency=12.49 ms.
+ImageNet16-120 train : [loss = 2.529, top1 = 36.16%], valid : [loss = 2.644, top1 = 33.63%], test : [loss = 2.684, top1 = 34.33%]
+2025-01-14 18:46:14,471 cifar10 train 97.750000 test 88.930000
+2025-01-14 18:46:14,472 cifar100 train 79.090000 valid 63.280000 test 64.260000
+2025-01-14 18:46:14,472 imagenet16 train 36.160000 valid 33.630000 test 34.330000
+2025-01-14 18:46:14,485 epoch 31 lr 7.933888e-03
+2025-01-14 18:46:14,485 genotype = Structure(4 nodes with |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 18:46:14,486 tensor([[0.1997, 0.1996, 0.1998, 0.2004, 0.2005],
+        [0.1997, 0.2003, 0.2000, 0.1999, 0.2000],
+        [0.2004, 0.1999, 0.1999, 0.2000, 0.1998],
+        [0.2003, 0.1999, 0.1998, 0.2000, 0.2000],
+        [0.1999, 0.2003, 0.2000, 0.1999, 0.2000],
+        [0.2000, 0.2001, 0.2003, 0.2000, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 18:46:15,343 train 000 3.648817e-01 90.625000 98.437500
+2025-01-14 18:47:03,504 train 050 4.077337e-01 85.569855 99.601723
+2025-01-14 18:47:50,830 train 100 4.132805e-01 85.318687 99.597771
+2025-01-14 18:48:38,808 train 150 4.065717e-01 85.471855 99.596443
+2025-01-14 18:49:26,994 train 200 4.025542e-01 85.712059 99.580223
+2025-01-14 18:50:14,438 train 250 4.036395e-01 85.651146 99.576698
+2025-01-14 18:51:02,185 train 300 4.033053e-01 85.735046 99.605476
+2025-01-14 18:51:50,166 train 350 4.024397e-01 85.879631 99.586006
+2025-01-14 18:52:28,377 train_acc  85.977463
+2025-01-14 18:52:28,379 train_loss 0.400464
+2025-01-14 18:53:00,153 valid_acc  81.012001
+2025-01-14 18:53:00,153 valid_loss 0.562216
+2025-01-14 18:53:00,155 |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=9178
+cifar10-valid  FLOP= 11.72 M, Params=0.101 MB, latency=13.77 ms.
+cifar10-valid  train : [loss = 0.031, top1 = 99.35%], valid : [loss = 0.624, top1 = 85.40%]
+cifar10        FLOP= 11.72 M, Params=0.101 MB, latency=12.31 ms.
+cifar10        train : [loss = 0.071, top1 = 97.75%], test  : [loss = 0.405, top1 = 88.93%]
+cifar100       FLOP= 11.72 M, Params=0.107 MB, latency=11.05 ms.
+cifar100       train : [loss = 0.719, top1 = 79.09%], valid : [loss = 1.372, top1 = 63.28%], test : [loss = 1.367, top1 = 64.26%]
+ImageNet16-120 FLOP=  2.94 M, Params=0.108 MB, latency=12.49 ms.
+ImageNet16-120 train : [loss = 2.529, top1 = 36.16%], valid : [loss = 2.644, top1 = 33.63%], test : [loss = 2.684, top1 = 34.33%]
+2025-01-14 18:53:00,155 cifar10 train 97.750000 test 88.930000
+2025-01-14 18:53:00,155 cifar100 train 79.090000 valid 63.280000 test 64.260000
+2025-01-14 18:53:00,155 imagenet16 train 36.160000 valid 33.630000 test 34.330000
+2025-01-14 18:53:00,168 epoch 32 lr 7.261919e-03
+2025-01-14 18:53:00,169 genotype = Structure(4 nodes with |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 18:53:00,169 tensor([[0.1998, 0.1996, 0.1998, 0.2004, 0.2004],
+        [0.1998, 0.2003, 0.2000, 0.1999, 0.2000],
+        [0.2004, 0.1999, 0.1999, 0.2000, 0.1997],
+        [0.2004, 0.1999, 0.1998, 0.2000, 0.1999],
+        [0.1999, 0.2003, 0.2000, 0.1999, 0.1999],
+        [0.2001, 0.2001, 0.2002, 0.2000, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 18:53:01,027 train 000 3.863890e-01 82.812500 98.437500
+2025-01-14 18:53:49,562 train 050 4.212300e-01 85.049019 99.509804
+2025-01-14 18:54:37,861 train 100 3.995723e-01 86.061264 99.520416
+2025-01-14 18:55:25,834 train 150 3.912350e-01 86.475578 99.565399
+2025-01-14 18:56:14,103 train 200 3.935055e-01 86.489426 99.587997
+2025-01-14 18:57:01,907 train 250 3.917229e-01 86.584915 99.595375
+2025-01-14 18:57:49,121 train 300 3.919133e-01 86.601952 99.589905
+2025-01-14 18:58:37,153 train 350 3.925193e-01 86.582977 99.590454
+2025-01-14 18:59:16,133 train_acc  86.620842
+2025-01-14 18:59:16,135 train_loss 0.391512
+2025-01-14 18:59:47,686 valid_acc  81.951996
+2025-01-14 18:59:47,687 valid_loss 0.531308
+2025-01-14 18:59:47,688 |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=14987
+cifar10-valid  FLOP= 47.10 M, Params=0.344 MB, latency=14.88 ms.
+cifar10-valid  train : [loss = 0.006, top1 = 99.94%], valid : [loss = 0.473, top1 = 89.09%]
+cifar10        FLOP= 47.10 M, Params=0.344 MB, latency=15.99 ms.
+cifar10        train : [loss = 0.013, top1 = 99.76%], test  : [loss = 0.307, top1 = 92.31%]
+cifar100       FLOP= 47.11 M, Params=0.350 MB, latency=15.28 ms.
+cifar100       train : [loss = 0.314, top1 = 91.57%], valid : [loss = 1.261, top1 = 67.95%], test : [loss = 1.243, top1 = 68.19%]
+ImageNet16-120 FLOP= 11.78 M, Params=0.351 MB, latency=13.10 ms.
+ImageNet16-120 train : [loss = 2.031, top1 = 46.79%], valid : [loss = 2.303, top1 = 40.93%], test : [loss = 2.318, top1 = 41.24%]
+2025-01-14 18:59:47,689 cifar10 train 99.760000 test 92.310000
+2025-01-14 18:59:47,689 cifar100 train 91.570000 valid 67.950000 test 68.190000
+2025-01-14 18:59:47,689 imagenet16 train 46.790000 valid 40.930000 test 41.240000
+2025-01-14 18:59:47,701 epoch 33 lr 6.612739e-03
+2025-01-14 18:59:47,702 genotype = Structure(4 nodes with |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 18:59:47,702 tensor([[0.1998, 0.1996, 0.1998, 0.2004, 0.2004],
+        [0.1997, 0.2003, 0.2001, 0.1999, 0.2000],
+        [0.2005, 0.1999, 0.1999, 0.2000, 0.1998],
+        [0.2004, 0.1999, 0.1998, 0.2001, 0.1999],
+        [0.1999, 0.2003, 0.1999, 0.2000, 0.2000],
+        [0.2000, 0.2001, 0.2002, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 18:59:48,542 train 000 2.361430e-01 95.312500 100.000000
+2025-01-14 19:00:36,665 train 050 3.830116e-01 86.243874 99.785545
+2025-01-14 19:01:24,246 train 100 4.054511e-01 86.061264 99.659653
+2025-01-14 19:02:12,301 train 150 3.910287e-01 86.423843 99.658524
+2025-01-14 19:02:59,786 train 200 3.844047e-01 86.707085 99.650185
+2025-01-14 19:03:47,696 train 250 3.812413e-01 86.790344 99.589149
+2025-01-14 19:04:34,789 train 300 3.799510e-01 86.830353 99.574333
+2025-01-14 19:05:22,972 train 350 3.823836e-01 86.801102 99.581551
+2025-01-14 19:06:01,018 train_acc  86.820648
+2025-01-14 19:06:01,020 train_loss 0.382959
+2025-01-14 19:06:32,666 valid_acc  82.236000
+2025-01-14 19:06:32,666 valid_loss 0.535011
+2025-01-14 19:06:32,668 |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=9178
+cifar10-valid  FLOP= 11.72 M, Params=0.101 MB, latency=13.77 ms.
+cifar10-valid  train : [loss = 0.031, top1 = 99.35%], valid : [loss = 0.624, top1 = 85.40%]
+cifar10        FLOP= 11.72 M, Params=0.101 MB, latency=12.31 ms.
+cifar10        train : [loss = 0.071, top1 = 97.75%], test  : [loss = 0.405, top1 = 88.93%]
+cifar100       FLOP= 11.72 M, Params=0.107 MB, latency=11.05 ms.
+cifar100       train : [loss = 0.719, top1 = 79.09%], valid : [loss = 1.372, top1 = 63.28%], test : [loss = 1.367, top1 = 64.26%]
+ImageNet16-120 FLOP=  2.94 M, Params=0.108 MB, latency=12.49 ms.
+ImageNet16-120 train : [loss = 2.529, top1 = 36.16%], valid : [loss = 2.644, top1 = 33.63%], test : [loss = 2.684, top1 = 34.33%]
+2025-01-14 19:06:32,668 cifar10 train 97.750000 test 88.930000
+2025-01-14 19:06:32,668 cifar100 train 79.090000 valid 63.280000 test 64.260000
+2025-01-14 19:06:32,668 imagenet16 train 36.160000 valid 33.630000 test 34.330000
+2025-01-14 19:06:32,681 epoch 34 lr 5.988904e-03
+2025-01-14 19:06:32,682 genotype = Structure(4 nodes with |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 19:06:32,682 tensor([[0.1997, 0.1996, 0.1998, 0.2003, 0.2005],
+        [0.1997, 0.2003, 0.2001, 0.1999, 0.2000],
+        [0.2005, 0.1999, 0.1999, 0.1999, 0.1998],
+        [0.2003, 0.1999, 0.1998, 0.2000, 0.1999],
+        [0.1999, 0.2003, 0.2000, 0.1999, 0.1999],
+        [0.2000, 0.2001, 0.2002, 0.2000, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 19:06:33,534 train 000 4.804366e-01 84.375000 100.000000
+2025-01-14 19:07:21,675 train 050 3.843728e-01 86.519608 99.540443
+2025-01-14 19:08:09,723 train 100 3.633372e-01 87.237007 99.721535
+2025-01-14 19:08:57,832 train 150 3.657842e-01 87.437912 99.679222
+2025-01-14 19:09:45,887 train 200 3.655270e-01 87.352303 99.619087
+2025-01-14 19:10:34,027 train 250 3.652534e-01 87.369278 99.645172
+2025-01-14 19:11:22,064 train 300 3.673986e-01 87.256020 99.672966
+2025-01-14 19:12:09,774 train 350 3.675593e-01 87.126068 99.666130
+2025-01-14 19:12:47,865 train_acc  87.056427
+2025-01-14 19:12:47,867 train_loss 0.368204
+2025-01-14 19:13:19,392 valid_acc  82.287994
+2025-01-14 19:13:19,392 valid_loss 0.529049
+2025-01-14 19:13:19,393 |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=9178
+cifar10-valid  FLOP= 11.72 M, Params=0.101 MB, latency=13.77 ms.
+cifar10-valid  train : [loss = 0.031, top1 = 99.35%], valid : [loss = 0.624, top1 = 85.40%]
+cifar10        FLOP= 11.72 M, Params=0.101 MB, latency=12.31 ms.
+cifar10        train : [loss = 0.071, top1 = 97.75%], test  : [loss = 0.405, top1 = 88.93%]
+cifar100       FLOP= 11.72 M, Params=0.107 MB, latency=11.05 ms.
+cifar100       train : [loss = 0.719, top1 = 79.09%], valid : [loss = 1.372, top1 = 63.28%], test : [loss = 1.367, top1 = 64.26%]
+ImageNet16-120 FLOP=  2.94 M, Params=0.108 MB, latency=12.49 ms.
+ImageNet16-120 train : [loss = 2.529, top1 = 36.16%], valid : [loss = 2.644, top1 = 33.63%], test : [loss = 2.684, top1 = 34.33%]
+2025-01-14 19:13:19,393 cifar10 train 97.750000 test 88.930000
+2025-01-14 19:13:19,394 cifar100 train 79.090000 valid 63.280000 test 64.260000
+2025-01-14 19:13:19,394 imagenet16 train 36.160000 valid 33.630000 test 34.330000
+2025-01-14 19:13:19,406 epoch 35 lr 5.392869e-03
+2025-01-14 19:13:19,407 genotype = Structure(4 nodes with |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 19:13:19,407 tensor([[0.1998, 0.1996, 0.1997, 0.2004, 0.2005],
+        [0.1998, 0.2003, 0.2000, 0.2000, 0.2000],
+        [0.2004, 0.1999, 0.2000, 0.2001, 0.1997],
+        [0.2004, 0.1999, 0.1997, 0.2001, 0.1999],
+        [0.1999, 0.2002, 0.2000, 0.2000, 0.1999],
+        [0.2000, 0.2001, 0.2002, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 19:13:20,261 train 000 3.350632e-01 84.375000 98.437500
+2025-01-14 19:14:08,459 train 050 3.345233e-01 88.388481 99.479172
+2025-01-14 19:14:56,366 train 100 3.285202e-01 88.706680 99.566833
+2025-01-14 19:15:44,245 train 150 3.358007e-01 88.462334 99.565399
+2025-01-14 19:16:32,248 train 200 3.409600e-01 88.292908 99.572449
+2025-01-14 19:17:20,251 train 250 3.446334e-01 88.103836 99.607819
+2025-01-14 19:18:08,311 train 300 3.434874e-01 88.138496 99.636627
+2025-01-14 19:18:55,270 train 350 3.468395e-01 87.931801 99.643875
+2025-01-14 19:19:34,355 train_acc  87.923592
+2025-01-14 19:19:34,357 train_loss 0.348027
+2025-01-14 19:20:05,841 valid_acc  81.568001
+2025-01-14 19:20:05,841 valid_loss 0.551547
+2025-01-14 19:20:05,843 |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=14987
+cifar10-valid  FLOP= 47.10 M, Params=0.344 MB, latency=14.88 ms.
+cifar10-valid  train : [loss = 0.006, top1 = 99.94%], valid : [loss = 0.473, top1 = 89.09%]
+cifar10        FLOP= 47.10 M, Params=0.344 MB, latency=15.99 ms.
+cifar10        train : [loss = 0.013, top1 = 99.76%], test  : [loss = 0.307, top1 = 92.31%]
+cifar100       FLOP= 47.11 M, Params=0.350 MB, latency=15.28 ms.
+cifar100       train : [loss = 0.314, top1 = 91.57%], valid : [loss = 1.261, top1 = 67.95%], test : [loss = 1.243, top1 = 68.19%]
+ImageNet16-120 FLOP= 11.78 M, Params=0.351 MB, latency=13.10 ms.
+ImageNet16-120 train : [loss = 2.031, top1 = 46.79%], valid : [loss = 2.303, top1 = 40.93%], test : [loss = 2.318, top1 = 41.24%]
+2025-01-14 19:20:05,843 cifar10 train 99.760000 test 92.310000
+2025-01-14 19:20:05,843 cifar100 train 91.570000 valid 67.950000 test 68.190000
+2025-01-14 19:20:05,843 imagenet16 train 46.790000 valid 40.930000 test 41.240000
+2025-01-14 19:20:05,856 epoch 36 lr 4.826977e-03
+2025-01-14 19:20:05,857 genotype = Structure(4 nodes with |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 19:20:05,857 tensor([[0.1998, 0.1995, 0.1998, 0.2005, 0.2004],
+        [0.1998, 0.2002, 0.2000, 0.2000, 0.1999],
+        [0.2004, 0.1998, 0.2000, 0.2001, 0.1997],
+        [0.2004, 0.1999, 0.1998, 0.2001, 0.1998],
+        [0.1999, 0.2002, 0.2001, 0.2000, 0.1999],
+        [0.2001, 0.2001, 0.2002, 0.2001, 0.1995]], grad_fn=<ToCopyBackward0>)
+2025-01-14 19:20:06,716 train 000 2.565903e-01 92.187500 100.000000
+2025-01-14 19:20:54,684 train 050 3.611956e-01 87.775742 99.632355
+2025-01-14 19:21:42,260 train 100 3.462701e-01 88.041458 99.690590
+2025-01-14 19:22:30,235 train 150 3.416780e-01 88.296768 99.699921
+2025-01-14 19:23:18,359 train 200 3.416976e-01 88.191849 99.704597
+2025-01-14 19:24:06,363 train 250 3.383276e-01 88.290588 99.663849
+2025-01-14 19:24:53,914 train 300 3.366342e-01 88.434380 99.667770
+2025-01-14 19:25:42,190 train 350 3.377061e-01 88.368057 99.652779
+2025-01-14 19:26:20,579 train_acc  88.367165
+2025-01-14 19:26:20,582 train_loss 0.337364
+2025-01-14 19:26:52,349 valid_acc  82.764000
+2025-01-14 19:26:52,350 valid_loss 0.523131
+2025-01-14 19:26:52,352 |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=9178
+cifar10-valid  FLOP= 11.72 M, Params=0.101 MB, latency=13.77 ms.
+cifar10-valid  train : [loss = 0.031, top1 = 99.35%], valid : [loss = 0.624, top1 = 85.40%]
+cifar10        FLOP= 11.72 M, Params=0.101 MB, latency=12.31 ms.
+cifar10        train : [loss = 0.071, top1 = 97.75%], test  : [loss = 0.405, top1 = 88.93%]
+cifar100       FLOP= 11.72 M, Params=0.107 MB, latency=11.05 ms.
+cifar100       train : [loss = 0.719, top1 = 79.09%], valid : [loss = 1.372, top1 = 63.28%], test : [loss = 1.367, top1 = 64.26%]
+ImageNet16-120 FLOP=  2.94 M, Params=0.108 MB, latency=12.49 ms.
+ImageNet16-120 train : [loss = 2.529, top1 = 36.16%], valid : [loss = 2.644, top1 = 33.63%], test : [loss = 2.684, top1 = 34.33%]
+2025-01-14 19:26:52,352 cifar10 train 97.750000 test 88.930000
+2025-01-14 19:26:52,352 cifar100 train 79.090000 valid 63.280000 test 64.260000
+2025-01-14 19:26:52,352 imagenet16 train 36.160000 valid 33.630000 test 34.330000
+2025-01-14 19:26:52,366 epoch 37 lr 4.293451e-03
+2025-01-14 19:26:52,366 genotype = Structure(4 nodes with |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 19:26:52,367 tensor([[0.1997, 0.1997, 0.1998, 0.2004, 0.2005],
+        [0.1997, 0.2003, 0.2001, 0.1999, 0.2000],
+        [0.2004, 0.1999, 0.1999, 0.1999, 0.1998],
+        [0.2003, 0.2000, 0.1998, 0.2000, 0.1999],
+        [0.1999, 0.2003, 0.1999, 0.1999, 0.2000],
+        [0.2000, 0.2001, 0.2002, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 19:26:53,213 train 000 6.109298e-01 84.375000 96.875000
+2025-01-14 19:27:41,341 train 050 3.099025e-01 89.859070 99.754906
+2025-01-14 19:28:29,572 train 100 3.117001e-01 89.542076 99.706062
+2025-01-14 19:29:17,636 train 150 3.148194e-01 89.507454 99.699921
+2025-01-14 19:30:05,837 train 200 3.086012e-01 89.653297 99.735695
+2025-01-14 19:30:54,089 train 250 3.097734e-01 89.523163 99.744774
+2025-01-14 19:31:42,449 train 300 3.100096e-01 89.534882 99.761208
+2025-01-14 19:32:30,619 train 350 3.092914e-01 89.485397 99.777420
+2025-01-14 19:33:09,091 train_acc  89.270302
+2025-01-14 19:33:09,093 train_loss 0.314477
+2025-01-14 19:33:40,731 valid_acc  82.935997
+2025-01-14 19:33:40,731 valid_loss 0.515877
+2025-01-14 19:33:40,733 |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|skip_connect~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=240
+cifar10-valid  FLOP=  7.78 M, Params=0.073 MB, latency=9.48 ms.
+cifar10-valid  train : [loss = 0.498, top1 = 82.72%], valid : [loss = 0.654, top1 = 77.96%]
+cifar10        FLOP=  7.78 M, Params=0.073 MB, latency=9.73 ms.
+cifar10        train : [loss = 0.520, top1 = 81.94%], test  : [loss = 0.594, top1 = 79.79%]
+cifar100       FLOP=  7.79 M, Params=0.079 MB, latency=9.10 ms.
+cifar100       train : [loss = 1.696, top1 = 53.99%], valid : [loss = 1.855, top1 = 50.47%], test : [loss = 1.873, top1 = 50.55%]
+ImageNet16-120 FLOP=  1.95 M, Params=0.080 MB, latency=8.67 ms.
+ImageNet16-120 train : [loss = 3.326, top1 = 21.27%], valid : [loss = 3.313, top1 = 21.61%], test : [loss = 3.350, top1 = 20.77%]
+2025-01-14 19:33:40,733 cifar10 train 81.940000 test 79.790000
+2025-01-14 19:33:40,733 cifar100 train 53.990000 valid 50.470000 test 50.550000
+2025-01-14 19:33:40,733 imagenet16 train 21.270000 valid 21.610000 test 20.770000
+2025-01-14 19:33:40,746 epoch 38 lr 3.794383e-03
+2025-01-14 19:33:40,747 genotype = Structure(4 nodes with |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|skip_connect~2|)
+2025-01-14 19:33:40,747 tensor([[0.1997, 0.1996, 0.1998, 0.2004, 0.2005],
+        [0.1997, 0.2003, 0.2001, 0.1999, 0.2000],
+        [0.2004, 0.1999, 0.2000, 0.2000, 0.1998],
+        [0.2003, 0.1999, 0.1998, 0.2001, 0.1999],
+        [0.1998, 0.2003, 0.2000, 0.2000, 0.2000],
+        [0.2000, 0.2002, 0.2001, 0.2000, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 19:33:41,592 train 000 2.455257e-01 92.187500 100.000000
+2025-01-14 19:34:30,034 train 050 3.218641e-01 89.001228 99.601723
+2025-01-14 19:35:18,426 train 100 3.195282e-01 89.000618 99.613243
+2025-01-14 19:36:06,590 train 150 3.172171e-01 89.000412 99.679222
+2025-01-14 19:36:54,554 train 200 3.121690e-01 89.046951 99.704597
+2025-01-14 19:37:42,395 train 250 3.064309e-01 89.330185 99.707420
+2025-01-14 19:38:29,918 train 300 3.080525e-01 89.301285 99.698921
+2025-01-14 19:39:17,836 train 350 3.032138e-01 89.485397 99.715096
+2025-01-14 19:39:56,650 train_acc  89.446129
+2025-01-14 19:39:56,652 train_loss 0.302550
+2025-01-14 19:40:28,262 valid_acc  83.164001
+2025-01-14 19:40:28,262 valid_loss 0.510905
+2025-01-14 19:40:28,264 |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=14987
+cifar10-valid  FLOP= 47.10 M, Params=0.344 MB, latency=14.88 ms.
+cifar10-valid  train : [loss = 0.006, top1 = 99.94%], valid : [loss = 0.473, top1 = 89.09%]
+cifar10        FLOP= 47.10 M, Params=0.344 MB, latency=15.99 ms.
+cifar10        train : [loss = 0.013, top1 = 99.76%], test  : [loss = 0.307, top1 = 92.31%]
+cifar100       FLOP= 47.11 M, Params=0.350 MB, latency=15.28 ms.
+cifar100       train : [loss = 0.314, top1 = 91.57%], valid : [loss = 1.261, top1 = 67.95%], test : [loss = 1.243, top1 = 68.19%]
+ImageNet16-120 FLOP= 11.78 M, Params=0.351 MB, latency=13.10 ms.
+ImageNet16-120 train : [loss = 2.031, top1 = 46.79%], valid : [loss = 2.303, top1 = 40.93%], test : [loss = 2.318, top1 = 41.24%]
+2025-01-14 19:40:28,264 cifar10 train 99.760000 test 92.310000
+2025-01-14 19:40:28,264 cifar100 train 91.570000 valid 67.950000 test 68.190000
+2025-01-14 19:40:28,264 imagenet16 train 46.790000 valid 40.930000 test 41.240000
+2025-01-14 19:40:28,277 epoch 39 lr 3.331723e-03
+2025-01-14 19:40:28,278 genotype = Structure(4 nodes with |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 19:40:28,278 tensor([[0.1998, 0.1996, 0.1998, 0.2004, 0.2004],
+        [0.1997, 0.2003, 0.2001, 0.1999, 0.2000],
+        [0.2004, 0.1999, 0.2000, 0.2000, 0.1997],
+        [0.2003, 0.1999, 0.1997, 0.2001, 0.1999],
+        [0.1999, 0.2003, 0.1999, 0.1999, 0.2000],
+        [0.2000, 0.2002, 0.2002, 0.2000, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 19:40:29,134 train 000 2.197408e-01 90.625000 100.000000
+2025-01-14 19:41:17,154 train 050 3.114303e-01 89.246330 99.816177
+2025-01-14 19:42:04,951 train 100 3.064016e-01 89.325493 99.798882
+2025-01-14 19:42:52,315 train 150 2.997257e-01 89.683357 99.813744
+2025-01-14 19:43:40,232 train 200 3.001857e-01 89.622200 99.790108
+2025-01-14 19:44:28,456 train 250 2.998733e-01 89.473358 99.807022
+2025-01-14 19:45:15,569 train 300 2.978644e-01 89.591980 99.797546
+2025-01-14 19:46:03,987 train 350 2.939448e-01 89.770302 99.795227
+2025-01-14 19:46:42,004 train_acc  89.733856
+2025-01-14 19:46:42,006 train_loss 0.294605
+2025-01-14 19:47:13,697 valid_acc  82.979996
+2025-01-14 19:47:13,697 valid_loss 0.516977
+2025-01-14 19:47:13,699 |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=9178
+cifar10-valid  FLOP= 11.72 M, Params=0.101 MB, latency=13.77 ms.
+cifar10-valid  train : [loss = 0.031, top1 = 99.35%], valid : [loss = 0.624, top1 = 85.40%]
+cifar10        FLOP= 11.72 M, Params=0.101 MB, latency=12.31 ms.
+cifar10        train : [loss = 0.071, top1 = 97.75%], test  : [loss = 0.405, top1 = 88.93%]
+cifar100       FLOP= 11.72 M, Params=0.107 MB, latency=11.05 ms.
+cifar100       train : [loss = 0.719, top1 = 79.09%], valid : [loss = 1.372, top1 = 63.28%], test : [loss = 1.367, top1 = 64.26%]
+ImageNet16-120 FLOP=  2.94 M, Params=0.108 MB, latency=12.49 ms.
+ImageNet16-120 train : [loss = 2.529, top1 = 36.16%], valid : [loss = 2.644, top1 = 33.63%], test : [loss = 2.684, top1 = 34.33%]
+2025-01-14 19:47:13,699 cifar10 train 97.750000 test 88.930000
+2025-01-14 19:47:13,699 cifar100 train 79.090000 valid 63.280000 test 64.260000
+2025-01-14 19:47:13,699 imagenet16 train 36.160000 valid 33.630000 test 34.330000
+2025-01-14 19:47:13,804 epoch 40 lr 2.907274e-03
+2025-01-14 19:47:13,805 genotype = Structure(4 nodes with |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 19:47:13,805 tensor([[0.1997, 0.1996, 0.1998, 0.2004, 0.2005],
+        [0.1997, 0.2003, 0.2001, 0.1999, 0.2000],
+        [0.2004, 0.1999, 0.1999, 0.1999, 0.1998],
+        [0.2003, 0.1999, 0.1998, 0.2000, 0.1999],
+        [0.1999, 0.2003, 0.1999, 0.2000, 0.1999],
+        [0.2000, 0.2001, 0.2002, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 19:47:14,637 train 000 3.212473e-01 90.625000 100.000000
+2025-01-14 19:48:02,507 train 050 3.145510e-01 89.123779 99.785545
+2025-01-14 19:48:50,297 train 100 2.990796e-01 89.387375 99.829826
+2025-01-14 19:49:38,198 train 150 2.997313e-01 89.269455 99.772354
+2025-01-14 19:50:26,328 train 200 3.008170e-01 89.280159 99.759018
+2025-01-14 19:51:14,428 train 250 2.964232e-01 89.510712 99.719872
+2025-01-14 19:52:02,273 train 300 2.926106e-01 89.664658 99.735252
+2025-01-14 19:52:49,973 train 350 2.923397e-01 89.756943 99.741806
+2025-01-14 19:53:28,128 train_acc  89.853737
+2025-01-14 19:53:28,130 train_loss 0.289993
+2025-01-14 19:53:59,752 valid_acc  83.827995
+2025-01-14 19:53:59,752 valid_loss 0.495808
+2025-01-14 19:53:59,754 |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=14987
+cifar10-valid  FLOP= 47.10 M, Params=0.344 MB, latency=14.88 ms.
+cifar10-valid  train : [loss = 0.006, top1 = 99.94%], valid : [loss = 0.473, top1 = 89.09%]
+cifar10        FLOP= 47.10 M, Params=0.344 MB, latency=15.99 ms.
+cifar10        train : [loss = 0.013, top1 = 99.76%], test  : [loss = 0.307, top1 = 92.31%]
+cifar100       FLOP= 47.11 M, Params=0.350 MB, latency=15.28 ms.
+cifar100       train : [loss = 0.314, top1 = 91.57%], valid : [loss = 1.261, top1 = 67.95%], test : [loss = 1.243, top1 = 68.19%]
+ImageNet16-120 FLOP= 11.78 M, Params=0.351 MB, latency=13.10 ms.
+ImageNet16-120 train : [loss = 2.031, top1 = 46.79%], valid : [loss = 2.303, top1 = 40.93%], test : [loss = 2.318, top1 = 41.24%]
+2025-01-14 19:53:59,754 cifar10 train 99.760000 test 92.310000
+2025-01-14 19:53:59,754 cifar100 train 91.570000 valid 67.950000 test 68.190000
+2025-01-14 19:53:59,754 imagenet16 train 46.790000 valid 40.930000 test 41.240000
+2025-01-14 19:53:59,767 epoch 41 lr 2.522678e-03
+2025-01-14 19:53:59,768 genotype = Structure(4 nodes with |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 19:53:59,768 tensor([[0.1998, 0.1995, 0.1998, 0.2004, 0.2004],
+        [0.1998, 0.2003, 0.2001, 0.1999, 0.1999],
+        [0.2005, 0.1999, 0.2000, 0.2000, 0.1997],
+        [0.2004, 0.1999, 0.1998, 0.2001, 0.1999],
+        [0.1999, 0.2002, 0.2000, 0.2000, 0.1999],
+        [0.2001, 0.2001, 0.2002, 0.2000, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 19:54:00,606 train 000 2.028957e-01 93.750000 100.000000
+2025-01-14 19:54:48,513 train 050 2.677352e-01 91.084564 99.816177
+2025-01-14 19:55:36,785 train 100 2.657714e-01 90.810638 99.860764
+2025-01-14 19:56:24,817 train 150 2.668272e-01 90.862999 99.844788
+2025-01-14 19:57:13,018 train 200 2.708717e-01 90.640549 99.852295
+2025-01-14 19:58:01,228 train 250 2.693846e-01 90.643677 99.825699
+2025-01-14 19:58:49,735 train 300 2.683057e-01 90.739197 99.833885
+2025-01-14 19:59:37,251 train 350 2.701998e-01 90.691772 99.808578
+2025-01-14 20:00:16,236 train_acc  90.728897
+2025-01-14 20:00:16,238 train_loss 0.267965
+2025-01-14 20:00:47,772 valid_acc  83.699997
+2025-01-14 20:00:47,772 valid_loss 0.494257
+2025-01-14 20:00:47,774 |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=14987
+cifar10-valid  FLOP= 47.10 M, Params=0.344 MB, latency=14.88 ms.
+cifar10-valid  train : [loss = 0.006, top1 = 99.94%], valid : [loss = 0.473, top1 = 89.09%]
+cifar10        FLOP= 47.10 M, Params=0.344 MB, latency=15.99 ms.
+cifar10        train : [loss = 0.013, top1 = 99.76%], test  : [loss = 0.307, top1 = 92.31%]
+cifar100       FLOP= 47.11 M, Params=0.350 MB, latency=15.28 ms.
+cifar100       train : [loss = 0.314, top1 = 91.57%], valid : [loss = 1.261, top1 = 67.95%], test : [loss = 1.243, top1 = 68.19%]
+ImageNet16-120 FLOP= 11.78 M, Params=0.351 MB, latency=13.10 ms.
+ImageNet16-120 train : [loss = 2.031, top1 = 46.79%], valid : [loss = 2.303, top1 = 40.93%], test : [loss = 2.318, top1 = 41.24%]
+2025-01-14 20:00:47,775 cifar10 train 99.760000 test 92.310000
+2025-01-14 20:00:47,775 cifar100 train 91.570000 valid 67.950000 test 68.190000
+2025-01-14 20:00:47,775 imagenet16 train 46.790000 valid 40.930000 test 41.240000
+2025-01-14 20:00:47,787 epoch 42 lr 2.179405e-03
+2025-01-14 20:00:47,788 genotype = Structure(4 nodes with |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 20:00:47,788 tensor([[0.1998, 0.1996, 0.1998, 0.2004, 0.2004],
+        [0.1998, 0.2002, 0.2001, 0.1999, 0.2000],
+        [0.2004, 0.1998, 0.2000, 0.2000, 0.1997],
+        [0.2004, 0.1999, 0.1998, 0.2000, 0.1999],
+        [0.1999, 0.2002, 0.2000, 0.1999, 0.1999],
+        [0.2001, 0.2001, 0.2002, 0.2000, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 20:00:48,629 train 000 3.153684e-01 89.062500 100.000000
+2025-01-14 20:01:36,770 train 050 2.485666e-01 91.605392 99.846817
+2025-01-14 20:02:23,876 train 100 2.493464e-01 91.460396 99.829826
+2025-01-14 20:03:12,082 train 150 2.537596e-01 91.276901 99.803391
+2025-01-14 20:03:59,636 train 200 2.506564e-01 91.394585 99.828979
+2025-01-14 20:04:47,603 train 250 2.523550e-01 91.303535 99.819473
+2025-01-14 20:05:34,782 train 300 2.506368e-01 91.393272 99.828697
+2025-01-14 20:06:22,698 train 350 2.492806e-01 91.377312 99.839745
+2025-01-14 20:07:00,331 train_acc  91.348305
+2025-01-14 20:07:00,333 train_loss 0.250077
+2025-01-14 20:07:32,583 valid_acc  83.811996
+2025-01-14 20:07:32,583 valid_loss 0.503205
+2025-01-14 20:07:32,585 |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=14987
+cifar10-valid  FLOP= 47.10 M, Params=0.344 MB, latency=14.88 ms.
+cifar10-valid  train : [loss = 0.006, top1 = 99.94%], valid : [loss = 0.473, top1 = 89.09%]
+cifar10        FLOP= 47.10 M, Params=0.344 MB, latency=15.99 ms.
+cifar10        train : [loss = 0.013, top1 = 99.76%], test  : [loss = 0.307, top1 = 92.31%]
+cifar100       FLOP= 47.11 M, Params=0.350 MB, latency=15.28 ms.
+cifar100       train : [loss = 0.314, top1 = 91.57%], valid : [loss = 1.261, top1 = 67.95%], test : [loss = 1.243, top1 = 68.19%]
+ImageNet16-120 FLOP= 11.78 M, Params=0.351 MB, latency=13.10 ms.
+ImageNet16-120 train : [loss = 2.031, top1 = 46.79%], valid : [loss = 2.303, top1 = 40.93%], test : [loss = 2.318, top1 = 41.24%]
+2025-01-14 20:07:32,585 cifar10 train 99.760000 test 92.310000
+2025-01-14 20:07:32,585 cifar100 train 91.570000 valid 67.950000 test 68.190000
+2025-01-14 20:07:32,585 imagenet16 train 46.790000 valid 40.930000 test 41.240000
+2025-01-14 20:07:32,598 epoch 43 lr 1.878743e-03
+2025-01-14 20:07:32,599 genotype = Structure(4 nodes with |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 20:07:32,599 tensor([[0.1998, 0.1996, 0.1998, 0.2004, 0.2004],
+        [0.1998, 0.2003, 0.2001, 0.2000, 0.2000],
+        [0.2004, 0.1998, 0.1999, 0.2001, 0.1997],
+        [0.2004, 0.1999, 0.1998, 0.2001, 0.1999],
+        [0.1999, 0.2003, 0.1999, 0.2000, 0.1999],
+        [0.2000, 0.2001, 0.2002, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 20:07:33,441 train 000 3.209353e-01 87.500000 98.437500
+2025-01-14 20:08:21,584 train 050 2.542662e-01 91.666672 99.754906
+2025-01-14 20:09:09,345 train 100 2.618118e-01 91.212868 99.752472
+2025-01-14 20:09:57,027 train 150 2.564316e-01 91.349335 99.751656
+2025-01-14 20:10:45,204 train 200 2.535167e-01 91.231339 99.774559
+2025-01-14 20:11:33,103 train 250 2.482094e-01 91.477844 99.788353
+2025-01-14 20:12:21,160 train 300 2.507291e-01 91.403656 99.787163
+2025-01-14 20:13:09,033 train 350 2.482445e-01 91.435188 99.808578
+2025-01-14 20:13:47,187 train_acc  91.408249
+2025-01-14 20:13:47,189 train_loss 0.247212
+2025-01-14 20:14:18,690 valid_acc  83.767998
+2025-01-14 20:14:18,690 valid_loss 0.498819
+2025-01-14 20:14:18,692 |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|skip_connect~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=10459
+cifar10-valid  FLOP= 43.17 M, Params=0.316 MB, latency=12.83 ms.
+cifar10-valid  train : [loss = 0.007, top1 = 99.94%], valid : [loss = 0.461, top1 = 88.95%]
+cifar10        FLOP= 43.17 M, Params=0.316 MB, latency=11.36 ms.
+cifar10        train : [loss = 0.013, top1 = 99.80%], test  : [loss = 0.313, top1 = 91.89%]
+cifar100       FLOP= 43.18 M, Params=0.322 MB, latency=13.41 ms.
+cifar100       train : [loss = 0.324, top1 = 91.24%], valid : [loss = 1.317, top1 = 67.44%], test : [loss = 1.333, top1 = 66.82%]
+ImageNet16-120 FLOP= 10.80 M, Params=0.323 MB, latency=8.21 ms.
+ImageNet16-120 train : [loss = 2.065, top1 = 46.23%], valid : [loss = 2.397, top1 = 40.17%], test : [loss = 2.414, top1 = 39.43%]
+2025-01-14 20:14:18,692 cifar10 train 99.800000 test 91.890000
+2025-01-14 20:14:18,692 cifar100 train 91.240000 valid 67.440000 test 66.820000
+2025-01-14 20:14:18,692 imagenet16 train 46.230000 valid 40.170000 test 39.430000
+2025-01-14 20:14:18,705 epoch 44 lr 1.621774e-03
+2025-01-14 20:14:18,706 genotype = Structure(4 nodes with |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|skip_connect~2|)
+2025-01-14 20:14:18,706 tensor([[0.1998, 0.1996, 0.1998, 0.2005, 0.2004],
+        [0.1998, 0.2003, 0.2000, 0.1999, 0.2000],
+        [0.2004, 0.1999, 0.1999, 0.2000, 0.1997],
+        [0.2004, 0.2000, 0.1997, 0.2000, 0.1999],
+        [0.1999, 0.2003, 0.1999, 0.2000, 0.1999],
+        [0.2000, 0.2002, 0.2001, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 20:14:19,558 train 000 2.629867e-01 92.187500 100.000000
+2025-01-14 20:15:07,172 train 050 2.416806e-01 92.003677 99.846817
+2025-01-14 20:15:55,066 train 100 2.516393e-01 91.506805 99.860764
+2025-01-14 20:16:42,776 train 150 2.508881e-01 91.473511 99.875824
+2025-01-14 20:17:30,658 train 200 2.435897e-01 91.689987 99.867844
+2025-01-14 20:18:18,443 train 250 2.385260e-01 91.932274 99.869278
+2025-01-14 20:19:05,717 train 300 2.392084e-01 91.933136 99.885796
+2025-01-14 20:19:53,480 train 350 2.394578e-01 91.866989 99.888710
+2025-01-14 20:20:32,451 train_acc  91.887787
+2025-01-14 20:20:32,453 train_loss 0.238668
+2025-01-14 20:21:04,063 valid_acc  83.975998
+2025-01-14 20:21:04,063 valid_loss 0.494067
+2025-01-14 20:21:04,065 |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=14987
+cifar10-valid  FLOP= 47.10 M, Params=0.344 MB, latency=14.88 ms.
+cifar10-valid  train : [loss = 0.006, top1 = 99.94%], valid : [loss = 0.473, top1 = 89.09%]
+cifar10        FLOP= 47.10 M, Params=0.344 MB, latency=15.99 ms.
+cifar10        train : [loss = 0.013, top1 = 99.76%], test  : [loss = 0.307, top1 = 92.31%]
+cifar100       FLOP= 47.11 M, Params=0.350 MB, latency=15.28 ms.
+cifar100       train : [loss = 0.314, top1 = 91.57%], valid : [loss = 1.261, top1 = 67.95%], test : [loss = 1.243, top1 = 68.19%]
+ImageNet16-120 FLOP= 11.78 M, Params=0.351 MB, latency=13.10 ms.
+ImageNet16-120 train : [loss = 2.031, top1 = 46.79%], valid : [loss = 2.303, top1 = 40.93%], test : [loss = 2.318, top1 = 41.24%]
+2025-01-14 20:21:04,065 cifar10 train 99.760000 test 92.310000
+2025-01-14 20:21:04,065 cifar100 train 91.570000 valid 67.950000 test 68.190000
+2025-01-14 20:21:04,065 imagenet16 train 46.790000 valid 40.930000 test 41.240000
+2025-01-14 20:21:04,078 epoch 45 lr 1.409344e-03
+2025-01-14 20:21:04,079 genotype = Structure(4 nodes with |nor_conv_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 20:21:04,079 tensor([[0.1998, 0.1996, 0.1998, 0.2004, 0.2004],
+        [0.1997, 0.2003, 0.2001, 0.1999, 0.2000],
+        [0.2005, 0.1999, 0.1999, 0.2000, 0.1997],
+        [0.2004, 0.1999, 0.1998, 0.2001, 0.1999],
+        [0.1999, 0.2002, 0.2000, 0.2000, 0.1999],
+        [0.2001, 0.2001, 0.2002, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 20:21:04,925 train 000 1.929845e-01 93.750000 98.437500
+2025-01-14 20:21:53,131 train 050 2.363142e-01 92.187500 99.754906
+2025-01-14 20:22:41,521 train 100 2.309012e-01 92.450493 99.783417
+2025-01-14 20:23:29,414 train 150 2.275102e-01 92.653145 99.772354
+2025-01-14 20:24:18,081 train 200 2.261268e-01 92.630592 99.805656
+2025-01-14 20:25:06,836 train 250 2.259234e-01 92.573456 99.825699
+2025-01-14 20:25:54,139 train 300 2.267668e-01 92.441856 99.839073
+2025-01-14 20:26:42,643 train 350 2.249369e-01 92.472397 99.835289
+2025-01-14 20:27:20,733 train_acc  92.543159
+2025-01-14 20:27:20,735 train_loss 0.223944
+2025-01-14 20:27:52,459 valid_acc  83.823997
+2025-01-14 20:27:52,459 valid_loss 0.503968
+2025-01-14 20:27:52,461 |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=9178
+cifar10-valid  FLOP= 11.72 M, Params=0.101 MB, latency=13.77 ms.
+cifar10-valid  train : [loss = 0.031, top1 = 99.35%], valid : [loss = 0.624, top1 = 85.40%]
+cifar10        FLOP= 11.72 M, Params=0.101 MB, latency=12.31 ms.
+cifar10        train : [loss = 0.071, top1 = 97.75%], test  : [loss = 0.405, top1 = 88.93%]
+cifar100       FLOP= 11.72 M, Params=0.107 MB, latency=11.05 ms.
+cifar100       train : [loss = 0.719, top1 = 79.09%], valid : [loss = 1.372, top1 = 63.28%], test : [loss = 1.367, top1 = 64.26%]
+ImageNet16-120 FLOP=  2.94 M, Params=0.108 MB, latency=12.49 ms.
+ImageNet16-120 train : [loss = 2.529, top1 = 36.16%], valid : [loss = 2.644, top1 = 33.63%], test : [loss = 2.684, top1 = 34.33%]
+2025-01-14 20:27:52,461 cifar10 train 97.750000 test 88.930000
+2025-01-14 20:27:52,461 cifar100 train 79.090000 valid 63.280000 test 64.260000
+2025-01-14 20:27:52,461 imagenet16 train 36.160000 valid 33.630000 test 34.330000
+2025-01-14 20:27:52,474 epoch 46 lr 1.241998e-03
+2025-01-14 20:27:52,474 genotype = Structure(4 nodes with |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 20:27:52,475 tensor([[0.1998, 0.1996, 0.1998, 0.2004, 0.2004],
+        [0.1997, 0.2002, 0.2002, 0.1999, 0.2000],
+        [0.2004, 0.1999, 0.1999, 0.1999, 0.1998],
+        [0.2004, 0.1999, 0.1998, 0.2001, 0.1999],
+        [0.1999, 0.2002, 0.2000, 0.1999, 0.1999],
+        [0.2000, 0.2001, 0.2002, 0.2000, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 20:27:53,328 train 000 2.353923e-01 93.750000 100.000000
+2025-01-14 20:28:41,242 train 050 2.364555e-01 92.126228 99.938728
+2025-01-14 20:29:29,055 train 100 2.275195e-01 92.280319 99.907173
+2025-01-14 20:30:17,241 train 150 2.225219e-01 92.508278 99.886177
+2025-01-14 20:31:05,405 train 200 2.251047e-01 92.249687 99.883392
+2025-01-14 20:31:53,039 train 250 2.252090e-01 92.187500 99.875504
+2025-01-14 20:32:40,803 train 300 2.243073e-01 92.203072 99.875412
+2025-01-14 20:33:28,782 train 350 2.245500e-01 92.227562 99.870903
+2025-01-14 20:34:06,820 train_acc  92.271416
+2025-01-14 20:34:06,822 train_loss 0.223445
+2025-01-14 20:34:38,421 valid_acc  83.872002
+2025-01-14 20:34:38,421 valid_loss 0.498617
+2025-01-14 20:34:38,423 |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=9178
+cifar10-valid  FLOP= 11.72 M, Params=0.101 MB, latency=13.77 ms.
+cifar10-valid  train : [loss = 0.031, top1 = 99.35%], valid : [loss = 0.624, top1 = 85.40%]
+cifar10        FLOP= 11.72 M, Params=0.101 MB, latency=12.31 ms.
+cifar10        train : [loss = 0.071, top1 = 97.75%], test  : [loss = 0.405, top1 = 88.93%]
+cifar100       FLOP= 11.72 M, Params=0.107 MB, latency=11.05 ms.
+cifar100       train : [loss = 0.719, top1 = 79.09%], valid : [loss = 1.372, top1 = 63.28%], test : [loss = 1.367, top1 = 64.26%]
+ImageNet16-120 FLOP=  2.94 M, Params=0.108 MB, latency=12.49 ms.
+ImageNet16-120 train : [loss = 2.529, top1 = 36.16%], valid : [loss = 2.644, top1 = 33.63%], test : [loss = 2.684, top1 = 34.33%]
+2025-01-14 20:34:38,423 cifar10 train 97.750000 test 88.930000
+2025-01-14 20:34:38,423 cifar100 train 79.090000 valid 63.280000 test 64.260000
+2025-01-14 20:34:38,423 imagenet16 train 36.160000 valid 33.630000 test 34.330000
+2025-01-14 20:34:38,436 epoch 47 lr 1.119837e-03
+2025-01-14 20:34:38,437 genotype = Structure(4 nodes with |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 20:34:38,437 tensor([[0.1998, 0.1996, 0.1998, 0.2004, 0.2004],
+        [0.1998, 0.2003, 0.2001, 0.1999, 0.2000],
+        [0.2004, 0.1999, 0.2000, 0.2000, 0.1997],
+        [0.2004, 0.1999, 0.1998, 0.2001, 0.1999],
+        [0.1999, 0.2002, 0.2000, 0.1999, 0.1999],
+        [0.2000, 0.2001, 0.2002, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 20:34:39,288 train 000 1.942683e-01 93.750000 100.000000
+2025-01-14 20:35:27,300 train 050 2.024116e-01 92.738976 99.938728
+2025-01-14 20:36:15,194 train 100 2.055184e-01 93.038368 99.891708
+2025-01-14 20:37:03,155 train 150 2.111511e-01 92.839401 99.906868
+2025-01-14 20:37:50,896 train 200 2.099575e-01 92.863800 99.906715
+2025-01-14 20:38:39,464 train 250 2.106627e-01 92.940742 99.906624
+2025-01-14 20:39:27,796 train 300 2.093233e-01 92.966156 99.890984
+2025-01-14 20:40:15,449 train 350 2.092340e-01 92.904205 99.902061
+2025-01-14 20:40:53,847 train_acc  92.974747
+2025-01-14 20:40:53,849 train_loss 0.209159
+2025-01-14 20:41:26,063 valid_acc  84.180000
+2025-01-14 20:41:26,064 valid_loss 0.498114
+2025-01-14 20:41:26,065 |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|skip_connect~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=240
+cifar10-valid  FLOP=  7.78 M, Params=0.073 MB, latency=9.48 ms.
+cifar10-valid  train : [loss = 0.498, top1 = 82.72%], valid : [loss = 0.654, top1 = 77.96%]
+cifar10        FLOP=  7.78 M, Params=0.073 MB, latency=9.73 ms.
+cifar10        train : [loss = 0.520, top1 = 81.94%], test  : [loss = 0.594, top1 = 79.79%]
+cifar100       FLOP=  7.79 M, Params=0.079 MB, latency=9.10 ms.
+cifar100       train : [loss = 1.696, top1 = 53.99%], valid : [loss = 1.855, top1 = 50.47%], test : [loss = 1.873, top1 = 50.55%]
+ImageNet16-120 FLOP=  1.95 M, Params=0.080 MB, latency=8.67 ms.
+ImageNet16-120 train : [loss = 3.326, top1 = 21.27%], valid : [loss = 3.313, top1 = 21.61%], test : [loss = 3.350, top1 = 20.77%]
+2025-01-14 20:41:26,066 cifar10 train 81.940000 test 79.790000
+2025-01-14 20:41:26,066 cifar100 train 53.990000 valid 50.470000 test 50.550000
+2025-01-14 20:41:26,066 imagenet16 train 21.270000 valid 21.610000 test 20.770000
+2025-01-14 20:41:26,078 epoch 48 lr 1.042124e-03
+2025-01-14 20:41:26,079 genotype = Structure(4 nodes with |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|skip_connect~2|)
+2025-01-14 20:41:26,079 tensor([[0.1997, 0.1996, 0.1998, 0.2004, 0.2005],
+        [0.1997, 0.2004, 0.2000, 0.1999, 0.2000],
+        [0.2004, 0.1999, 0.1998, 0.2000, 0.1998],
+        [0.2003, 0.2000, 0.1997, 0.2000, 0.2000],
+        [0.1999, 0.2003, 0.1999, 0.1999, 0.2000],
+        [0.1999, 0.2002, 0.2002, 0.2001, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 20:41:26,926 train 000 3.065183e-01 93.750000 100.000000
+2025-01-14 20:42:14,956 train 050 2.016987e-01 93.566177 99.846817
+2025-01-14 20:43:01,958 train 100 2.082317e-01 92.991951 99.876236
+2025-01-14 20:43:50,012 train 150 2.056947e-01 93.098099 99.886177
+2025-01-14 20:44:38,250 train 200 2.074033e-01 92.980408 99.883392
+2025-01-14 20:45:26,195 train 250 2.049872e-01 93.009216 99.900398
+2025-01-14 20:46:13,337 train 300 2.068200e-01 92.992111 99.890984
+2025-01-14 20:47:00,810 train 350 2.070814e-01 93.055557 99.893166
+2025-01-14 20:47:39,098 train_acc  92.970749
+2025-01-14 20:47:39,100 train_loss 0.208096
+2025-01-14 20:48:10,622 valid_acc  83.923996
+2025-01-14 20:48:10,622 valid_loss 0.501396
+2025-01-14 20:48:10,623 |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=9178
+cifar10-valid  FLOP= 11.72 M, Params=0.101 MB, latency=13.77 ms.
+cifar10-valid  train : [loss = 0.031, top1 = 99.35%], valid : [loss = 0.624, top1 = 85.40%]
+cifar10        FLOP= 11.72 M, Params=0.101 MB, latency=12.31 ms.
+cifar10        train : [loss = 0.071, top1 = 97.75%], test  : [loss = 0.405, top1 = 88.93%]
+cifar100       FLOP= 11.72 M, Params=0.107 MB, latency=11.05 ms.
+cifar100       train : [loss = 0.719, top1 = 79.09%], valid : [loss = 1.372, top1 = 63.28%], test : [loss = 1.367, top1 = 64.26%]
+ImageNet16-120 FLOP=  2.94 M, Params=0.108 MB, latency=12.49 ms.
+ImageNet16-120 train : [loss = 2.529, top1 = 36.16%], valid : [loss = 2.644, top1 = 33.63%], test : [loss = 2.684, top1 = 34.33%]
+2025-01-14 20:48:10,623 cifar10 train 97.750000 test 88.930000
+2025-01-14 20:48:10,624 cifar100 train 79.090000 valid 63.280000 test 64.260000
+2025-01-14 20:48:10,624 imagenet16 train 36.160000 valid 33.630000 test 34.330000
+2025-01-14 20:48:10,637 epoch 49 lr 1.005926e-03
+2025-01-14 20:48:10,637 genotype = Structure(4 nodes with |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|)
+2025-01-14 20:48:10,637 tensor([[0.1998, 0.1996, 0.1998, 0.2004, 0.2005],
+        [0.1997, 0.2003, 0.2001, 0.1999, 0.2000],
+        [0.2004, 0.1999, 0.2000, 0.2000, 0.1998],
+        [0.2003, 0.1999, 0.1998, 0.2001, 0.1999],
+        [0.1999, 0.2002, 0.2000, 0.1999, 0.1999],
+        [0.2000, 0.2001, 0.2002, 0.2000, 0.1996]], grad_fn=<ToCopyBackward0>)
+2025-01-14 20:48:11,487 train 000 1.641734e-01 95.312500 100.000000
+2025-01-14 20:48:59,378 train 050 2.202761e-01 92.003677 99.938728
+2025-01-14 20:49:47,198 train 100 2.238630e-01 92.032799 99.938118
+2025-01-14 20:50:35,040 train 150 2.145614e-01 92.353065 99.927567
+2025-01-14 20:51:22,576 train 200 2.118762e-01 92.560631 99.930038
+2025-01-14 20:52:10,422 train 250 2.098729e-01 92.685509 99.931526
+2025-01-14 20:52:58,699 train 300 2.070873e-01 92.898666 99.916939
+2025-01-14 20:53:47,049 train 350 2.076378e-01 92.832977 99.924324
+2025-01-14 20:54:25,334 train_acc  92.870842
+2025-01-14 20:54:25,336 train_loss 0.206146
+2025-01-14 20:54:57,114 valid_acc  84.375999
+2025-01-14 20:54:57,115 valid_loss 0.488573
+2025-01-14 20:54:57,116 |avg_pool_3x3~0|+|skip_connect~0|none~1|+|none~0|skip_connect~1|nor_conv_1x1~2|
+datasets : ['cifar10-valid', 'cifar10', 'cifar100', 'ImageNet16-120'], extra-info : arch-index=9178
+cifar10-valid  FLOP= 11.72 M, Params=0.101 MB, latency=13.77 ms.
+cifar10-valid  train : [loss = 0.031, top1 = 99.35%], valid : [loss = 0.624, top1 = 85.40%]
+cifar10        FLOP= 11.72 M, Params=0.101 MB, latency=12.31 ms.
+cifar10        train : [loss = 0.071, top1 = 97.75%], test  : [loss = 0.405, top1 = 88.93%]
+cifar100       FLOP= 11.72 M, Params=0.107 MB, latency=11.05 ms.
+cifar100       train : [loss = 0.719, top1 = 79.09%], valid : [loss = 1.372, top1 = 63.28%], test : [loss = 1.367, top1 = 64.26%]
+ImageNet16-120 FLOP=  2.94 M, Params=0.108 MB, latency=12.49 ms.
+ImageNet16-120 train : [loss = 2.529, top1 = 36.16%], valid : [loss = 2.644, top1 = 33.63%], test : [loss = 2.684, top1 = 34.33%]
+2025-01-14 20:54:57,116 cifar10 train 97.750000 test 88.930000
+2025-01-14 20:54:57,116 cifar100 train 79.090000 valid 63.280000 test 64.260000
+2025-01-14 20:54:57,116 imagenet16 train 36.160000 valid 33.630000 test 34.330000
