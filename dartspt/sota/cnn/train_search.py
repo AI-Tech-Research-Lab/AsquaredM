@@ -238,7 +238,7 @@ def main():
     criterion = criterion.cuda()
 
     ## darts
-    if args.method in ['darts', 'blank']:
+    if args.method in ['darts', 'blank', 'darts-sam']:
         model = DartsNetwork(args.init_channels, n_classes, args.layers, criterion, spaces_dict[args.search_space], args)
     ## sdarts
     elif args.method == 'sdarts':
