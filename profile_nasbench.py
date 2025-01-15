@@ -269,7 +269,7 @@ def get_bins(dataset, radius):
             return 20, 40, 60
         elif radius == 3:
             return 60, 60, 60
-
+'''
 def plot_histograms(data_array, bins=100, path='', baselines=None, dataset='cifar10', radius=1):  
     FONT_SIZE = 8  
     FIGSIZE = (4, 5)  
@@ -318,6 +318,82 @@ def plot_histograms(data_array, bins=100, path='', baselines=None, dataset='cifa
         # Add grid with custom interval  
         axs[i].grid(True, axis='y', which='both', linestyle='--', linewidth=0.5)  
         axs[i].set_yticks(np.arange(0, ymax, 0.2))  
+
+    # Add common X-axis label  
+    axs[-1].set_xlabel('Accuracy', fontsize=FONT_SIZE)  
+
+    # Adjust layout to prevent clipping of titles and labels  
+    plt.tight_layout()  
+
+    # Save the plot to a file  
+    plt.savefig(path, format='pdf', bbox_inches='tight', dpi=300)  
+
+    # Show the plot  
+    plt.show()
+'''
+
+def plot_histograms(data_array, bins=100, path='', baselines=None, dataset='cifar10', radius=1):  
+    FONT_SIZE = 8  
+    FIGSIZE = (4, 5)  
+    COLORS = [mcolors.TABLEAU_COLORS[k] for k in mcolors.TABLEAU_COLORS.keys()]  
+    titles = ['Models A', 'Models B', 'Models C']  
+
+    num_plots = len(data_array) - 1  
+
+    # Set up subplots  
+    fig, axs = plt.subplots(num_plots, 1, figsize=FIGSIZE, sharex=False)  
+
+    all_dataset = data_array[0]  
+    data_array = data_array[1:]  
+
+    global_max_density = 0  # Track the global maximum density  
+
+    # First pass: Determine global maximum density  
+    for i, data in enumerate(data_array):  
+        temp_bins = get_bins(dataset, radius)[i]  
+        data = np.array(data)  
+        data = data[data > 10]  
+
+        sns.histplot(all_dataset, bins=bins, color='green', edgecolor='black', kde=True,  
+                     line_kws={'linewidth': 1, 'alpha': 0.2}, stat='density')  
+        sns.histplot(data, bins=temp_bins, color='darkblue', edgecolor='black', kde=True,  
+                     line_kws={'linewidth': 2}, stat='density')  
+
+        y_values = [bar.get_height() for bar in plt.gca().patches]  
+        max_density = max(y_values, default=0)  
+        global_max_density = max(global_max_density, max_density)  
+
+    # Adjust global maximum density if needed  
+    global_max_density = global_max_density if global_max_density < 0.8 else 0.8  
+    print("GLOBAL MAX DENSITY: ", global_max_density)   
+
+    # Second pass: Plot histograms with uniform y-axis limits  
+    for i, data in enumerate(data_array):  
+        temp_bins = get_bins(dataset, radius)[i]  
+        data = np.array(data)  
+        data = data[data > 10]  
+
+        sns.histplot(all_dataset, bins=bins, color='green', edgecolor='black', kde=True,  
+                     line_kws={'linewidth': 1, 'alpha': 0.2}, ax=axs[i], stat='density')  
+        sns.histplot(data, bins=temp_bins, color='darkblue', edgecolor='black', kde=True,  
+                     line_kws={'linewidth': 2}, ax=axs[i], stat='density')  
+
+        axs[i].tick_params(axis='y', which='both', left=False, right=False, labelleft=True)  
+        x_max, x_min = get_limits_plot(dataset)  
+        axs[i].set_xlim(x_min, x_max)  
+        axs[i].set_ylim(0, global_max_density)  
+
+        # Add title to each subplot  
+        axs[i].set_title(f"{titles[i]} (Test accuracy: {baselines[i][0]:.2f}%-{baselines[i][1]:.2f}%)")  
+
+        # Add light grey interval for baseline  
+        if baselines:  
+            min_val, max_val = baselines[i]  
+            axs[i].fill_betweenx([0, global_max_density], min_val, max_val, color='lightgrey', alpha=0.5, label='Baseline Interval')  
+
+        # Add grid with custom interval  
+        axs[i].grid(True, axis='y', which='both', linestyle='--', linewidth=0.5)  
+        axs[i].set_yticks(np.arange(0, global_max_density, 0.2))  
 
     # Add common X-axis label  
     axs[-1].set_xlabel('Accuracy', fontsize=FONT_SIZE)  
@@ -822,6 +898,7 @@ def distributions_nasbench(bench, dataset, radius, dist_path='results/flatness_e
 
     dist.insert(0, test_accs)
      
+    print("Saved in path: ", os.path.join(folder, f'histo_nasbench_{dataset}_{radius}.pdf'))
     # Plot histograms
     plot_histograms(
         dist, bins=100,

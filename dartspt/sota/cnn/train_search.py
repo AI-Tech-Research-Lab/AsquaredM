@@ -244,7 +244,7 @@ def main():
     elif args.method == 'sdarts':
         model = SDartsNetwork(args.init_channels, n_classes, args.layers, criterion, spaces_dict[args.search_space], args)
     ## projection
-    elif args.method in ['darts-proj', 'blank-proj']:
+    elif args.method in ['darts-proj', 'blank-proj', 'darts-proj-sam']:
         model = DartsNetworkProj(args.init_channels, n_classes, args.layers, criterion, spaces_dict[args.search_space], args)
     elif args.method in ['sdarts-proj']:
         model = SDartsNetworkProj(args.init_channels, n_classes, args.layers, criterion, spaces_dict[args.search_space], args)

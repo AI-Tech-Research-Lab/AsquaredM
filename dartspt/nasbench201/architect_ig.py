@@ -23,7 +23,7 @@ class Architect(object):
         # Set mode based on method
         if args.method in ['darts', 'darts-proj','sdarts','sdarts-proj']:
             self.method = 'fo'
-        elif args.method in ['darts-sam']:
+        elif args.method in ['darts-sam', 'darts-proj-sam']:
             self.method = 'darts-sam'
             self.rho_alpha = args.rho_alpha
             self.epsilon = 0.01

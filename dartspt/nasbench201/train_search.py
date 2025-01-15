@@ -158,7 +158,7 @@ def main():
     search_space = SearchSpaceNames[args.search_space]
     if args.method in ['darts', 'blank', 'darts-sam']:
         model = TinyNetworkDarts(C=args.init_channels, N=5, max_nodes=4, num_classes=n_classes, criterion=criterion, search_space=search_space, args=args)
-    elif args.method in ['darts-proj', 'blank-proj']:
+    elif args.method in ['darts-proj', 'blank-proj', 'darts-proj-sam']:
         model = TinyNetworkDartsProj(C=args.init_channels, N=5, max_nodes=4, num_classes=n_classes, criterion=criterion, search_space=search_space, args=args)
     model = model.cuda()
     logging.info("param size = %fMB", ig_utils.count_parameters_in_MB(model))

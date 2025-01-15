@@ -201,8 +201,10 @@ def path_bench_qualities(path1, path2, dataset):
         'legend.fontsize': FONT_SIZE+2,   # Legend font size
     })
 
-    acc_base = {'DARTScifar10': 91.92, 'DARTScifar100': 73.5, 'SAMcifar10': 92.77, 'SAMcifar100': 74.7}
-    acc_target = {'DARTScifar10': 91.73, 'DARTScifar100': 73.54, 'SAMcifar10': 92.75, 'SAMcifar100': 74.78}
+    #acc_base = {'DARTScifar10': 91.92, 'DARTScifar100': 73.5, 'SAMcifar10': 92.77, 'SAMcifar100': 74.7}
+    #acc_target = {'DARTScifar10': 91.73, 'DARTScifar100': 73.54, 'SAMcifar10': 92.75, 'SAMcifar100': 74.78}
+    acc_base = {'DARTScifar10': 96.91, 'DARTScifar100': 81.52, 'SAMcifar10': 97.4, 'SAMcifar100': 83.2}
+    acc_target = {'DARTScifar10': 96.77, 'DARTScifar100': 81.33, 'SAMcifar10': 97.32, 'SAMcifar100': 83.16}
 
     # Define qualities
     qualities = ["DARTS", "SAM"]
@@ -276,8 +278,9 @@ plot_neighbors('results/darts_train_neighbors_datasetcifar10', dataset='cifar10'
 plot_neighbors('results/darts_train_neighbors_datasetcifar10', dataset='cifar10', radius=3, baselines=[91.92, 92.77])
 '''
 
-path_bench_qualities('results/darts_path_neighbors_datasetcifar10_archDARTS_seed3_arch_target{DARTS_TARGET_CIFAR10}_radius3/archive_darts.txt', 'results/darts_path_neighbors_datasetcifar10_archSAM_exp1_seed7_arch_target{SAM_TARGET_CIFAR10}_radius3/archive_darts.txt', 'cifar10')
-path_bench_qualities('results/darts_path_neighbors_datasetcifar100_archDARTS_seed3_arch_target{DARTS_TARGET_CIFAR100}_radius3/archive_darts.txt', 'results/darts_path_neighbors_datasetcifar100_archSAM_exp1_seed7_arch_target{SAM_TARGET_CIFAR100}_radius3/archive_darts.txt', 'cifar100')
+path_bench_qualities('results/darts_path_neighbors_datasetcifar10_archDARTS_seed3_arch_targetDARTS_TARGET_CIFAR10_radius3/archive_darts.txt', 'results/darts_path_neighbors_datasetcifar10_archSAM_exp1_seed7_arch_targetSAM_TARGET_CIFAR10_radius3/archive_darts.txt', 'cifar10')
+path_bench_qualities('results/darts_path_neighbors_datasetcifar100_archDARTS_seed3_arch_targetDARTS_TARGET_CIFAR100_radius3/archive_darts.txt', 'results/darts_path_neighbors_datasetcifar100_archSAM_exp1_seed7_arch_targetSAM_TARGET_CIFAR100_radius3/archive_darts.txt', 'cifar100')
+
 '''
 folder = 'results/darts_train_neighbors_datasetcifar100_archBETADARTS'
 filename=os.path.join(folder,'archive_darts.txt')
