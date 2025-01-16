@@ -271,10 +271,10 @@ def main():
                         "metrics/train_loss": train_obj,
                         "metrics/val_loss": valid_obj,
                         "metrics/beta_loss": beta_loss})
+                logging.info("Beta loss: %.2f", beta_loss)
             
         logging.info("Train acc: %.2f, Val acc: %.2f", train_acc, valid_acc)
         logging.info("Train loss: %.2f, Val loss: %.2f", train_obj, valid_obj)
-        logging.info("Beta loss: %.2f", beta_loss)
     
         if valid_obj < best_loss:
             logging.info('Best model found at epoch %d', epoch)
