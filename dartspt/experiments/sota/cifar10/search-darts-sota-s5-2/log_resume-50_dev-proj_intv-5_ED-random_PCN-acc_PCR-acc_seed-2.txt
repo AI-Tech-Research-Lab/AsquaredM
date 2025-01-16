@@ -1,11 +1,11 @@
-2025-01-15 08:26:08,622 gpu device = 0
-2025-01-15 08:26:08,622 args = Namespace(data='../../data', dataset='cifar10', batch_size=64, learning_rate=0.025, learning_rate_min=0.001, momentum=0.9, weight_decay=0.0003, report_freq=50, gpu='auto', epochs=50, init_channels=16, layers=8, model_path='saved_models', cutout=False, cutout_length=16, cutout_prob=1.0, save='../../experiments/sota/cifar10/search-darts-sota-s5-2', seed=2, grad_clip=5, train_portion=0.5, arch_learning_rate=0.0003, arch_weight_decay=0.001, search_space='s5', ckpt_interval=10, method='darts-proj', arch_opt='adam', resume_epoch=50, resume_expid='search-darts-sota-s5-2', dev='proj', deter=False, expid_tag='', log_tag='', unrolled=False, perturb_alpha='none', epsilon_alpha=0.3, tune_epochs=140, fast=False, dev_resume_epoch=-1, dev_resume_log='', edge_decision='random', proj_crit_normal='acc', proj_crit_reduce='acc', proj_crit_edge='acc', proj_intv=5, proj_mode_edge='reg', rho_alpha=0.1, dev_resume_checkpoint_dir='../../experiments/sota/cifar10/search-darts-sota-s5-2/', dev_save_checkpoint_dir='../../experiments/sota/cifar10/search-darts-sota-s5-2/log_resume-50_dev-proj_intv-5_ED-random_PCN-acc_PCR-acc_seed-2')
-2025-01-15 08:26:12,021 param size = 1.930618MB
-2025-01-15 08:26:12,021 loading checkpoint from darts-proj-sota
-2025-01-15 08:26:12,021 => loading checkpoint '../../experiments/sota/cifar10/search-darts-sota-s5-2/checkpoint_50.pth.tar'
-2025-01-15 08:26:13,550 => loaded checkpoint '../../experiments/sota/cifar10/search-darts-sota-s5-2/checkpoint_50.pth.tar' (epoch 50)
-2025-01-15 08:26:13,550 starting training at epoch 50
-2025-01-15 08:26:13,570 
+2025-01-16 09:07:14,604 gpu device = 0
+2025-01-16 09:07:14,604 args = Namespace(data='../../data', dataset='cifar10', batch_size=64, learning_rate=0.025, learning_rate_min=0.001, momentum=0.9, weight_decay=0.0003, report_freq=50, gpu='auto', epochs=50, init_channels=16, layers=8, model_path='saved_models', cutout=False, cutout_length=16, cutout_prob=1.0, save='../../experiments/sota/cifar10/search-darts-sota-s5-2', seed=2, grad_clip=5, train_portion=0.5, arch_learning_rate=0.0003, arch_weight_decay=0.001, search_space='s5', ckpt_interval=10, method='darts-proj', arch_opt='adam', resume_epoch=50, resume_expid='search-darts-sota-s5-2', dev='proj', deter=False, expid_tag='', log_tag='', unrolled=False, perturb_alpha='none', epsilon_alpha=0.3, tune_epochs=140, fast=False, dev_resume_epoch=-1, dev_resume_log='', edge_decision='random', proj_crit_normal='acc', proj_crit_reduce='acc', proj_crit_edge='acc', proj_intv=5, proj_mode_edge='reg', rho_alpha=0.1, dev_resume_checkpoint_dir='../../experiments/sota/cifar10/search-darts-sota-s5-2/', dev_save_checkpoint_dir='../../experiments/sota/cifar10/search-darts-sota-s5-2/log_resume-50_dev-proj_intv-5_ED-random_PCN-acc_PCR-acc_seed-2')
+2025-01-16 09:07:22,548 param size = 1.930618MB
+2025-01-16 09:07:22,548 loading checkpoint from darts-proj-sota
+2025-01-16 09:07:22,548 => loading checkpoint '../../experiments/sota/cifar10/search-darts-sota-s5-2/checkpoint_50.pth.tar'
+2025-01-16 09:07:28,738 => loaded checkpoint '../../experiments/sota/cifar10/search-darts-sota-s5-2/checkpoint_50.pth.tar' (epoch 50)
+2025-01-16 09:07:28,739 starting training at epoch 50
+2025-01-16 09:07:28,757 
 tensor([[0.0657, 0.0549, 0.1667, 0.2294, 0.1576, 0.1840, 0.1419],
         [0.0396, 0.0308, 0.0626, 0.2408, 0.2296, 0.2329, 0.1638],
         [0.0933, 0.0717, 0.2142, 0.2441, 0.1619, 0.1014, 0.1135],
@@ -21,7 +21,7 @@ tensor([[0.0657, 0.0549, 0.1667, 0.2294, 0.1576, 0.1840, 0.1419],
         [0.0488, 0.0477, 0.1046, 0.2154, 0.1211, 0.2520, 0.2105],
         [0.0477, 0.0493, 0.0534, 0.1932, 0.2085, 0.2324, 0.2154]],
        device='cuda:0', grad_fn=<SoftmaxBackward0>)
-2025-01-15 08:26:13,654 
+2025-01-16 09:07:28,851 
 tensor([[0.2274, 0.2161, 0.1201, 0.1140, 0.1188, 0.1199, 0.0837],
         [0.1592, 0.1302, 0.2023, 0.1260, 0.1289, 0.1189, 0.1344],
         [0.2832, 0.2384, 0.0971, 0.0767, 0.1013, 0.1093, 0.0939],
@@ -37,10 +37,16 @@ tensor([[0.2274, 0.2161, 0.1201, 0.1140, 0.1188, 0.1199, 0.0837],
         [0.0602, 0.0796, 0.2456, 0.1690, 0.1233, 0.1702, 0.1521],
         [0.0602, 0.0890, 0.2269, 0.0901, 0.1252, 0.1701, 0.2386]],
        device='cuda:0', grad_fn=<SoftmaxBackward0>)
-2025-01-15 08:33:35,254 train_acc  99.928000
-2025-01-15 08:33:35,254 train_loss 0.005040
-2025-01-15 08:40:35,035 valid_acc  88.364000
-2025-01-15 08:40:35,035 valid_loss 0.524929
-2025-01-15 08:40:35,044 epoch 0
-2025-01-15 08:40:35,252 project op
-2025-01-15 08:40:35,253 selected edge: 8 normal
+2025-01-16 09:16:00,709 train_acc  99.928000
+2025-01-16 09:16:00,709 train_loss 0.005040
+2025-01-16 09:24:27,191 valid_acc  88.364000
+2025-01-16 09:24:27,192 valid_loss 0.524930
+2025-01-16 09:24:27,201 epoch 0
+2025-01-16 09:24:27,441 project op
+2025-01-16 09:24:27,447 selected edge: 8 normal
+2025-01-16 09:47:47,250 valid_acc  87.864000
+2025-01-16 09:47:47,250 valid_loss 0.548732
+2025-01-16 10:10:27,459 valid_acc  87.816000
+2025-01-16 10:10:27,459 valid_loss 0.548038
+2025-01-16 10:34:51,685 valid_acc  87.768000
+2025-01-16 10:34:51,686 valid_loss 0.552336

@@ -910,12 +910,13 @@ def distributions_nasbench(bench, dataset, radius, dist_path='results/flatness_e
 
 def plot_rho_nasbench():
     # Data
-    rho_values = [1e-1, 1e-2, 1e-4]
-    test_acc = [55.30, 92.39, 59.00]
-    std_dev = [41.44, 0.59, 44.76]
 
     # X-axis labels as plain numbers
-    rho_labels = ['1e-1', '1e-2', '1e-4']
+    rho_labels = ['1e-4', '1e-2', '1e-1']
+
+    rho_values = [1e-4, 1e-2, 1e-1]
+    test_acc = [59.00, 92.39, 55.30]
+    std_dev = [44.76, 0.59, 41.44]
 
     # Plot
     plt.figure(figsize=(8, 6))
@@ -931,19 +932,46 @@ def plot_rho_nasbench():
 
     # Show plot
     plt.show()
-    plt.savefig('results/rhovstest.pdf', format='pdf', bbox_inches='tight', dpi=300)
+    plt.savefig('results/rhovstestnasbench.pdf', format='pdf', bbox_inches='tight', dpi=300)
+
+def plot_rho_darts():
+    # Data
+    rho_values = [1e-4, 1e-2, 1e-1, 1]
+    test_acc = [97.03, 96.87, 97.20, 97.10]
+    std_dev = [0.19, 0.41, 0.15, 0.12]
+
+    # X-axis labels as plain numbers
+    rho_labels = ['1e-4', '1e-2', '1e-1', '1']
+
+    # Plot
+    plt.figure(figsize=(8, 6))
+    plt.errorbar(rho_labels, test_acc, yerr=std_dev, fmt='o-', capsize=5, label="Test Acc (%)", color="blue")
+
+    # Labels and title with Greek letter rho
+    plt.xlabel(r"$\rho$ Values")
+    plt.ylabel("Test ACC (%)")
+    plt.title(r"Test Accuracy vs $\rho$ using CIFAR-10 on DARTS")
+    plt.grid(alpha=0.5)
+    #plt.legend()
+    plt.tight_layout()
+
+    # Show plot
+    plt.show()
+    plt.savefig('results/rhovstestdarts.pdf', format='pdf', bbox_inches='tight', dpi=300)
 
 
-#plot_rho_nasbench()
+plot_rho_nasbench()
+plot_rho_darts()
 
-bench = NASBench201(dataset='cifar10')
-distributions_nasbench(bench, 'cifar10', 1)
-#distributions_nasbench(bench, 'cifar10', 2)
-#distributions_nasbench(bench, 'cifar10', 3)
 '''
+bench = NASBench201(dataset='cifar10')
+#distributions_nasbench(bench, 'cifar10', 1)
+distributions_nasbench(bench, 'cifar10', 2)
+distributions_nasbench(bench, 'cifar10', 3)
+
 bench = NASBench201(dataset='cifar100')
-#distributions_nasbench(bench, 'cifar100', 1)
-#distributions_nasbench(bench, 'cifar100', 2)
+distributions_nasbench(bench, 'cifar100', 1)
+distributions_nasbench(bench, 'cifar100', 2)
 distributions_nasbench(bench, 'cifar100', 3)
 
 bench = NASBench201(dataset='ImageNet16-120')

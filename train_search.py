@@ -81,6 +81,8 @@ parser.add_argument('--rho_alpha_sam', type=float, default=1e-2, help='rho alpha
 parser.add_argument('--epsilon_sam', type=float, default=1e-2, help='epsilon for SAM update')
 parser.add_argument('--flood_level', type=float, default=0.0, help='flood level for weight regularization')
 parser.add_argument('--data_aug', type=str2bool, default=True, help='use data augmentation on validation set')
+parser.add_argument('--sgd_alpha', type=str2bool, default=False, help='lookbehind optimizer for alpha')
+parser.add_argument('--k_sam', type=int, default=1, help='lookbehind steps for alpha')
 
 args = parser.parse_args()
 
