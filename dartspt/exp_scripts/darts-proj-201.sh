@@ -4,6 +4,7 @@ id=${script_name%.*}
 dataset=${dataset:-cifar10}
 seed=${seed:-0}
 gpu=${gpu:-"auto"}
+method=darts-proj-sam
 
 resume_epoch=${resume_epoch:-100}
 resume_expid=${resume_expid:-"search-darts-201-1"}
@@ -23,7 +24,7 @@ echo 'gpu:' $gpu
 
 cd ../nasbench201/
 python train_search.py \
-    --method darts-proj \
+    --method $method \
     --dataset $dataset \
     --save $id --gpu $gpu --seed $seed \
     --resume_epoch $resume_epoch --resume_expid $resume_expid --dev proj \
