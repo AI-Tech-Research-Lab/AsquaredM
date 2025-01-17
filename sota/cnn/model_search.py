@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from collections import OrderedDict
 from torch.autograd import Variable
+import math
 
 from sota.cnn.operations import *
 from sota.cnn.genotypes import Genotype
@@ -10,7 +11,7 @@ import sys
 sys.path.insert(0, '../../')
 from optimizers.darts.utils import drop_path
 
-
+'''
 class MixedOp(nn.Module):
 
     def __init__(self, C, stride, PRIMITIVES):
@@ -24,11 +25,79 @@ class MixedOp(nn.Module):
 
     def forward(self, x, weights):
         return sum(w * op(x) for w, op in zip(weights, self._ops))
+'''
+
+class DecayScheduler(object):
+    def __init__(self, base_lr=1.0, last_iter=-1, T_max=50, T_start=0, T_stop=50, decay_type='cosine'):
+        self.base_lr = base_lr
+        self.T_max = T_max
+        self.T_start = T_start
+        self.T_stop = T_stop
+        self.cnt = 0
+        self.decay_type = decay_type
+        self.decay_rate = 1.0
+
+    def step(self, epoch):
+        if epoch >= self.T_start:
+          if self.decay_type == "cosine":
+              self.decay_rate = self.base_lr * (1 + math.cos(math.pi * epoch / (self.T_max - self.T_start))) / 2.0 if epoch <= self.T_stop else self.decay_rate
+          elif self.decay_type == "slow_cosine":
+              self.decay_rate = self.base_lr * math.cos((math.pi/2) * epoch / (self.T_max - self.T_start)) if epoch <= self.T_stop else self.decay_rate
+          elif self.decay_type == "linear":
+              self.decay_rate = self.base_lr * (self.T_max - epoch) / (self.T_max - self.T_start) if epoch <= self.T_stop else self.decay_rate
+          else:
+              self.decay_rate = self.base_lr
+        else:
+            self.decay_rate = self.base_lr
+
+beta_decay_scheduler = DecayScheduler(base_lr=1, 
+                                            T_max=50, 
+                                            T_start=0, 
+                                            T_stop=50, 
+                                            decay_type='linear')
+
+class MixedOp(nn.Module):
+  
+  def __init__(self, C, stride, PRIMITIVES, auxiliary_skip=False, auxiliary_operation='skip'):
+    super(MixedOp, self).__init__()
+    self._ops = nn.ModuleList()
+    self.stride = stride
+    self.auxiliary_skip = auxiliary_skip
+
+    if auxiliary_skip: #DARTS-: auxiliary skip connection
+      if self.stride == 2:
+        self.auxiliary_op = FactorizedReduce(C, C, affine=False)
+      elif auxiliary_operation == 'skip':
+        self.auxiliary_op = Identity()
+      elif auxiliary_operation == 'conv1':
+        self.auxiliary_op = nn.Conv2d(C, C, 1, padding=0, bias=False)
+        # reinitialize with identity to be equivalent as skip
+        # print(self.auxiliary_op.weight.data.size())
+        eye = torch.eye(C,C)
+        for i in range(C):
+          self.auxiliary_op.weight.data[i,:,0,0] = eye[i]
+        # print(self.auxiliary_op.weight.data)
+
+      else:
+        assert False, 'Unknown auxiliary operation'
+
+    for primitive in PRIMITIVES:
+      op = OPS[primitive](C, stride, False)
+      if 'pool' in primitive:
+        op = nn.Sequential(op, nn.BatchNorm2d(C, affine=False))
+      self._ops.append(op)
+
+  def forward(self, x, weights):
+    res = sum(w * op(x) for w, op in zip(weights, self._ops))
+    if self.auxiliary_skip:
+      res += self.auxiliary_op(x) * beta_decay_scheduler.decay_rate
+    
+    return res
 
 
 class Cell(nn.Module):
 
-    def __init__(self, steps, multiplier, C_prev_prev, C_prev, C, reduction, reduction_prev):
+    def __init__(self, steps, multiplier, C_prev_prev, C_prev, C, reduction, reduction_prev, auxiliary_skip):
         super(Cell, self).__init__()
         self.reduction = reduction
         self.primitives = self.PRIMITIVES['primitives_reduct' if reduction else 'primitives_normal']
@@ -49,7 +118,7 @@ class Cell(nn.Module):
         for i in range(self._steps):
             for j in range(2+i):
                 stride = 2 if reduction and j < 2 else 1
-                op = MixedOp(C, stride, self.primitives[edge_index])
+                op = MixedOp(C, stride, self.primitives[edge_index], auxiliary_skip)
                 self._ops.append(op)
                 edge_index += 1
 
@@ -73,7 +142,7 @@ class Cell(nn.Module):
 class Network(nn.Module):
 
     def __init__(self, C, num_classes, layers, criterion, primitives, steps=4,
-                 multiplier=4, stem_multiplier=3, drop_path_prob=0.0):
+                 multiplier=4, stem_multiplier=3, drop_path_prob=0.0, auxiliary_skip=False):
         super(Network, self).__init__()
         self._C = C
         self._num_classes = num_classes
@@ -100,7 +169,7 @@ class Network(nn.Module):
                 reduction = True
             else:
                 reduction = False
-            cell = Cell(steps, multiplier, C_prev_prev, C_prev, C_curr, reduction, reduction_prev)
+            cell = Cell(steps, multiplier, C_prev_prev, C_prev, C_curr, reduction, reduction_prev, auxiliary_skip)
             reduction_prev = reduction
             self.cells += [cell]
             C_prev_prev, C_prev = C_prev, multiplier*C_curr

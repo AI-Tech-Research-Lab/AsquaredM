@@ -19,7 +19,8 @@ import torchvision.datasets as dset
 import torch.backends.cudnn as cudnn
 
 from torch.autograd import Variable
-from sota.cnn.model_search import Network
+from sota.cnn.model_search import Network, beta_decay_scheduler
+#from optimizers.dartsminus.model_search import Network as NetworkDartsMinus
 from optimizers.darts.architect import Architect
 from sota.cnn.spaces import spaces_dict
 
@@ -83,6 +84,7 @@ parser.add_argument('--data_aug', type=str2bool, default=True, help='use data au
 parser.add_argument('--w_nor', type=float, default=0.5, help='epsilon for beta regularization normal component')
 parser.add_argument('--k_sam', type=int, default=1, help='Number of ascent steps for SAM')
 parser.add_argument('--sgd_alpha', action='store_true', default=False, help='use sgd optim for arch encoding')
+parser.add_argument('--auxiliary_skip', action='store_true', default=False, help='use aux operation in mixedop (darts-)')
 
 args = parser.parse_args()
 
@@ -132,7 +134,6 @@ if args.dataset == 'cifar100':
 else:
     n_classes = 10
 
-
 def main():
     torch.set_num_threads(3)
     if not torch.cuda.is_available():
@@ -157,7 +158,9 @@ def main():
 
     criterion = nn.CrossEntropyLoss()
     criterion = criterion.cuda()
-    model = Network(args.init_channels, n_classes, args.layers, criterion, spaces_dict[args.search_space])
+
+    model = Network(args.init_channels, n_classes, args.layers, criterion, spaces_dict[args.search_space], auxiliary_skip=args.auxiliary_skip)
+
     model = model.cuda()
     logging.info("param size = %fMB", utils.count_parameters_in_MB(model))
 
@@ -275,6 +278,10 @@ def main():
             break
 
         scheduler.step()
+
+        if args.auxiliary_skip:
+            beta_decay_scheduler.step(epoch)
+            logging.info('Beta: %f', beta_decay_scheduler.decay_rate)
 
     #writer.close()
     # Info about best searched model

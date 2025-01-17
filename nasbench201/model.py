@@ -7,14 +7,43 @@ import math, random
 import warnings
 import sys
 sys.path.insert(0, '../')
-from operations import ResNetBasicblock, OPS, NAS_BENCH_201
+from operations import ResNetBasicblock, OPS, NAS_BENCH_201, FactorizedReduce, Identity
 from nasbench201.genotypes import Structure
+
+class DecayScheduler(object):
+    def __init__(self, base_lr=1.0, last_iter=-1, T_max=50, T_start=0, T_stop=50, decay_type='cosine'):
+        self.base_lr = base_lr
+        self.T_max = T_max
+        self.T_start = T_start
+        self.T_stop = T_stop
+        self.cnt = 0
+        self.decay_type = decay_type
+        self.decay_rate = 1.0
+
+    def step(self, epoch):
+        if epoch >= self.T_start:
+          if self.decay_type == "cosine":
+              self.decay_rate = self.base_lr * (1 + math.cos(math.pi * epoch / (self.T_max - self.T_start))) / 2.0 if epoch <= self.T_stop else self.decay_rate
+          elif self.decay_type == "slow_cosine":
+              self.decay_rate = self.base_lr * math.cos((math.pi/2) * epoch / (self.T_max - self.T_start)) if epoch <= self.T_stop else self.decay_rate
+          elif self.decay_type == "linear":
+              self.decay_rate = self.base_lr * (self.T_max - epoch) / (self.T_max - self.T_start) if epoch <= self.T_stop else self.decay_rate
+          else:
+              self.decay_rate = self.base_lr
+        else:
+            self.decay_rate = self.base_lr
+
+beta_decay_scheduler = DecayScheduler(base_lr=1.0, 
+                                            T_max=50, 
+                                            T_start=0, 
+                                            T_stop=50, 
+                                            decay_type='linear')
 
 
 # This module is used for NAS-Bench-201, represents a small search space with a complete DAG
 class SearchCell(nn.Module):
 
-  def __init__(self, C_in, C_out, stride, max_nodes, op_names, affine=False, track_running_stats=True):
+  def __init__(self, C_in, C_out, stride, max_nodes, op_names, affine=False, track_running_stats=True, auxiliary_skip=False, auxiliary_operation='skip'):
     super(SearchCell, self).__init__()
 
     self.op_names  = deepcopy(op_names)
@@ -33,6 +62,22 @@ class SearchCell(nn.Module):
     self.edge_keys  = sorted(list(self.edges.keys()))
     self.edge2index = {key:i for i, key in enumerate(self.edge_keys)}
     self.num_edges  = len(self.edges)
+    self.auxiliary_op=auxiliary_operation
+    self.auxiliary_skip= auxiliary_skip
+
+    if auxiliary_skip: #DARTS-: auxiliary skip connection
+      if stride == 2:
+        self.auxiliary_op = FactorizedReduce(C_in, C_in, affine=False)
+      elif auxiliary_operation == 'skip':
+        self.auxiliary_op = Identity()
+      elif auxiliary_operation == 'conv1':
+        self.auxiliary_op = nn.Conv2d(C_in, C_in, 1, padding=0, bias=False)
+        # reinitialize with identity to be equivalent as skip
+        # print(self.auxiliary_op.weight.data.size())
+        eye = torch.eye(C_in,C_in)
+        for i in range(C_in):
+          self.auxiliary_op.weight.data[i,:,0,0] = eye[i]
+        # print(self.auxiliary_op.weight.data)
 
   def extra_repr(self):
     string = 'info :: {max_nodes} nodes, inC={in_dim}, outC={out_dim}'.format(**self.__dict__)
@@ -45,8 +90,13 @@ class SearchCell(nn.Module):
       for j in range(i):
         node_str = '{:}<-{:}'.format(i, j)
         weights  = weightss[ self.edge2index[node_str] ]
-        inter_nodes.append( sum( layer(nodes[j]) * w for layer, w in zip(self.edges[node_str], weights) ) )
-      nodes.append( sum(inter_nodes) )
+        inter_nodes.append( sum( layer(nodes[j]) * w for layer, w in zip(self.edges[node_str], weights) ) + self.auxiliary_op(inputs) * beta_decay_scheduler.decay_rate if self.auxiliary_skip else 0)
+      nodes.append( sum(inter_nodes))
+    
+    #res = nodes[-1]
+    #if self.auxiliary_skip:
+    #   res += self.auxiliary_op(inputs) * beta_decay_scheduler.decay_rate
+
     return nodes[-1]
 
   # GDAS
@@ -125,7 +175,7 @@ class SearchCell(nn.Module):
 
 class Network(nn.Module):
 
-  def __init__(self, C, N, max_nodes, num_classes, criterion, search_space=NAS_BENCH_201, affine=False, track_running_stats=True):
+  def __init__(self, C, N, max_nodes, num_classes, criterion, search_space=NAS_BENCH_201, affine=False, track_running_stats=True, auxiliary_skip=False):
     super(Network, self).__init__()
     self._C        = C
     self._layerN   = N
@@ -145,7 +195,7 @@ class Network(nn.Module):
       if reduction:
         cell = ResNetBasicblock(C_prev, C_curr, 2)
       else:
-        cell = SearchCell(C_prev, C_curr, 1, max_nodes, search_space, affine, track_running_stats)
+        cell = SearchCell(C_prev, C_curr, 1, max_nodes, search_space, affine, track_running_stats, auxiliary_skip=auxiliary_skip)
         if num_edge is None: num_edge, edge2index = cell.num_edges, cell.edge2index
         else: assert num_edge == cell.num_edges and edge2index == cell.edge2index, 'invalid {:} vs. {:}.'.format(num_edge, cell.num_edges)
       self.cells.append( cell )

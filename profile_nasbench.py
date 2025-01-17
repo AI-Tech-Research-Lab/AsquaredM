@@ -348,20 +348,23 @@ def plot_histograms(data_array, bins=100, path='', baselines=None, dataset='cifa
 
     global_max_density = 0  # Track the global maximum density  
 
-    # First pass: Determine global maximum density  
-    for i, data in enumerate(data_array):  
-        temp_bins = get_bins(dataset, radius)[i]  
-        data = np.array(data)  
-        data = data[data > 10]  
+    # First pass: Determine global maximum density
+    for i, data in enumerate(data_array):
+        temp_bins = get_bins(dataset, radius)[i]
+        data = np.array(data)
+        data = data[data > 10]
 
-        sns.histplot(all_dataset, bins=bins, color='green', edgecolor='black', kde=True,  
-                     line_kws={'linewidth': 1, 'alpha': 0.2}, stat='density')  
-        sns.histplot(data, bins=temp_bins, color='darkblue', edgecolor='black', kde=True,  
-                     line_kws={'linewidth': 2}, stat='density')  
+        # Use a temporary figure and Axes to calculate density without affecting the actual subplots
+        fig_temp, ax_temp = plt.subplots()
+        sns.histplot(all_dataset, bins=bins, color='green', edgecolor='black', kde=True,
+                    line_kws={'linewidth': 1, 'alpha': 0.2}, stat='density', ax=ax_temp)
+        sns.histplot(data, bins=temp_bins, color='darkblue', edgecolor='black', kde=True,
+                    line_kws={'linewidth': 2}, stat='density', ax=ax_temp)
 
-        y_values = [bar.get_height() for bar in plt.gca().patches]  
-        max_density = max(y_values, default=0)  
-        global_max_density = max(global_max_density, max_density)  
+        y_values = [bar.get_height() for bar in ax_temp.patches]
+        max_density = max(y_values, default=0)
+        global_max_density = max(global_max_density, max_density)
+        plt.close(fig_temp)  # Close the temporary figure
 
     # Adjust global maximum density if needed  
     global_max_density = global_max_density if global_max_density < 0.8 else 0.8  
@@ -960,12 +963,13 @@ def plot_rho_darts():
     plt.savefig('results/rhovstestdarts.pdf', format='pdf', bbox_inches='tight', dpi=300)
 
 
-plot_rho_nasbench()
-plot_rho_darts()
+#plot_rho_nasbench()
+#plot_rho_darts()
 
-'''
+
 bench = NASBench201(dataset='cifar10')
-#distributions_nasbench(bench, 'cifar10', 1)
+distributions_nasbench(bench, 'cifar10', 1)
+'''
 distributions_nasbench(bench, 'cifar10', 2)
 distributions_nasbench(bench, 'cifar10', 3)
 

@@ -400,7 +400,8 @@ if __name__ == "__main__":
     genotype = eval(f"genotypes.{args.arch}")
     dict_ = darts.to_dict(genotype)
     matrix = darts.genotype_to_adjacency_matrix(dict_)
-
+    print("MATRIX")
+    print(matrix)
     if args.arch_target:
         genotype_target = eval(f"genotypes.{args.arch_target}")
         dict_target = darts.to_dict(genotype_target)

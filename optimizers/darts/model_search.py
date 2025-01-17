@@ -5,7 +5,7 @@ from torch.autograd import Variable
 
 #from nasbench_analysis.search_spaces.search_space_1 import SearchSpace1
 
-from operations import OPS, ReLUConvBN, ConvBnRelu, DARTS_SPACE
+from sota.cnn.operations import OPS, ReLUConvBN, ConvBnRelu, DARTS_SPACE
 
 class MixedOp(nn.Module):
 

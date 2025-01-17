@@ -217,6 +217,7 @@ class DARTS():
         genotype = self.adjacency_matrix_to_genotype(adjacency_matrices)
         return genotype
     
+    '''
     def sample_neighbors(self, adjacency_matrices, radius, n):
         unique_matrices = set()
         normal_matrix, reduce_matrix = adjacency_matrices
@@ -236,35 +237,78 @@ class DARTS():
             genes.append(self.adjacency_matrix_to_genotype((norm_matrix,red_matrix)))
 
         return genes
+    '''
+    def sample_neighbors(self, adjacency_matrices, radius, n):
+        unique_neighbors = set()
+        normal_matrix, reduce_matrix = adjacency_matrices
+
+        while len(unique_neighbors) < n:
+            # Generate a neighboring matrix pair
+            neighbor_matrices = self.create_neighboring_matrix((normal_matrix, reduce_matrix), radius)
+            normal_neighbor, reduce_neighbor = neighbor_matrices
+
+            # Add checks for each row in the matrices
+            if not self._validate_matrix_rows(normal_neighbor) or not self._validate_matrix_rows(reduce_neighbor):
+                print("Invalid matrix")
+                continue  # Skip invalid matrices
+
+            # Create a hashable representation of the matrices
+            neighbor_tuple = (
+                tuple(normal_neighbor.flatten()),
+                tuple(reduce_neighbor.flatten())
+            )
+
+            # Add to the set if unique
+            if neighbor_tuple not in unique_neighbors:
+                unique_neighbors.add(neighbor_tuple)
+
+        # Convert tuples back to adjacency matrices and return genotypes
+        genotypes = []
+        for neighbor_tuple in unique_neighbors:
+            norm_matrix = np.array(neighbor_tuple[0]).reshape(self.int_nodes, self.input_nodes + self.int_nodes - 1)
+            red_matrix = np.array(neighbor_tuple[1]).reshape(self.int_nodes, self.input_nodes + self.int_nodes - 1)
+            genotypes.append(self.adjacency_matrix_to_genotype((norm_matrix, red_matrix)))
+
+        return genotypes
+
+    def _validate_matrix_rows(self, adjacency_matrix):
+        """
+        Validate each row of the adjacency matrix to ensure it satisfies constraints:
+        - At least two non-zero operations per row.
+        - Optional: Validate operation indices are within a valid range.
+        """
+        for row in adjacency_matrix:
+            # Check if the row has at least two non-zero operations
+            if np.count_nonzero(row) < 2:
+                return False
+
+            # Check for valid operation indices (optional)
+            if not all(0 <= op < self.operations for op in row if op != 0):
+                return False
+
+        return True
+
     
     def to_dict(self, genotype):
         return genotype._asdict()
 
     def sample_neighbors_path(self, current_genotype, target_genotype, num_actions):
-        """
-        Returns all possible genotypes obtained from the current genotype by applying
-        up to num_actions changes to move closer to the target genotype.
-        """
+        import copy
         modified_genotypes = []
 
-        #reorder target
-        # Reorder target genotype to match current genotype
+        # Reorder target genotype for alignment
         for section in ['normal', 'reduce']:
-            for i in range(0, len(target_genotype[section]) - 1, 2):  # Step by 2 to check pairs 1&2, 3&4, etc.
-                # Check pairs of every two elements
+            for i in range(0, len(target_genotype[section]) - 1, 2):  # Step by 2
                 first_op, first_node = target_genotype[section][i]
                 second_op, second_node = target_genotype[section][i + 1]
-                # Check if swapping improves correspondence with current genotype
-                if (first_op, first_node) == current_genotype[section][i + 1] :
-                    # Swap the operations to improve alignment with current genotype
+                if (first_op, first_node) == current_genotype[section][i + 1]:
                     target_genotype[section][i], target_genotype[section][i + 1] = \
-                    target_genotype[section][i + 1], target_genotype[section][i]
+                        target_genotype[section][i + 1], target_genotype[section][i]
                 elif (second_op, second_node) == current_genotype[section][i]:
-                        # Swap the operations to improve alignment with current genotype
-                        target_genotype[section][i], target_genotype[section][i + 1] = \
+                    target_genotype[section][i], target_genotype[section][i + 1] = \
                         target_genotype[section][i + 1], target_genotype[section][i]
 
-        # Collect differences between current and target genotype
+        # Collect differences
         differences = []
         for section in ['normal', 'reduce']:
             for i, (current_op, current_node) in enumerate(current_genotype[section]):
@@ -272,28 +316,23 @@ class DARTS():
                 if current_op != target_op or current_node != target_node:
                     differences.append((section, i, current_op, current_node, target_op, target_node))
 
-        # Generate all combinations of changes up to num_actions
+        # Generate all combinations of changes
         for r in range(1, num_actions + 1):
             for changes in itertools.combinations(differences, r):
-                # Create a modified version of the current genotype
-                modified_genotype = {
-                    'normal': current_genotype['normal'][:],
-                    'normal_concat': current_genotype['normal_concat'][:],
-                    'reduce': current_genotype['reduce'][:],
-                    'reduce_concat': current_genotype['reduce_concat'][:]
-                }
+                modified_genotype = copy.deepcopy(current_genotype)
 
                 for section, i, current_op, current_node, target_op, target_node in changes:
                     if current_op != target_op:
-                        # Change the operation
                         modified_genotype[section][i] = (target_op, current_node)
                     elif current_node != target_node:
-                        # Change the node connection
                         modified_genotype[section][i] = (current_op, target_node)
 
-                modified_genotypes.append(modified_genotype)
+                # Validate and append
+                if len(modified_genotype['normal']) == 8 and len(modified_genotype['reduce']) == 8:
+                    modified_genotypes.append(modified_genotype)
 
         return modified_genotypes
+
     
     '''
     def sample_neighbors_path(self, current_genotype, target_genotype, num_actions):

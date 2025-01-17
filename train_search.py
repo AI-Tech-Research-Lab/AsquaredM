@@ -21,8 +21,9 @@ import torchvision.datasets as dset
 import torch.backends.cudnn as cudnn
 
 from torch.autograd import Variable
-from nasbench201.model import Network as BenchNetwork
+from nasbench201.model import Network as BenchNetwork, beta_decay_scheduler
 from optimizers.darts.model_search2 import Network as DARTSNetwork
+from optimizers.dartsminus.model_search import Network as DARTSMINUSNetwork
 from optimizers.darts.architect import Architect
 
 from attacker.perturb import Linf_PGD_alpha, Random_alpha
@@ -83,6 +84,8 @@ parser.add_argument('--flood_level', type=float, default=0.0, help='flood level 
 parser.add_argument('--data_aug', type=str2bool, default=True, help='use data augmentation on validation set')
 parser.add_argument('--sgd_alpha', type=str2bool, default=False, help='lookbehind optimizer for alpha')
 parser.add_argument('--k_sam', type=int, default=1, help='lookbehind steps for alpha')
+parser.add_argument('--method', type=str, default='darts', help='method to use')
+parser.add_argument('--auxiliary_skip', action='store_true', default=False, help='use aux operation in mixedop (darts-)')
 
 args = parser.parse_args()
 
@@ -151,11 +154,16 @@ def main():
     #model = Network(C=args.init_channels, N=5, max_nodes=4, num_classes=n_classes, criterion=criterion)  # N=5/1/3
 
     if not args.nasbench:
-        model = DARTSNetwork(args.init_channels, n_classes, args.n_cells, criterion)
+        if args.method == 'darts':
+            model = DARTSNetwork(args.init_channels, n_classes, args.n_cells, criterion)
+        else:
+            print('Using DARTSMINUS')
+            model = DARTSMINUSNetwork(args.init_channels, n_classes, args.n_cells, criterion)
+        
     else:
         #stages = 3
         #cells = 5
-        model = BenchNetwork(C=args.init_channels, N=5, max_nodes=4, num_classes=n_classes, criterion=criterion)
+        model = BenchNetwork(C=args.init_channels, N=5, max_nodes=4, num_classes=n_classes, criterion=criterion, auxiliary_skip=args.auxiliary_skip)
 
     model = model.cuda()
     logging.info("param size = %fMB", utils.count_parameters_in_MB(model))
@@ -252,15 +260,18 @@ def main():
                                          perturb_alpha, epsilon_alpha, epoch)
         
         scheduler.step() # scheduler step must be done after optimizer.step() in latest pytorch versions
+        if args.auxiliary_skip:
+            beta_decay_scheduler.step(epoch)
+            logging.info('Beta: %f', beta_decay_scheduler.decay_rate)
 
         # validation
         valid_acc, valid_obj = infer(valid_queue, model, criterion)
         
         if args.betadecay:
-            beta_loss = architect.beta_loss()        
+            beta_loss = architect._beta_loss()        
 
         if args.wandb:
-            if args.betadecay:
+            if not args.betadecay:
                 wandb.log({"metrics/train_acc": train_acc, 
                         "metrics/val_acc": valid_acc,
                         "metrics/train_loss": train_obj,
@@ -271,10 +282,10 @@ def main():
                         "metrics/train_loss": train_obj,
                         "metrics/val_loss": valid_obj,
                         "metrics/beta_loss": beta_loss})
+                logging.info("Beta loss: %.2f", beta_loss)
             
         logging.info("Train acc: %.2f, Val acc: %.2f", train_acc, valid_acc)
         logging.info("Train loss: %.2f, Val loss: %.2f", train_obj, valid_obj)
-        logging.info("Beta loss: %.2f", beta_loss)
     
         if valid_obj < best_loss:
             logging.info('Best model found at epoch %d', epoch)

@@ -60,6 +60,7 @@ class Cell(nn.Module):
                     h2 = drop_path(h2, drop_prob)
             s = h1 + h2
             states += [s]
+        
         return torch.cat([states[i] for i in self._concat], dim=1)
 
 
