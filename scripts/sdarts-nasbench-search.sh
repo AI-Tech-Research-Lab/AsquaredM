@@ -1,7 +1,7 @@
 dataset=cifar10
-rho=1e-3
+rho=1e-2
 epsilon=1e-2
-sam=False
+sam=True
 wandb=False
 epochs=50
 
@@ -11,4 +11,4 @@ python train_search.py --nasbench --save results/nasbench_search_sdartsrs_datase
                 --learning_rate 0.025 --learning_rate_min 0.001 --init_channels 16 --grad_clip 5 \
                 --arch_learning_rate 3e-4 --arch_weight_decay 1e-3 \
                 --sam $sam --betadecay False --rho_alpha_sam $rho --epsilon_sam $epsilon --wandb $wandb \
-                --perturb_alpha random
+                --perturb_alpha random 

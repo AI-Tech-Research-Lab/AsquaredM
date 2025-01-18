@@ -1,14 +1,14 @@
 #Beta-DARTS with flood weight regularization
 # imagenet16, cifar10, cifar100
 dataset=cifar10
-sam=False
+sam=True
 betadecay=False
 unrolled=False
 data_augs=(False True)
 data_aug=True
-rho_alpha_sams=(1e-6)
+rho_alpha_sams=(1e-2)
 seeds=(1)
-epsilon_sam=1e-1
+epsilon_sam=1e-2
 flood_level=0.0
 wandb=True
 

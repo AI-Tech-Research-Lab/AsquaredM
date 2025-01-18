@@ -1,9 +1,9 @@
 #!/bin/bash
 
 dataset=cifar10
-rho=1
+rho=1e-1
 epsilon=1e-2
-sam=False
+sam=True
 wandb=True
 betadecay=False
 unrolled=False
