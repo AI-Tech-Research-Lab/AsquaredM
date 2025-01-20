@@ -25,7 +25,6 @@ SearchSpaceNames = {'connect-nas'  : CONNECT_NAS_BENCHMARK,
                     'nas-bench-201': NAS_BENCH_201,
                     'darts'        : DARTS_SPACE}
 
-
 class ReLUConvBN(nn.Module):
 
   def __init__(self, C_in, C_out, kernel_size, stride, padding, dilation, affine, track_running_stats=True):
@@ -37,6 +36,7 @@ class ReLUConvBN(nn.Module):
     )
 
   def forward(self, x):
+    print(x)
     return self.op(x)
 
 

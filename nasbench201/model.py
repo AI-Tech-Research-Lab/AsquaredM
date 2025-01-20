@@ -90,7 +90,10 @@ class SearchCell(nn.Module):
       for j in range(i):
         node_str = '{:}<-{:}'.format(i, j)
         weights  = weightss[ self.edge2index[node_str] ]
-        inter_nodes.append( sum( layer(nodes[j]) * w for layer, w in zip(self.edges[node_str], weights) ) + self.auxiliary_op(inputs) * beta_decay_scheduler.decay_rate if self.auxiliary_skip else 0)
+        res = sum( layer(nodes[j]) * w for layer, w in zip(self.edges[node_str], weights) )
+        if self.auxiliary_skip:  # Add auxiliary_op only if skip is True
+          res += self.auxiliary_op(inputs) * beta_decay_scheduler.decay_rate
+        inter_nodes.append(res)
       nodes.append( sum(inter_nodes))
     
     #res = nodes[-1]

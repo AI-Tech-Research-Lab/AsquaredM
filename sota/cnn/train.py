@@ -200,7 +200,15 @@ def main():
 
     for epoch in range(start_epoch, args.epochs):
         lr = scheduler.get_last_lr()[0]
-        logging.info('epoch %d lr %e', epoch, lr)
+        if args.cutout:
+            # increase the cutout probability linearly throughout search
+            train_transform.transforms[-1].cutout_prob = args.cutout_prob * \
+                epoch / (args.epochs - 1)
+            logging.info('epoch %d lr %e cutout_prob %e', epoch, lr,
+                         train_transform.transforms[-1].cutout_prob)
+        else:
+            logging.info('epoch %d lr %e', epoch, lr)
+
         model.drop_path_prob = args.drop_path_prob * epoch / args.epochs
 
         train_acc, train_obj = train(train_queue, model, criterion, optimizer)
@@ -217,12 +225,21 @@ def main():
         # Save the best model weights
         if valid_obj < best_valid_obj:
             best_valid_obj = valid_obj
+            best_valid_acc = valid_acc
+            best_train_acc = train_acc
+            best_train_obj = train_obj
             utils.save(model, os.path.join(args.save, 'best_weights.pt'))
+            counter=0
         else:
             counter += 1
             if counter >= patience:
                 logging.info(f"Early stopping at epoch {epoch}")
                 break
+        
+        # Check if the training loss is below the threshold to stop training
+        if train_obj < args.train_limit:
+            logging.info('Training loss has fallen below the threshold. Stopping training.')
+            break
 
         # Save checkpoint every 10 epochs
         if epoch % 10 == 0 or epoch == args.epochs - 1:
