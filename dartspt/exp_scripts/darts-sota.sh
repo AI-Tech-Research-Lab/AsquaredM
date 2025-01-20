@@ -25,6 +25,7 @@ python train_search.py \
     --method $method \
     --search_space $space --dataset $dataset --batch_size 32 \
     --seed $seed --save $id --gpu $gpu \
+    --resume_epoch 40 --resume_expid search-darts-sota-s5-2-darts-sam
     # --expid_tag debug --fast \
 
 ## bash darts-sota.sh

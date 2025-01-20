@@ -52,7 +52,31 @@ parser.add_argument('--arch', type=str, default=None, help='which architecture t
 parser.add_argument('--grad_clip', type=float, default=5, help='gradient clipping')
 parser.add_argument('--wandb', action='store_true', default=False, help='use wandb')
 parser.add_argument('--train_limit', type=float, default=0.0, help='training loss limit')
+
+# Add a resume argument to argparse
+parser.add_argument('--resume', type=str, default=None, help='path to resume checkpoint')
+
 args = parser.parse_args()
+
+# Define the save_checkpoint function
+def save_checkpoint(state, save_path, epoch):
+    filename = os.path.join(save_path, f'checkpoint_epoch_{epoch}.pt')
+    torch.save(state, filename)
+    logging.info(f"Checkpoint saved at epoch {epoch}: {filename}")
+
+# Define the load_checkpoint function
+def load_checkpoint(checkpoint_path, model, optimizer, scheduler):
+    if not os.path.isfile(checkpoint_path):
+        logging.error(f"Checkpoint not found at {checkpoint_path}")
+        sys.exit(1)
+    checkpoint = torch.load(checkpoint_path)
+    model.load_state_dict(checkpoint['model_state_dict'])
+    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
+    start_epoch = checkpoint['epoch']
+    best_valid_obj = checkpoint['best_valid_obj']
+    logging.info(f"Checkpoint loaded: {checkpoint_path} (epoch {start_epoch})")
+    return start_epoch, best_valid_obj
 
 '''
 args.save = '../../experiments/sota/{}/eval-{}-{}-{}-{}'.format(
@@ -90,9 +114,6 @@ elif args.dataset == 'cifar10':
     n_classes = 10
 elif args.dataset == 'ImageNet16': #imagenet16-120
     n_classes = 120
-
-
-print("N_classes: ", n_classes)
 
 def main():
     torch.set_num_threads(3)
@@ -171,56 +192,50 @@ def main():
     patience = 100  # Patience for early stopping
     counter=0
 
-    for epoch in range(args.epochs):
-        #scheduler.step()
+    # Load checkpoint if specified
+    start_epoch = 0
+    best_valid_obj = float('inf')
+    if args.resume:
+        start_epoch, best_valid_obj = load_checkpoint(args.resume, model, optimizer, scheduler)
+
+    for epoch in range(start_epoch, args.epochs):
         lr = scheduler.get_last_lr()[0]
-        if args.cutout:
-            # increase the cutout probability linearly throughout search
-            train_transform.transforms[-1].cutout_prob = args.cutout_prob * \
-                epoch / (args.epochs - 1)
-            logging.info('epoch %d lr %e cutout_prob %e', epoch, lr,
-                         train_transform.transforms[-1].cutout_prob)
-        else:
-            logging.info('epoch %d lr %e', epoch, lr)
+        logging.info('epoch %d lr %e', epoch, lr)
         model.drop_path_prob = args.drop_path_prob * epoch / args.epochs
 
         train_acc, train_obj = train(train_queue, model, criterion, optimizer)
         logging.info('train_acc %f', train_acc)
-        #writer.add_scalar('Acc/train', train_acc, epoch)
-        #writer.add_scalar('Obj/train', train_obj, epoch)
-
         valid_acc, valid_obj = infer(valid_queue, model, criterion)
         logging.info('valid_acc %f', valid_acc)
-        #writer.add_scalar('Acc/valid', valid_acc, epoch)
-        #writer.add_scalar('Obj/valid', valid_obj, epoch)
 
         if args.wandb:
             wandb.log({"metrics/train_acc": train_acc, 
-                    "metrics/val_acc": valid_acc,
-                    "metrics/train_loss": train_obj,
-                    "metrics/val_loss": valid_obj})
-            
-        # Save the best model weights based on the lowest validation loss
+                       "metrics/val_acc": valid_acc,
+                       "metrics/train_loss": train_obj,
+                       "metrics/val_loss": valid_obj})
+
+        # Save the best model weights
         if valid_obj < best_valid_obj:
             best_valid_obj = valid_obj
-            best_valid_acc = valid_acc
-            best_train_acc = train_acc
-            best_train_obj = train_obj
             utils.save(model, os.path.join(args.save, 'best_weights.pt'))
-            counter = 0
         else:
             counter += 1
             if counter >= patience:
-                logging.info('Validation loss has not improved in the last %d epochs. Stopping training.', patience)
+                logging.info(f"Early stopping at epoch {epoch}")
                 break
 
-        # Check if the training loss is below the threshold to stop training
-        if train_obj < args.train_limit:
-            logging.info('Training loss has fallen below the threshold. Stopping training.')
-            break
+        # Save checkpoint every 10 epochs
+        if epoch % 10 == 0 or epoch == args.epochs - 1:
+            save_checkpoint({
+                'epoch': epoch + 1,
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'scheduler_state_dict': scheduler.state_dict(),
+                'best_valid_obj': best_valid_obj
+            }, args.save, epoch + 1)
 
         scheduler.step()
-        #utils.save(model, os.path.join(args.save, 'weights.pt'))
+
 
     #writer.close()
 
