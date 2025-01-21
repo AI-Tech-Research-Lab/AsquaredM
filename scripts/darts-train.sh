@@ -8,7 +8,7 @@ epochs=600
 base_save_dir="results/darts_train"
 
 # Define the architecture and seeds
-architectures=("DARTSPT")
+architectures=("DARTSMINUS_SAM")
 seeds=(1)
 
 # Loop through each architecture

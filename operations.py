@@ -36,7 +36,6 @@ class ReLUConvBN(nn.Module):
     )
 
   def forward(self, x):
-    print(x)
     return self.op(x)
 
 

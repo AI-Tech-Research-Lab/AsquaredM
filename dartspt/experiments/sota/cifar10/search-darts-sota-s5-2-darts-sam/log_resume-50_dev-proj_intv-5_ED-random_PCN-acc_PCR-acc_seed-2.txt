@@ -1,0 +1,50 @@
+2025-01-21 10:39:13,231 gpu device = 0
+2025-01-21 10:39:13,231 args = Namespace(data='../../data', dataset='cifar10', batch_size=64, learning_rate=0.025, learning_rate_min=0.001, momentum=0.9, weight_decay=0.0003, report_freq=50, gpu='auto', epochs=50, init_channels=16, layers=8, model_path='saved_models', cutout=False, cutout_length=16, cutout_prob=1.0, save='../../experiments/sota/cifar10/search-darts-sota-s5-2-darts-sam', seed=2, grad_clip=5, train_portion=0.5, arch_learning_rate=0.0003, arch_weight_decay=0.001, search_space='s5', ckpt_interval=10, method='darts-proj-sam', arch_opt='adam', resume_epoch=50, resume_expid='search-darts-sota-s5-2-darts-sam', dev='proj', deter=False, expid_tag='', log_tag='', unrolled=False, perturb_alpha='none', epsilon_alpha=0.3, tune_epochs=140, fast=False, dev_resume_epoch=-1, dev_resume_log='', edge_decision='random', proj_crit_normal='acc', proj_crit_reduce='acc', proj_crit_edge='acc', proj_intv=5, proj_mode_edge='reg', rho_alpha=0.1, dev_resume_checkpoint_dir='../../experiments/sota/cifar10/search-darts-sota-s5-2-darts-sam/', dev_save_checkpoint_dir='../../experiments/sota/cifar10/search-darts-sota-s5-2-darts-sam/log_resume-50_dev-proj_intv-5_ED-random_PCN-acc_PCR-acc_seed-2')
+2025-01-21 10:39:18,155 param size = 1.930618MB
+2025-01-21 10:39:18,155 loading checkpoint from darts-proj-sota
+2025-01-21 10:39:18,155 => loading checkpoint '../../experiments/sota/cifar10/search-darts-sota-s5-2-darts-sam/checkpoint_50.pth.tar'
+2025-01-21 10:39:21,491 => loaded checkpoint '../../experiments/sota/cifar10/search-darts-sota-s5-2-darts-sam/checkpoint_50.pth.tar' (epoch 50)
+2025-01-21 10:39:21,491 starting training at epoch 50
+2025-01-21 10:39:21,511 
+tensor([[0.1428, 0.1425, 0.1429, 0.1429, 0.1430, 0.1430, 0.1429],
+        [0.1429, 0.1428, 0.1429, 0.1429, 0.1428, 0.1427, 0.1430],
+        [0.1429, 0.1430, 0.1429, 0.1428, 0.1427, 0.1430, 0.1426],
+        [0.1429, 0.1427, 0.1429, 0.1429, 0.1429, 0.1429, 0.1428],
+        [0.1428, 0.1428, 0.1429, 0.1431, 0.1426, 0.1429, 0.1428],
+        [0.1427, 0.1427, 0.1429, 0.1431, 0.1429, 0.1427, 0.1429],
+        [0.1428, 0.1429, 0.1429, 0.1430, 0.1429, 0.1429, 0.1427],
+        [0.1427, 0.1431, 0.1430, 0.1428, 0.1429, 0.1429, 0.1427],
+        [0.1428, 0.1426, 0.1429, 0.1429, 0.1428, 0.1429, 0.1430],
+        [0.1429, 0.1428, 0.1428, 0.1429, 0.1429, 0.1429, 0.1429],
+        [0.1430, 0.1428, 0.1429, 0.1428, 0.1428, 0.1429, 0.1427],
+        [0.1428, 0.1432, 0.1430, 0.1428, 0.1429, 0.1427, 0.1426],
+        [0.1426, 0.1430, 0.1430, 0.1429, 0.1427, 0.1429, 0.1430],
+        [0.1431, 0.1429, 0.1427, 0.1429, 0.1428, 0.1428, 0.1428]],
+       device='cuda:0', grad_fn=<SoftmaxBackward0>)
+2025-01-21 10:39:21,608 
+tensor([[0.1429, 0.1429, 0.1428, 0.1430, 0.1428, 0.1429, 0.1427],
+        [0.1426, 0.1431, 0.1426, 0.1429, 0.1428, 0.1431, 0.1429],
+        [0.1431, 0.1429, 0.1429, 0.1428, 0.1427, 0.1429, 0.1427],
+        [0.1432, 0.1428, 0.1428, 0.1428, 0.1427, 0.1430, 0.1427],
+        [0.1428, 0.1429, 0.1430, 0.1428, 0.1428, 0.1428, 0.1429],
+        [0.1427, 0.1428, 0.1429, 0.1429, 0.1430, 0.1431, 0.1426],
+        [0.1430, 0.1427, 0.1428, 0.1428, 0.1429, 0.1430, 0.1429],
+        [0.1430, 0.1426, 0.1430, 0.1430, 0.1429, 0.1430, 0.1425],
+        [0.1430, 0.1429, 0.1429, 0.1427, 0.1430, 0.1427, 0.1428],
+        [0.1430, 0.1429, 0.1428, 0.1428, 0.1428, 0.1428, 0.1429],
+        [0.1428, 0.1428, 0.1429, 0.1427, 0.1430, 0.1429, 0.1430],
+        [0.1430, 0.1426, 0.1431, 0.1428, 0.1429, 0.1425, 0.1431],
+        [0.1429, 0.1430, 0.1426, 0.1428, 0.1428, 0.1428, 0.1431],
+        [0.1430, 0.1429, 0.1429, 0.1428, 0.1427, 0.1428, 0.1429]],
+       device='cuda:0', grad_fn=<SoftmaxBackward0>)
+2025-01-21 10:43:55,456 train_acc  99.836000
+2025-01-21 10:43:55,456 train_loss 0.005652
+2025-01-21 10:45:32,881 valid_acc  89.744000
+2025-01-21 10:45:32,881 valid_loss 0.475485
+2025-01-21 10:45:32,891 epoch 0
+2025-01-21 10:45:33,094 project op
+2025-01-21 10:45:33,097 selected edge: 8 normal
+2025-01-21 10:50:47,044 valid_acc  89.128000
+2025-01-21 10:50:47,044 valid_loss 0.484375
+2025-01-21 10:58:13,423 valid_acc  88.972000
+2025-01-21 10:58:13,423 valid_loss 0.485928
