@@ -1,4 +1,5 @@
 Guidelines to replicate the results.
+First of all, pip install -r requirements.txt to install the libraries used.
 
 ## FlatDARTS algorithm
 
@@ -18,12 +19,12 @@ Launch them from the main directory
 To be compliant with Lambda-DARTS and DARTSPT code, where the code of the original NAS-Bench-201 repo (https://github.com/D-X-Y/AutoDL-Projects) is used, you need to download the NAS-Bench-201-v1_0-e61699.pth and put it into these paths: Lambda-DARTS/NAS-Bench201 and dartspt/data (create the data folder).
 
 Into the Lambda-DARTS/scripts:
-- LAMBDADARTS: run_search_NASBENCH and run_search_DARTS.sh (use the flag --sam for FlatDARTS)
-Launch it from the main directory
+- LAMBDADARTS: run_search_NASBENCH * and run_search_DARTS.sh (use the flag --sam for FlatDARTS)
+Launch the nasbench script from Lambda-DARTS/NAS-Bench201 while the darts script from Lambda-DARTS
 
 Into the DARTSPT/exp_scripts: 
-- NASBENCH: darts-201.sh for search phase and darts-proj-201.sh --resume_epoch 50 --resume_expid search-darts-201-1 for selection (projection) phase
-- DARTS: darts-sota.sh for search phase and darts-proj-sota.sh --resume_expid search-darts-sota-s5-2 for selection (projection) phase
+- NASBENCH: darts-201.sh for search phase and darts-proj-201.sh --resume_epoch 50 --resume_expid search-darts-201-1 for selection (projection) phase *
+- DARTS: darts-sota.sh for search phase and darts-proj-sota.sh --resume_expid search-darts-sota-s5-2 for selection (projection) phase *
 Use the --method=darts-sam or darts-proj-sam to use FlatDARTS during the search phase and the projection phase respectively.
 Launch them from the exp_scripts directory
 
