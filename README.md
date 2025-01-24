@@ -7,6 +7,7 @@ The search is performed on CIFAR-10. On NAS-Bench-201, the evaluation on all dat
 To run the search the following scripts are used.
 
 [The evaluated accuracies of NAS-Bench-201 are reported in ..]
+
 Into the scripts folder
 - DARTS: darts-nasbench-search.sh and darts-search.sh (sam=True for FlatDARTS)
 - SDARTS: sdarts-nasbench-search.sh and sdarts-search.sh (sam=True for FlatDARTS)
@@ -14,6 +15,7 @@ Into the scripts folder
 - BETADARTS: betadarts-nasbench-search.sh and betadarts-search.sh (sam=True for FlatDARTS)
 
 [The evaluated accuracies of NAS-Bench-201 are reported in ..]
+
 Into the Lambda-DARTS/scripts:
 - LAMBDADARTS: run_search_NASBENCH and run_search_DARTS.sh
 [Explain how to use SAM]
