@@ -742,7 +742,7 @@ def path_bench_qualities(dataset):
     plt.xticks(x, fontsize=FONT_SIZE)
     plt.yticks(fontsize=FONT_SIZE)
     plt.legend(fontsize=FONT_SIZE)
-    plt.grid(True)
+    plt.grid(False)
     plt.show()
 
     # Save the plot to the results folder
@@ -806,41 +806,39 @@ def get_archs(dataset, quality):
 
 
 def get_idx_interval(acc, dataset):
-
     if dataset == 'cifar10':
-        if acc < 94.44 and acc > 94.3:
+        if 92.3 <= acc <= 93.7:
             return 0
-        elif acc < 85.7 and acc > 84.3:
+        elif 84.3 <= acc <= 85.7:
             return 1
-        elif acc < 75.7 and acc > 74.3:
+        elif 74.3 <= acc <= 75.7:
             return 2
         else:
             return -1
     elif dataset == 'cifar100':
-        if acc < 74.2 and acc > 68.8 :
+        if 69.3 <= acc <= 70.7:
             return 0
-        elif acc < 65.7 and acc > 64.3:
+        elif 64.3 <= acc <= 65.7:
             return 1
-        elif acc < 55.7 and acc > 54.3:
+        elif 54.3 <= acc <= 55.7:
             return 2
         else:
             return -1
     elif dataset == 'ImageNet16-120':
-        if acc < 48 and acc > 46.6:
+        if 45.9 <= acc <= 47.3:
             return 0
-        elif acc < 35.7 and acc > 34.3:
+        elif 34.3 <= acc <= 35.7:
             return 1
-        elif acc < 25.7 and acc > 24.3:
+        elif 24.3 <= acc <= 25.7:
             return 2
         else:
             return -1
         
 def get_acc_limits(dataset):
     if dataset == 'cifar10':
-        # Return the min and max bounds of the accuracy ranges
         return [92.3, 93.7], [84.3, 85.7], [74.3, 75.7]
     elif dataset == 'cifar100':
-        return [68.1, 73.5], [64.3, 65.7], [54.3, 55.7]
+        return [69.3, 70.7], [64.3, 65.7], [54.3, 55.7]
     elif dataset == 'ImageNet16-120':
         return [45.9, 47.3], [34.3, 35.7], [24.3, 25.7]
     else:
@@ -966,10 +964,9 @@ def plot_rho_darts():
 #plot_rho_nasbench()
 #plot_rho_darts()
 
-
+'''
 bench = NASBench201(dataset='cifar10')
 distributions_nasbench(bench, 'cifar10', 1)
-'''
 distributions_nasbench(bench, 'cifar10', 2)
 distributions_nasbench(bench, 'cifar10', 3)
 
@@ -977,12 +974,12 @@ bench = NASBench201(dataset='cifar100')
 distributions_nasbench(bench, 'cifar100', 1)
 distributions_nasbench(bench, 'cifar100', 2)
 distributions_nasbench(bench, 'cifar100', 3)
-
+'''
 bench = NASBench201(dataset='ImageNet16-120')
 distributions_nasbench(bench, 'ImageNet16-120', 1)
 distributions_nasbench(bench, 'ImageNet16-120', 2)
 distributions_nasbench(bench, 'ImageNet16-120', 3)
-'''
+
 
 '''
 

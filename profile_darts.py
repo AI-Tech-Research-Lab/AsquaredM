@@ -252,7 +252,7 @@ def path_bench_qualities(path1, path2, dataset):
     plt.title(f'Path Accuracies for {name}')
     plt.xticks(x)
     plt.legend()
-    plt.grid(True)
+    plt.grid(False)
 
     # Save the plot to the results folder
     results_dir = f'results/flatness_exp_{dataset}'

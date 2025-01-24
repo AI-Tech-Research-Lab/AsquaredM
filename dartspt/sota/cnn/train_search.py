@@ -98,7 +98,7 @@ if args.expid_tag != '':
 
 expid = args.save
 args.save = '../../experiments/sota/{}/search-{}-{}-{}-{}'.format(
-    args.dataset, args.save, args.search_space, args.seed, args.method)
+    args.dataset, args.save, args.search_space, args.seed, 'darts-sam')
 
 if args.unrolled:
     args.save += '-unrolled'
@@ -264,10 +264,22 @@ def main():
 
     #### resume
     start_epoch = 0
+    '''
     if args.resume_epoch > 0:
         logging.info('loading checkpoint from {}'.format(expid))
         filename = os.path.join(args.save, 'checkpoint_{}.pth.tar'.format(args.resume_epoch))
-
+    '''
+    if args.resume_epoch > 0:
+        if args.dev_resume_epoch < 0:
+            logging.info('Resuming from checkpoint in the main directory: {}'.format(expid))
+            filename = os.path.join(args.save, 'checkpoint_{}.pth.tar'.format(args.resume_epoch))
+        elif args.dev_resume_epoch > 0:
+            logging.info('Resuming from development checkpoint in {}'.format(args.dev_resume_checkpoint_dir))
+            filename = os.path.join(args.dev_resume_checkpoint_dir, 'checkpoint_{}.pth.tar'.format(args.dev_resume_epoch))
+        else:
+            filename = None
+        print("FILENAME")
+        print(filename)
         if os.path.isfile(filename):
             logging.info("=> loading checkpoint '{}'".format(filename))
             checkpoint = torch.load(filename, map_location='cpu')
