@@ -6,24 +6,26 @@ The search is performed on CIFAR-10. On NAS-Bench-201, the evaluation on all dat
 
 To run the search the following scripts are used.
 
-[The evaluated accuracies of NAS-Bench-201 are reported in ..]
+The evaluated accuracies of NAS-Bench-201 are reported in nasbench201_info.pt (that we provide)
 
 Into the scripts folder
-- DARTS: darts-nasbench-search.sh and darts-search.sh (sam=True for FlatDARTS)
-- SDARTS: sdarts-nasbench-search.sh and sdarts-search.sh (sam=True for FlatDARTS)
-- DARTS-: dartsminus-nasbench-search.sh and dartsminus-search.sh (sam=True for FlatDARTS)
-- BETADARTS: betadarts-nasbench-search.sh and betadarts-search.sh (sam=True for FlatDARTS)
+- DARTS: darts-nasbench-search.sh and darts-search.sh (--sam True for FlatDARTS)
+- SDARTS: sdarts-nasbench-search.sh and sdarts-search.sh (--sam True for FlatDARTS)
+- DARTS-: dartsminus-nasbench-search.sh and dartsminus-search.sh (--sam True for FlatDARTS)
+- BETADARTS: betadarts-nasbench-search.sh and betadarts-search.sh (--sam True for FlatDARTS)
+Launch them from the main directory
 
-[The evaluated accuracies of NAS-Bench-201 are reported in ..]
+To be compliant with Lambda-DARTS and DARTSPT code, where the code of the original NAS-Bench-201 repo (https://github.com/D-X-Y/AutoDL-Projects) is used, you need to download the NAS-Bench-201-v1_0-e61699.pth and put it into these paths: Lambda-DARTS/NAS-Bench201 and dartspt/data (create the data folder).
 
 Into the Lambda-DARTS/scripts:
-- LAMBDADARTS: run_search_NASBENCH and run_search_DARTS.sh
-[Explain how to use SAM]
+- LAMBDADARTS: run_search_NASBENCH and run_search_DARTS.sh (use the flag --sam for FlatDARTS)
+Launch it from the main directory
 
 Into the DARTSPT/exp_scripts: 
 - NASBENCH: darts-201.sh for search phase and darts-proj-201.sh --resume_epoch 50 --resume_expid search-darts-201-1 for selection (projection) phase
 - DARTS: darts-sota.sh for search phase and darts-proj-sota.sh --resume_expid search-darts-sota-s5-2 for selection (projection) phase
-[Explain how to use SAM]
+Use the --method=darts-sam or darts-proj-sam to use FlatDARTS during the search phase and the projection phase respectively.
+Launch them from the exp_scripts directory
 
 ## Geometry of the landscapes
 
