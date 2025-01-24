@@ -1,7 +1,9 @@
 Guidelines to replicate the results.
 
 ## FlatDARTS algorithm
-The search is performed on CIFAR-10 and the found genotype must be added to sota/cnn/genotypes.py
+
+The search is performed on CIFAR-10. On NAS-Bench-201, the evaluation on all datasets is shown after the search since accuracies are precomputed. On DARTS, the found genotype must be added to sota/cnn/genotypes.py and then you can run the train by launching scripts/darts-train.sh selecting the architectures and the seeds.
+
 To run the search the following scripts are used.
 Into the scripts folder
 - DARTS: darts-nasbench-search.sh and darts-search.sh (sam=True for FlatDARTS)
