@@ -1,6 +1,6 @@
 Guidelines to replicate the results.
 
-##FlatDARTS algorithm
+## FlatDARTS algorithm
 The search is performed on CIFAR-10 and the found genotype must be added to sota/cnn/genotypes.py
 To run the search the following scripts are used.
 Into the scripts folder
@@ -16,7 +16,7 @@ Into the DARTSPT/exp_scripts:
 - DARTS: darts-sota.sh for search phase and darts-proj-sota.sh --resume_expid search-darts-sota-s5-2 for selection (projection) phase
 [Explain how to use SAM]
 
-##Geometry of the landscapes
+## Geometry of the landscapes
 
 Procedures to visualize the geometry are listed in profile_nasbench.py and profile_darts.py
 Into the scripts folder
