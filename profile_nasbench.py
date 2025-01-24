@@ -975,10 +975,12 @@ distributions_nasbench(bench, 'cifar100', 1)
 distributions_nasbench(bench, 'cifar100', 2)
 distributions_nasbench(bench, 'cifar100', 3)
 '''
+'''
 bench = NASBench201(dataset='ImageNet16-120')
 distributions_nasbench(bench, 'ImageNet16-120', 1)
 distributions_nasbench(bench, 'ImageNet16-120', 2)
 distributions_nasbench(bench, 'ImageNet16-120', 3)
+'''
 
 
 '''
@@ -1011,5 +1013,18 @@ path_bench('ImageNet16-120')
 #compute_acc_by_radius('cifar10')
 #compute_acc_by_radius('cifar100')
 #compute_acc_by_radius('ImageNet16-120')
+
+print(get_archs('cifar10', 'Model A'))
+print(get_archs('cifar10', 'Model B'))
+print(get_archs('cifar10', 'Model C'))
+print(get_archs('cifar100', 'Model A'))
+print(get_archs('cifar100', 'Model B'))
+print(get_archs('cifar100', 'Model C'))
+print(get_archs('ImageNet16-120', 'Model A'))
+print(get_archs('ImageNet16-120', 'Model B'))
+print(get_archs('ImageNet16-120', 'Model C'))
+
+
+
 
 

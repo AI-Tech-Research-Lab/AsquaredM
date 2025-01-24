@@ -1,7 +1,7 @@
-#DARTS: unrolled=False for darts1
+#Beta-DARTS: betadecay=True
 dataset=cifar10
 sam=True
-betadecay=False
+betadecay=True
 unrolled=False
 data_augs=(False True)
 data_aug=True

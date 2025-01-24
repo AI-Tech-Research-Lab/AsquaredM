@@ -21,6 +21,7 @@ class Architect(object):
         self.k=1
         self.rho_alpha=0.1
         self.epsilon=0.01
+        self.sam=args.sam
 
     def _train_loss(self, model, input, target):
         return model._loss(input, target)
@@ -45,8 +46,10 @@ class Architect(object):
         if unrolled:
             self._backward_step_unrolled(input_train, target_train, input_valid, target_valid, eta, network_optimizer)
         else:
-            #self._backward_step(input_valid, target_valid)
-            self._backward_step_SAM(input_valid, target_valid)
+            if not self.sam:
+                self._backward_step(input_valid, target_valid)
+            else:
+                self._backward_step_SAM(input_valid, target_valid)
         self.optimizer.step()
     
     def _backward_step(self, input_valid, target_valid):

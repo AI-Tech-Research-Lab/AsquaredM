@@ -271,6 +271,9 @@ if __name__ == '__main__':
                                               default=False,   help='use layer gradient correlation regularization')
   parser.add_argument('--lambda_',            type=float,   default=0.125, help='gradient correlation regularization lambda')
   parser.add_argument('--epsilon_0',          type=float,   default=0.0001, help='finite difference approximation epsilon')
+  parser.add_argument('--sam ',
+                                              action='store_true',
+                                              default=False,   help='use sam')
   args = parser.parse_args()
   if args.rand_seed is None or args.rand_seed < 0: args.rand_seed = random.randint(1, 100000)
   main(args)
