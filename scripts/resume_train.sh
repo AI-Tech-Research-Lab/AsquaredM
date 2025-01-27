@@ -1,0 +1,2 @@
+CUDA_VISIBLE_DEVICES=0 python sota/cnn/train.py --gpu 0 --dataset cifar100 --data ../datasets/cifar100 --save results/darts_path_neighbors_datasetcifar100_archSAM_exp_bad_seed1_arch_targetSAM_exp_bad2_seed1_radius3/neighbor_1 --epochs 600 --train_limit 0.0 --batch_size 96 --momentum 0.9 --drop_path_prob 0.2 --auxiliary --auxiliary_weight 0.4 --cutout --seed 1 \
+                    --resume results/darts_path_neighbors_datasetcifar100_archSAM_exp_bad_seed1_arch_targetSAM_exp_bad2_seed1_radius3/neighbor_1/checkpoint_epoch_411.pt

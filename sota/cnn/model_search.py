@@ -97,7 +97,7 @@ class MixedOp(nn.Module):
 
 class Cell(nn.Module):
 
-    def __init__(self, steps, multiplier, C_prev_prev, C_prev, C, reduction, reduction_prev, auxiliary_skip):
+    def __init__(self, steps, multiplier, C_prev_prev, C_prev, C, reduction, reduction_prev, auxiliary_skip=False):
         super(Cell, self).__init__()
         self.reduction = reduction
         self.primitives = self.PRIMITIVES['primitives_reduct' if reduction else 'primitives_normal']

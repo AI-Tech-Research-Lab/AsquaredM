@@ -16,18 +16,19 @@ class Architect(object):
         self.network_weight_decay = args.weight_decay
         self.model = model
         self.lr = args.arch_learning_rate
-        self.sgd_alpha=args.sgd_alpha
+
+        self.sgd_alpha= args.sgd_alpha if hasattr(args, 'sgd_alpha') else False
     
-        if args.sgd_alpha: #lookbehind optimizer
+        if self.sgd_alpha: #lookbehind optimizer
             self.optimizer = torch.optim.SGD(self.model.arch_parameters(), lr=1)
         else: #original optimizer of darts
             self.optimizer = torch.optim.Adam(self.model.arch_parameters(),
                                           lr=args.arch_learning_rate, betas=(0.5, 0.999),
                                           weight_decay=args.arch_weight_decay)
-        self.sam = args.sam
-        self.rho_alpha = args.rho_alpha_sam
-        self.epsilon = args.epsilon_sam
-        self.betadecay = args.betadecay
+        self.sam = args.sam if hasattr(args, 'sam') else False
+        self.rho_alpha = args.rho_alpha_sam if hasattr(args, 'rho_alpha_sam') else 0
+        self.epsilon = args.epsilon_sam if hasattr(args, 'epsilon_sam') else 1e-3
+        self.betadecay = args.betadecay if hasattr(args, 'betadecay') else False
         if hasattr(args, 'w_nor'):
             self.w_nor = 2 * args.w_nor
             self.w_red = 2 * (1 - args.w_nor)
@@ -36,12 +37,9 @@ class Architect(object):
         self.tau = 1/2
         self.w_init = 0
 
-        if args.k_sam > 1: #Lookbehind-SAM
-            print("Using Lookbehind-SAM with k=", args.k_sam)   
-            self.k = args.k_sam
-            #self.scheduler = torch.optim.lr_scheduler.MultiStepLR(self.optimizer, milestones=[12, 24, 36], gamma=0.1)
-        else:
-            self.k = 1
+        self.k = args.k_sam if hasattr(args, 'k_sam') else 1
+        print('sam:', self.sam) 
+
 
     def _train_loss(self, model, input, target):
         return model._loss(input, target)
@@ -82,7 +80,7 @@ class Architect(object):
         unrolled_model = self._construct_model_from_theta(theta - eta * (moment + dtheta))
         return unrolled_model
     
-    def step(self, input_train, target_train, input_valid, target_valid, eta, network_optimizer, epoch, unrolled):
+    def step(self, input_train, target_train, input_valid, target_valid, eta, network_optimizer, epoch=0, unrolled=False):
         self.optimizer.zero_grad()
         if self.sam:
             self._backward_step_SAM(input_valid, target_valid, epoch)

@@ -1,6 +1,7 @@
 import os
 import sys
-sys.path.insert(0, '../../')
+#sys.path.insert(0, '../../')
+sys.path.insert(0, os.path.expanduser('~/workspace/darts-SAM'))
 import time
 import glob
 import numpy as np
@@ -26,6 +27,15 @@ from numpy import linalg as LA
 
 from torch.utils.tensorboard import SummaryWriter
 
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 parser = argparse.ArgumentParser("sota")
 parser.add_argument('--data', type=str, default='../../data',
@@ -53,9 +63,12 @@ parser.add_argument('--unrolled', action='store_true', default=False, help='use 
 parser.add_argument('--arch_learning_rate', type=float, default=3e-4, help='learning rate for arch encoding')
 parser.add_argument('--arch_weight_decay', type=float, default=1e-3, help='weight decay for arch encoding')
 parser.add_argument('--search_space', type=str, default='s1', help='searching space to choose from')
+parser.add_argument('--sam', type=str2bool, default=False, help='use sam update rule')
+parser.add_argument('--rho_alpha_sam', type=float, default=1e-2, help='rho alpha for SAM update')
+parser.add_argument('--epsilon_sam', type=float, default=1e-2, help='epsilon for SAM update')
 args = parser.parse_args()
 
-args.save = '../../experiments/sota/{}/search-pcdarts-{}-{}-{}-{}'.format(
+args.save = 'results/search-pcdarts-{}-{}-{}-{}-{}'.format(
     args.dataset, args.save, time.strftime("%Y%m%d-%H%M%S"), args.search_space, args.seed)
 
 if args.unrolled:
@@ -145,8 +158,8 @@ def main():
     architect = Architect(model, args)
 
     for epoch in range(args.epochs):
-        scheduler.step()
-        lr = scheduler.get_lr()[0]
+
+        lr = scheduler.get_last_lr()[0]
         if args.cutout:
             # increase the cutout probability linearly throughout search
             train_transform.transforms[-1].cutout_prob = args.cutout_prob * epoch / (args.epochs - 1)
@@ -174,6 +187,7 @@ def main():
         writer.add_scalar('Obj/valid', valid_obj, epoch)
 
         utils.save(model, os.path.join(args.save, 'weights.pt'))
+        scheduler.step()
     writer.close()
 
 
