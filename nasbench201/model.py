@@ -39,31 +39,50 @@ beta_decay_scheduler = DecayScheduler(base_lr=1.0,
                                             T_stop=50, 
                                             decay_type='linear')
 
+def channel_shuffle(x, groups):
+    batchsize, num_channels, height, width = x.data.size()
+
+    channels_per_group = num_channels // groups
+
+    # reshape
+    x = x.view(batchsize, groups,
+               channels_per_group, height, width)
+
+    x = torch.transpose(x, 1, 2).contiguous()
+
+    # flatten
+    x = x.view(batchsize, -1, height, width)
+    return x
+
 
 # This module is used for NAS-Bench-201, represents a small search space with a complete DAG
 class SearchCell(nn.Module):
 
-  def __init__(self, C_in, C_out, stride, max_nodes, op_names, affine=False, track_running_stats=True, auxiliary_skip=False, auxiliary_operation='skip'):
+  def __init__(self, C_in, C_out, stride, max_nodes, op_names, affine=False, track_running_stats=True, auxiliary_skip=False, auxiliary_operation='skip',
+               forward_mode='default'):
     super(SearchCell, self).__init__()
 
     self.op_names  = deepcopy(op_names)
     self.edges     = nn.ModuleDict()
     self.max_nodes = max_nodes
-    self.in_dim    = C_in
-    self.out_dim   = C_out
+    self.in_dim    = C_in #if forward_mode == 'default' else C_in // 4
+    self.out_dim   = C_out #if forward_mode == 'default' else C_out // 4
+    in_dim = self.in_dim if forward_mode == 'default' else self.in_dim // 4
+    out_dim = self.out_dim if forward_mode == 'default' else self.out_dim // 4
     for i in range(1, max_nodes):
       for j in range(i):
         node_str = '{:}<-{:}'.format(i, j)
         if j == 0:
-          xlists = [OPS[op_name](C_in , C_out, stride, affine, track_running_stats) for op_name in op_names]
+          xlists = [OPS[op_name](in_dim, out_dim, stride, affine, track_running_stats) for op_name in op_names]
         else:
-          xlists = [OPS[op_name](C_in , C_out,      1, affine, track_running_stats) for op_name in op_names]
+          xlists = [OPS[op_name](in_dim, out_dim,      1, affine, track_running_stats) for op_name in op_names]
         self.edges[ node_str ] = nn.ModuleList( xlists )
     self.edge_keys  = sorted(list(self.edges.keys()))
     self.edge2index = {key:i for i, key in enumerate(self.edge_keys)}
     self.num_edges  = len(self.edges)
     self.auxiliary_op=auxiliary_operation
     self.auxiliary_skip= auxiliary_skip
+    self.forward_mode = forward_mode
 
     if auxiliary_skip: #DARTS-: auxiliary skip connection
       if stride == 2:
@@ -82,8 +101,19 @@ class SearchCell(nn.Module):
   def extra_repr(self):
     string = 'info :: {max_nodes} nodes, inC={in_dim}, outC={out_dim}'.format(**self.__dict__)
     return string
+  
+  def forward(self, inputs, weights):
+    if self.forward_mode == 'pc':
+        #print("Using PC forward")
+        return self.forward_pc(inputs, weights)
+    elif self.forward_mode == 'default':
+        #print("Using default forward")
+        return self.default_forward(inputs, weights)
+    else:
+        raise ValueError(f"Invalid forward_mode: {self.forward_mode}. Choose 'default' or 'pc'.")
 
-  def forward(self, inputs, weightss):
+
+  def default_forward(self, inputs, weightss):
     nodes = [inputs]
     for i in range(1, self.max_nodes):
       inter_nodes = []
@@ -101,6 +131,74 @@ class SearchCell(nn.Module):
     #   res += self.auxiliary_op(inputs) * beta_decay_scheduler.decay_rate
 
     return nodes[-1]
+  
+  
+  def forward_pc(self, x, weightss):
+      # Channel proportion k=4
+      dim_2 = x.shape[1]
+      xtemp = x[:, :dim_2 // 4, :, :]   # First 1/4 channels
+      xtemp2 = x[:, dim_2 // 4:, :, :]  # Remaining 3/4 channels
+
+      nodes = [xtemp]
+      for i in range(1, self.max_nodes):
+          inter_nodes = []
+          for j in range(i):
+              node_str = '{:}<-{:}'.format(i, j)
+              weights = weightss[self.edge2index[node_str]]
+              res = sum(w * layer(nodes[j]) for w, layer in zip(weights, self.edges[node_str]))
+              #if self.auxiliary_skip:  # Add auxiliary_op only if skip is True
+              #    res += self.auxiliary_op(xtemp) * beta_decay_scheduler.decay_rate
+              inter_nodes.append(res)
+          nodes.append(sum(inter_nodes))
+
+      # Combine final node with the remaining channels (xtemp2)
+      temp1 = nodes[-1]
+      #print("temp1 shape: ", temp1.shape)
+      if temp1.shape[2] == x.shape[2]:  # Check spatial dimensions
+          ans = torch.cat([temp1, xtemp2], dim=1)
+      else:  # Apply pooling if dimensions mismatch
+          ans = torch.cat([temp1, self.mp(xtemp2)], dim=1)
+      #assert ans.shape[1] == dim_2, 'Invalid shape {:} vs {:}'.format(ans.shape, dim_2)
+      # Perform channel shuffling
+      ans = channel_shuffle(ans, 4)
+      #print("ans shape: ", ans.shape)
+      #assert ans.shape[1] == dim_2, 'Invalid shape {:} vs {:}'.format(ans.shape, dim_2)
+      return ans
+  
+  '''
+  def forward_pc(self, x, weightss):
+    # Dynamically handle reduced channels: splitting inputs
+    dim_2 = x.shape[1]
+    xtemp = x[:, :dim_2 // 4, :, :]  # First 1/4 channels
+    xtemp2 = x[:, dim_2 // 4:, :, :]  # Remaining 3/4 channels
+
+    # Start processing with xtemp (1/4 channels)
+    nodes = [xtemp]
+    for i in range(1, self.max_nodes):
+        inter_nodes = []
+        for j in range(i):
+            node_str = '{:}<-{:}'.format(i, j)
+            weights = weightss[self.edge2index[node_str]]
+
+            # Dynamically adjust the channel size of OPS based on the input size (xtemp here)
+            #in_channels = xtemp.shape[1]  # Using xtemp only initially
+            xlists = [OPS[op_name](dim_2//4, dim_2//4, 1, affine=True, track_running_stats=True) for op_name in self.op_names]
+            res = sum(w * layer(nodes[j]) for w, layer in zip(weights, xlists))
+            inter_nodes.append(res)
+
+        nodes.append(sum(inter_nodes))
+
+    # After processing nodes, combine the result with xtemp2 (remaining channels)
+    temp1 = nodes[-1]
+    if temp1.shape[2] == x.shape[2]:  # Check spatial dimensions
+        ans = torch.cat([temp1, xtemp2], dim=1)  # Concatenate along the channel dimension
+    else:  # Apply pooling if dimensions mismatch
+        ans = torch.cat([temp1, self.mp(xtemp2)], dim=1)
+
+    # Perform channel shuffling
+    ans = channel_shuffle(ans, 4)
+    return ans
+  '''
 
   # GDAS
   def forward_gdas(self, inputs, hardwts, index):
@@ -178,7 +276,8 @@ class SearchCell(nn.Module):
 
 class Network(nn.Module):
 
-  def __init__(self, C, N, max_nodes, num_classes, criterion, search_space=NAS_BENCH_201, affine=False, track_running_stats=True, auxiliary_skip=False):
+  def __init__(self, C, N, max_nodes, num_classes, criterion, search_space=NAS_BENCH_201, affine=False, track_running_stats=True, auxiliary_skip=False, 
+               forward_mode='default'):
     super(Network, self).__init__()
     self._C        = C
     self._layerN   = N
@@ -198,7 +297,7 @@ class Network(nn.Module):
       if reduction:
         cell = ResNetBasicblock(C_prev, C_curr, 2)
       else:
-        cell = SearchCell(C_prev, C_curr, 1, max_nodes, search_space, affine, track_running_stats, auxiliary_skip=auxiliary_skip)
+        cell = SearchCell(C_prev, C_curr, 1, max_nodes, search_space, affine, track_running_stats, auxiliary_skip=auxiliary_skip, forward_mode=forward_mode)
         if num_edge is None: num_edge, edge2index = cell.num_edges, cell.edge2index
         else: assert num_edge == cell.num_edges and edge2index == cell.edge2index, 'invalid {:} vs. {:}.'.format(num_edge, cell.num_edges)
       self.cells.append( cell )

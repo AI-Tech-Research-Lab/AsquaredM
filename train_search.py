@@ -86,6 +86,7 @@ parser.add_argument('--sgd_alpha', type=str2bool, default=False, help='lookbehin
 parser.add_argument('--k_sam', type=int, default=1, help='lookbehind steps for alpha')
 parser.add_argument('--method', type=str, default='darts', help='method to use')
 parser.add_argument('--auxiliary_skip', action='store_true', default=False, help='use aux operation in mixedop (darts-)')
+parser.add_argument('--forward_mode', type=str, default='default', help='forward mode for enabling pcdarts')
 
 args = parser.parse_args()
 
@@ -163,7 +164,8 @@ def main():
     else:
         #stages = 3
         #cells = 5
-        model = BenchNetwork(C=args.init_channels, N=5, max_nodes=4, num_classes=n_classes, criterion=criterion, auxiliary_skip=args.auxiliary_skip)
+        model = BenchNetwork(C=args.init_channels, N=5, max_nodes=4, num_classes=n_classes, criterion=criterion, auxiliary_skip=args.auxiliary_skip,
+                             forward_mode=args.forward_mode)
 
     model = model.cuda()
     logging.info("param size = %fMB", utils.count_parameters_in_MB(model))
