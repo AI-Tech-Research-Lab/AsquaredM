@@ -5,7 +5,7 @@ import subprocess
 import sys
 
 sys.path.append(os.path.join(os.path.expanduser('~'),'workspace/darts-SAM')) 
-#sys.path.append("/u01/homes/fpittorino/workspace/darts-SAM") 
+
 from imagenet16 import ImageNet16
 import time
 import glob

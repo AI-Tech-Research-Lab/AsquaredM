@@ -68,6 +68,7 @@ parser.add_argument('--lambda_', type=float, default=0.125, help='Lambda value f
 
 ##
 parser.add_argument('--wandb', action='store_true', default=False, help='use wandb for logging')
+parser.add_argument('--sam', action='store_true', default=False, help='use sam during the darts search')
 
 args = parser.parse_args()
 

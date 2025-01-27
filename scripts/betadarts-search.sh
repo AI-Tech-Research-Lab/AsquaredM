@@ -1,5 +1,4 @@
-#!/bin/bash
-#DARTS: unrolled=False for darts1
+#Beta-DARTS: betadecay=True
 dataset=cifar10
 rho=1e-1
 epsilon=1e-2
