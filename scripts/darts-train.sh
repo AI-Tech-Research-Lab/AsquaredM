@@ -1,35 +1,30 @@
-#!/bin/bash
+#!/bin/sh
 
 # Define common parameters
-dataset=cifar100
-device=0
+dataset="cifar10"
+device="0"
 optim="SGD"
-epochs=600
+epochs="600"
 base_save_dir="results/darts_train"
 
 # Define the architecture and seeds
-<<<<<<< HEAD
-
-architectures=("SAM_exp_bad")
-=======
-architectures=("DARTSPT_SAM")
->>>>>>> 607cd2caf3abfdf07cda91d08411ccae3c97a251
-seeds=(1)
+architectures="PCDARTS"
+seeds="1"
 
 # Loop through each architecture
-for arch in "${architectures[@]}"; do
+for arch in $architectures; do
     # Loop through each seed
-    for seed in "${seeds[@]}"; do
+    for seed in $seeds; do
         # Construct the save directory for each combination of architecture and seed
         save_dir="${base_save_dir}_dataset${dataset}_arch${arch}_seed${seed}"
         
         # Run the training command
-        python sota/cnn/train.py --dataset $dataset --arch ${arch}_seed$seed \
-            --data ../datasets/$dataset --gpu $device \
-            --save $save_dir \
-            --epochs $epochs --momentum 0.9 --batch_size 96 \
-            --drop_path_prob 0.2 --cutout --seed $seed \
-            --auxiliary --auxiliary_weight 0.4 --wandb 
+        python sota/cnn/train.py --dataset "$dataset" --arch "${arch}_seed$seed" \
+            --data "../datasets/$dataset" --gpu "$device" \
+            --save "$save_dir" \
+            --epochs "$epochs" --momentum "0.9" --batch_size "96" \
+            --drop_path_prob "0.2" --cutout --seed "$seed" \
+            --auxiliary --auxiliary_weight "0.4" --wandb
     done
 done
 
