@@ -362,12 +362,12 @@ def plot_histograms(data_array, bins=100, path='', baselines=None, dataset='cifa
                     line_kws={'linewidth': 2}, stat='density', ax=ax_temp)
 
         y_values = [bar.get_height() for bar in ax_temp.patches]
-        max_density = max(y_values, default=0)
+        max_density = max(y_values, default=0.2)
         global_max_density = max(global_max_density, max_density)
         plt.close(fig_temp)  # Close the temporary figure
 
     # Adjust global maximum density if needed  
-    global_max_density = global_max_density if global_max_density < 0.8 else 0.8  
+    global_max_density = global_max_density if global_max_density >0.25 else 0.25  
     print("GLOBAL MAX DENSITY: ", global_max_density)   
 
     # Second pass: Plot histograms with uniform y-axis limits  
@@ -395,8 +395,8 @@ def plot_histograms(data_array, bins=100, path='', baselines=None, dataset='cifa
             axs[i].fill_betweenx([0, global_max_density], min_val, max_val, color='lightgrey', alpha=0.5, label='Baseline Interval')  
 
         # Add grid with custom interval  
-        axs[i].grid(True, axis='y', which='both', linestyle='--', linewidth=0.5)  
-        axs[i].set_yticks(np.arange(0, global_max_density, 0.2))  
+        #axs[i].grid(True, axis='y', which='both', linestyle='--', linewidth=0.5)  
+        axs[i].set_yticks(np.arange(0, global_max_density, 0.1))  
 
     # Add common X-axis label  
     axs[-1].set_xlabel('Accuracy', fontsize=FONT_SIZE)  
@@ -964,7 +964,7 @@ def plot_rho_darts():
 #plot_rho_nasbench()
 #plot_rho_darts()
 
-'''
+
 bench = NASBench201(dataset='cifar10')
 distributions_nasbench(bench, 'cifar10', 1)
 distributions_nasbench(bench, 'cifar10', 2)
@@ -974,13 +974,11 @@ bench = NASBench201(dataset='cifar100')
 distributions_nasbench(bench, 'cifar100', 1)
 distributions_nasbench(bench, 'cifar100', 2)
 distributions_nasbench(bench, 'cifar100', 3)
-'''
-'''
+
 bench = NASBench201(dataset='ImageNet16-120')
 distributions_nasbench(bench, 'ImageNet16-120', 1)
 distributions_nasbench(bench, 'ImageNet16-120', 2)
 distributions_nasbench(bench, 'ImageNet16-120', 3)
-'''
 
 
 '''
