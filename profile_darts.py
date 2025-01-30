@@ -183,7 +183,7 @@ def plot_neighbors(folder, dataset='cifar10', radius=1, baselines=None):
     plot_histogram(accs, bins=10, path=os.path.join(folder1,'histogram_darts_dataset' + dataset+'_radius' + str(radius) + '.pdf'), 
                     dataset=dataset, baselines=baselines, radius=radius)
 
-def path_bench_qualities(path1, path2, dataset):
+def path_bench_qualities(paths, dataset):
     import os
     import json
     import numpy as np
@@ -203,12 +203,14 @@ def path_bench_qualities(path1, path2, dataset):
 
     #acc_base = {'DARTScifar10': 91.92, 'DARTScifar100': 73.5, 'SAMcifar10': 92.77, 'SAMcifar100': 74.7}
     #acc_target = {'DARTScifar10': 91.73, 'DARTScifar100': 73.54, 'SAMcifar10': 92.75, 'SAMcifar100': 74.78}
-    acc_base = {'DARTScifar10': 96.91, 'DARTScifar100': 81.52, 'SAMcifar10': 97.4, 'SAMcifar100': 83.2}
-    acc_target = {'DARTScifar10': 96.77, 'DARTScifar100': 81.33, 'SAMcifar10': 97.32, 'SAMcifar100': 83.16}
+
+    acc_base = {'DARTScifar10': 96.91, 'DARTScifar100': 81.52, 'SAMcifar10': 97.4, 'SAMcifar100': 83.2, 'BADcifar10': 95.63, 'BADcifar100': 77.32}
+    acc_target = {'DARTScifar10': 96.77, 'DARTScifar100': 81.33, 'SAMcifar10': 97.32, 'SAMcifar100': 83.16, 'BADcifar10': 95.7, 'BADcifar100': 77.45}
+
 
     # Define qualities
-    qualities = ["DARTS", "SAM"]
-    paths = [path1, path2]
+    qualities = ["DARTS", "SAM", "BAD"]
+    #paths = [path1, path2]
     barriers = []
     paths_by_quality = {}
     accs_by_quality = {}
@@ -232,7 +234,7 @@ def path_bench_qualities(path1, path2, dataset):
     # Plot the paths for qualities
     plt.figure(figsize=(10, 5))
     x = list(range(4))  # 0, 1, 2, 3 representing the radius
-    colors = ['red', 'blue']
+    colors = ['red', 'blue', 'orange']
 
     for i, quality in enumerate(qualities):
         y = paths_by_quality[quality]
@@ -277,9 +279,15 @@ plot_neighbors('results/darts_train_neighbors_datasetcifar10', dataset='cifar10'
 plot_neighbors('results/darts_train_neighbors_datasetcifar10', dataset='cifar10', radius=2, baselines=[91.92, 92.77])
 plot_neighbors('results/darts_train_neighbors_datasetcifar10', dataset='cifar10', radius=3, baselines=[91.92, 92.77])
 '''
+paths=['results/darts_path_neighbors_datasetcifar10_archDARTS_seed3_arch_targetDARTS_TARGET_CIFAR10_radius3/archive_darts.txt', 
+       'results/darts_path_neighbors_datasetcifar10_archSAM_exp1_seed7_arch_targetSAM_TARGET_CIFAR10_radius3/archive_darts.txt',
+       'results/darts_path_neighbors_datasetcifar10_archSAM_exp_bad_seed1_arch_targetSAM_exp_bad2_seed1_radius3/archive_darts.txt']
+path_bench_qualities(paths, 'cifar10')
+paths=['results/darts_path_neighbors_datasetcifar100_archDARTS_seed3_arch_targetDARTS_TARGET_CIFAR100_radius3/archive_darts.txt', 
+'results/darts_path_neighbors_datasetcifar100_archSAM_exp1_seed7_arch_targetSAM_TARGET_CIFAR100_radius3/archive_darts.txt', 
+'results/darts_path_neighbors_datasetcifar100_archSAM_exp_bad_seed1_arch_targetSAM_exp_bad2_seed1_radius3/archive_darts.txt']
 
-path_bench_qualities('results/darts_path_neighbors_datasetcifar10_archDARTS_seed3_arch_targetDARTS_TARGET_CIFAR10_radius3/archive_darts.txt', 'results/darts_path_neighbors_datasetcifar10_archSAM_exp1_seed7_arch_targetSAM_TARGET_CIFAR10_radius3/archive_darts.txt', 'cifar10')
-path_bench_qualities('results/darts_path_neighbors_datasetcifar100_archDARTS_seed3_arch_targetDARTS_TARGET_CIFAR100_radius3/archive_darts.txt', 'results/darts_path_neighbors_datasetcifar100_archSAM_exp1_seed7_arch_targetSAM_TARGET_CIFAR100_radius3/archive_darts.txt', 'cifar100')
+path_bench_qualities(paths, 'cifar100')
 
 '''
 folder = 'results/darts_train_neighbors_datasetcifar100_archBETADARTS'

@@ -138,7 +138,7 @@ def update_archive_from_stats(exp_dir, archive_path):
     results = []
 
     # Iterate over all experiment directories
-    for folder in os.listdir(exp_dir):
+    for folder in sorted(os.listdir(exp_dir)):
         folder_path = os.path.join(exp_dir, folder)
         if os.path.isdir(folder_path):
             stats_path = os.path.join(folder_path, 'stats.json')
@@ -260,6 +260,57 @@ def read_val_accs_path_from_archive(filename,n):
     return avg_array, stds
 '''
 
+
+def read_val_accs_path_from_archive(filename, n=3):
+    """
+    Reads validation accuracies from an archive and averages samples for different levels,
+    calculating standard deviations for each level.
+    """
+    array = []
+    avg_array = []
+    std_array = []
+    
+    with open(filename, 'r') as file:
+        for line in file:
+            if line.strip():  # Ensure the line is not empty
+                # Split the line into architecture and metrics
+                parts = line.split('}:', 1)
+                if len(parts) != 2:
+                    print(f"Invalid line format: {line}")
+                    continue
+
+                arch_part, metrics_part = parts
+
+                # Parse the architecture part
+                try:
+                    architecture = json.loads(arch_part + '}')
+                except json.JSONDecodeError as e:
+                    print(f"Failed to decode architecture JSON: {e}")
+                    continue
+
+                # Parse the metrics part
+                try:
+                    metrics = json.loads(metrics_part.strip())
+                except json.JSONDecodeError as e:
+                    print(f"Failed to decode metrics JSON: {e}")
+                    continue
+
+                valid_acc = metrics.get("best_valid_acc", None)
+                if valid_acc is None:
+                    print(f"Missing 'best_valid_acc' in metrics: {metrics}")
+                    continue
+
+                array.append(valid_acc)
+
+                # Aggregate when enough samples are collected
+                if len(array) == n:
+                    avg_array.append(np.mean(array))
+                    std_array.append(np.std(array))
+                    array = []  # Reset for the next set
+
+    return avg_array, std_array
+
+'''
 def read_val_accs_path_from_archive(filename, n):
     """
     Reads validation accuracies from an archive and averages samples for different levels,
@@ -306,6 +357,7 @@ def read_val_accs_path_from_archive(filename, n):
                     to_samples = 3  # Reset the number of samples per level
 
     return avg_array, std_array
+'''
 
 def plot_histogram(data, bins=100, path='', baseline=None, dataset='cifar10', radius=1):
     FONT_SIZE = 8
