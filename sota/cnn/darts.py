@@ -4,7 +4,8 @@ import os
 import random
 import sys
 import numpy as np
-sys.path.append('/u01/homes/fpittorino/workspace/darts-SAM')
+home_dir = os.path.expanduser('~')
+sys.path.insert(0, os.path.join(home_dir, 'workspace', 'darts-SAM'))
 from sota.cnn.spaces import PRIMITIVES
 
 class DARTS():

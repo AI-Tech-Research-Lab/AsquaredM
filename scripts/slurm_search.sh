@@ -10,9 +10,9 @@
 #SBATCH --time=72:00:00              # walltime limit
 #SBATCH --gpus=1                     # num gpus. If set to 0 change the partition to defq or compute
 #SBATCH --partition=long_gpu             # [gpu, defq, compute, debug_gpu, long_gpu, medium_gpu]
-#SBATCH --account=pittorino
+#SBATCH --account=[user]
 #SBATCH --mail-type=NONE              #notify for NONE, BEGIN, END, FAIL, REQUEUE, ALL
-#SBATCH --mail-user=fabrizio.pittorino@unibocconi.it
+#SBATCH --mail-user=[mail]
 #SBATCH --output=out/%x_%j.out       # where to write standard output. %j gives job id and %x gives job name
 #SBATCH --error=err/%x_%j.err        # where to write standard error.
 #### #SBATCH --mem-per-cpu=8000M     # memory per cpu core, default 8GB
@@ -25,8 +25,8 @@
 #medium_gpu 3 hours
 #debug_gpu 15 minutes 
 
-export PATH="/home/Pittorino/miniconda3/bin:$PATH"
-#export PATH="/home/Pittorino/miniconda3:$PATH"
+export PATH="/home/User/miniconda3/bin:$PATH"
+#export PATH="/home/User/miniconda3:$PATH"
 
 module load cuda/12.3
 conda init

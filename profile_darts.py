@@ -189,11 +189,11 @@ def path_bench_qualities(paths, dataset):
     import numpy as np
     import matplotlib.pyplot as plt
 
-    FONT_SIZE=18
+    FONT_SIZE=20
 
     # Set font sizes
     plt.rcParams.update({
-        'font.size': FONT_SIZE+2,         # General font size
+        'font.size': FONT_SIZE+4,         # General font size
         'axes.titlesize': FONT_SIZE+4,    # Title font size
         'axes.labelsize': FONT_SIZE+4,    # Axis label font size
         'xtick.labelsize': FONT_SIZE,   # X-tick label font size
@@ -209,7 +209,7 @@ def path_bench_qualities(paths, dataset):
 
 
     # Define qualities
-    qualities = ["DARTS", "SAM", "BAD"]
+    qualities = ["DARTS", "SAM"]#, "BAD"]
     #paths = [path1, path2]
     barriers = []
     paths_by_quality = {}

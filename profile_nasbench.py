@@ -252,14 +252,14 @@ def get_bins(dataset, radius):
         if radius == 1 :
             return 10, 100, 100
         elif radius == 2:
-            return 10, 100, 100
+            return 30, 100, 100
         elif radius == 3:
             return 90, 90, 90
     elif dataset == 'cifar100':
         if radius == 1:
             return 10, 20, 30
         elif radius == 2:
-            return 20, 40, 60
+            return 30, 40, 60
         elif radius == 3:
             return 60, 60, 60
     elif dataset == 'ImageNet16-120':
@@ -274,7 +274,7 @@ def plot_histograms(data_array, bins=100, path='', baselines=None, dataset='cifa
     FONT_SIZE = 8  
     FIGSIZE = (4, 5)  
     COLORS = [mcolors.TABLEAU_COLORS[k] for k in mcolors.TABLEAU_COLORS.keys()]  
-    titles = ['Model A', 'Model B', 'Model C']  
+    titles = ['A', 'B', 'C']  
 
     num_plots = len(data_array) - 1  
 
@@ -387,19 +387,19 @@ def plot_histograms(data_array, bins=100, path='', baselines=None, dataset='cifa
         axs[i].set_ylim(0, global_max_density)  
 
         # Add title to each subplot  
-        axs[i].set_title(f"{titles[i]} (Test accuracy: {baselines[i][0]:.2f}%-{baselines[i][1]:.2f}%)")  
+        axs[i].set_title(f"{titles[i]} (Test accuracy: [{baselines[i][0]:.2f}%,{baselines[i][1]:.2f}%]")  
 
         # Add light grey interval for baseline  
         if baselines:  
             min_val, max_val = baselines[i]  
-            axs[i].fill_betweenx([0, global_max_density], min_val, max_val, color='lightgrey', alpha=0.5, label='Baseline Interval')  
+            axs[i].fill_betweenx([0, global_max_density], min_val, max_val, color='red', alpha=0.5, label='Baseline Interval')  
 
         # Add grid with custom interval  
         #axs[i].grid(True, axis='y', which='both', linestyle='--', linewidth=0.5)  
         axs[i].set_yticks(np.arange(0, global_max_density, 0.1))  
 
     # Add common X-axis label  
-    axs[-1].set_xlabel('Accuracy', fontsize=FONT_SIZE)  
+    axs[-1].set_xlabel('Accuracy', fontsize=FONT_SIZE+2)  
 
     # Adjust layout to prevent clipping of titles and labels  
     plt.tight_layout()  
@@ -673,11 +673,11 @@ def path_bench_qualities(dataset):
     import matplotlib.pyplot as plt
 
     print("DATASET: ", dataset)
-    FONT_SIZE = 18
+    FONT_SIZE = 20
     bench = NASBench201(dataset=dataset)
 
     # Define qualities and their respective colors
-    qualities = ["Model A", "Model B", "Model C"]
+    qualities = ["A", "B", "C"]
     colors = ["purple", "orange", "green"]
     paths_by_quality = {}
     accs_by_quality = {}
@@ -714,7 +714,7 @@ def path_bench_qualities(dataset):
         print(f"PATH ACCS for {quality}: ", path_accs)
         print(f"STD VAL ACCS for {quality}: ", std_test_accs)
 
-    # Plot the paths for Model A, Model B, and Model C qualities
+    # Plot the paths for A, B, and C qualities
     plt.figure(figsize=(10, 5))
     x = list(range(4))  # 0, 1, 2, 3 representing the radius
 
@@ -722,7 +722,8 @@ def path_bench_qualities(dataset):
         y = paths_by_quality[quality]
         yerr = std_by_quality[quality]
         plt.errorbar(
-            x, y, yerr=yerr, fmt='-o', capsize=5, capthick=2, elinewidth=1, color=color, label=f'{quality}'
+            x, y, yerr=yerr, fmt='-o', capsize=5, capthick=2, elinewidth=2, markeredgewidth=2, linewidth=3,
+            color=color, label=f'{quality}'
         )
         # Add squares for extreme points
         plt.scatter([x[0], x[-1]], [y[0], y[-1]], color=color, s=80, marker='s', zorder=3)  # Squares
@@ -730,8 +731,8 @@ def path_bench_qualities(dataset):
         plt.scatter(x[1:-1], y[1:-1], color=color, s=80, marker='o', zorder=3)  # Circles
 
     # Customize plot
-    plt.xlabel('Radius', fontsize=FONT_SIZE + 2)
-    plt.ylabel('Accuracy', fontsize=FONT_SIZE + 2)
+    plt.xlabel('Radius', fontsize=FONT_SIZE + 4)
+    plt.ylabel('Accuracy', fontsize=FONT_SIZE + 4)
     if dataset == 'cifar10': 
         name = 'CIFAR-10'
     elif dataset == 'cifar100':
@@ -739,8 +740,8 @@ def path_bench_qualities(dataset):
     elif dataset == 'ImageNet16-120':
         name = 'ImageNet16-120'
     plt.title(f'Path Accuracies for {name}', fontsize=FONT_SIZE + 4)
-    plt.xticks(x, fontsize=FONT_SIZE)
-    plt.yticks(fontsize=FONT_SIZE)
+    plt.xticks(x, fontsize=FONT_SIZE+2)
+    plt.yticks(fontsize=FONT_SIZE+2)
     plt.legend(fontsize=FONT_SIZE)
     plt.grid(False)
     plt.show()
@@ -773,33 +774,33 @@ def get_archs(dataset, quality):
     bench=NASBench201(dataset=dataset)
     idx1,idx2=0,0
     if dataset=='cifar10':
-        if quality=='Model A':
+        if quality=='A':
             idx1=81
             idx2=1459
-        elif quality=='Model B':
+        elif quality=='B':
             idx1=0
             idx2=163
-        elif quality=='Model C':
+        elif quality=='C':
             idx1=40
             idx2=12094
     elif dataset=='cifar100':
-        if quality=='Model A':
+        if quality=='A':
             idx1=81
             idx2=11711
-        elif quality=='Model B':
+        elif quality=='B':
             idx1=31
             idx2=7680
-        elif quality=='Model C':
+        elif quality=='C':
             idx1=146
             idx2=4461
     elif dataset=='ImageNet16-120':
-        if quality=='Model A':
+        if quality=='A':
             idx1=65
             idx2=2246
-        elif quality=='Model B':
+        elif quality=='B':
             idx1=17
             idx2=5845
-        elif quality=='Model C':
+        elif quality=='C':
             idx1=2
             idx2=348
     return bench.encode({'arch':bench.archive['str'][idx1]}), bench.encode({'arch':bench.archive['str'][idx2]}), bench.get_info_from_arch({'arch':bench.archive['str'][idx1]})['test-acc'], bench.get_info_from_arch({'arch':bench.archive['str'][idx2]})['test-acc']
@@ -909,62 +910,69 @@ def distributions_nasbench(bench, dataset, radius, dist_path='results/flatness_e
         radius=radius
     )
 
-def plot_rho_nasbench():
+import matplotlib.pyplot as plt
+
+def plot_rho_nasbench(figsize=(8, 6), font_size=18):
     # Data
-
-    # X-axis labels as plain numbers
     rho_labels = ['1e-4', '1e-2', '1e-1']
-
     rho_values = [1e-4, 1e-2, 1e-1]
     test_acc = [59.00, 92.39, 55.30]
     std_dev = [44.76, 0.59, 41.44]
 
+    # Set font size globally
+    plt.rcParams.update({'font.size': font_size})
+
     # Plot
-    plt.figure(figsize=(8, 6))
+    plt.figure(figsize=figsize)
     plt.errorbar(rho_labels, test_acc, yerr=std_dev, fmt='o-', capsize=5, label="Test Acc (%)", color="blue")
 
-    # Labels and title with Greek letter rho
-    plt.xlabel(r"$\rho$ Values")
-    plt.ylabel("Test ACC (%)")
-    plt.title(r"Test Accuracy vs $\rho$ using CIFAR-10 on NAS-Bench-201")
+    # Labels and title
+    plt.xlabel(r"$\rho$ Values", fontsize=font_size)
+    plt.ylabel("Test ACC (%)", fontsize=font_size)
+    plt.title(r"Test Accuracy vs $\rho$ using CIFAR-10 on NAS-Bench-201", fontsize=font_size + 2)
+    plt.xticks(fontsize=font_size)
+    plt.yticks(fontsize=font_size)
     plt.grid(alpha=0.5)
-    #plt.legend()
     plt.tight_layout()
 
-    # Show plot
-    plt.show()
+    # Save and show plot
     plt.savefig('results/rhovstestnasbench.pdf', format='pdf', bbox_inches='tight', dpi=300)
+    plt.show()
 
-def plot_rho_darts():
+
+def plot_rho_darts(figsize=(8, 6), font_size=18):
     # Data
+    rho_labels = ['1e-4', '1e-2', '1e-1', '1']
     rho_values = [1e-4, 1e-2, 1e-1, 1]
     test_acc = [97.03, 96.87, 97.20, 97.10]
     std_dev = [0.19, 0.41, 0.15, 0.12]
 
-    # X-axis labels as plain numbers
-    rho_labels = ['1e-4', '1e-2', '1e-1', '1']
+    # Set font size globally
+    plt.rcParams.update({'font.size': font_size})
 
     # Plot
-    plt.figure(figsize=(8, 6))
+    plt.figure(figsize=figsize)
     plt.errorbar(rho_labels, test_acc, yerr=std_dev, fmt='o-', capsize=5, label="Test Acc (%)", color="blue")
 
-    # Labels and title with Greek letter rho
-    plt.xlabel(r"$\rho$ Values")
-    plt.ylabel("Test ACC (%)")
-    plt.title(r"Test Accuracy vs $\rho$ using CIFAR-10 on DARTS")
+    # Labels and title
+    plt.xlabel(r"$\rho$ Values", fontsize=font_size)
+    plt.ylabel("Test ACC (%)", fontsize=font_size)
+    plt.title(r"Test Accuracy vs $\rho$ using CIFAR-10 on DARTS", fontsize=font_size + 2)
+    plt.xticks(fontsize=font_size)
+    plt.yticks(fontsize=font_size)
     plt.grid(alpha=0.5)
-    #plt.legend()
     plt.tight_layout()
 
-    # Show plot
-    plt.show()
+    # Save and show plot
     plt.savefig('results/rhovstestdarts.pdf', format='pdf', bbox_inches='tight', dpi=300)
+    plt.show()
+
 
 
 #plot_rho_nasbench()
 #plot_rho_darts()
 
-
+'''
 bench = NASBench201(dataset='cifar10')
 distributions_nasbench(bench, 'cifar10', 1)
 distributions_nasbench(bench, 'cifar10', 2)
@@ -979,6 +987,7 @@ bench = NASBench201(dataset='ImageNet16-120')
 distributions_nasbench(bench, 'ImageNet16-120', 1)
 distributions_nasbench(bench, 'ImageNet16-120', 2)
 distributions_nasbench(bench, 'ImageNet16-120', 3)
+'''
 
 
 '''
@@ -992,11 +1001,11 @@ print(bench.archive['str'][idx1])
 print(bench.archive['str'][idx2])
 '''
 
-'''
+
 path_bench_qualities('cifar10')
 path_bench_qualities('cifar100')
 path_bench_qualities('ImageNet16-120')
-'''
+
 
 
 '''
@@ -1012,15 +1021,6 @@ path_bench('ImageNet16-120')
 #compute_acc_by_radius('cifar100')
 #compute_acc_by_radius('ImageNet16-120')
 
-print(get_archs('cifar10', 'Model A'))
-print(get_archs('cifar10', 'Model B'))
-print(get_archs('cifar10', 'Model C'))
-print(get_archs('cifar100', 'Model A'))
-print(get_archs('cifar100', 'Model B'))
-print(get_archs('cifar100', 'Model C'))
-print(get_archs('ImageNet16-120', 'Model A'))
-print(get_archs('ImageNet16-120', 'Model B'))
-print(get_archs('ImageNet16-120', 'Model C'))
 
 
 

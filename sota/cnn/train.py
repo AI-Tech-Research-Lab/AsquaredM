@@ -1,7 +1,7 @@
 import json
 import os
 import sys
-#sys.path.insert(0, '/u01/homes/fpittorino/workspace/darts-SAM')
+
 home_dir = os.path.expanduser('~')
 sys.path.insert(0, os.path.join(home_dir, 'workspace', 'darts-SAM'))
 from imagenet16 import ImageNet16
