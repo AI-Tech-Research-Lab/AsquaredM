@@ -36,4 +36,3 @@ Procedures to visualize the geometry are listed in profile_nasbench.py and profi
 Into the scripts folder
 - path-neighbors.sh: Given two NNs and a dataset, it creates the path three and trains all the networks of the path three on DARTS on the dataset. At the end of the process, it creates the line plot of the path three
 - train-neighbors.sh: Given a NN and a dataset, finds all the neighbors of radius N and train all the networks stopping the training at a fixed train loss on DARTS on the dataset. At the end of the process, it creates the histogram of the neighbor three
-
