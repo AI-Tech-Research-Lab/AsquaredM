@@ -4,8 +4,8 @@
 dataset="cifar10"
 epsilon_sam="1e-2"
 rho_alpha_sam="1e-1"
-sam="True"
-seeds="1"  # Space-separated list of seeds
+sam="False"
+seeds="3"  # Space-separated list of seeds
 
 # Loop through the seeds and execute the command
 for seed in $seeds; do

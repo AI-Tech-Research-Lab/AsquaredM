@@ -50,10 +50,10 @@ def get_limits_plot(dataset):
     elif dataset == 'cifar100':
         return 70, 78
 
-def compute_barrier(accs):
+def compute_barrier(accs, acc_min):
     acc_a = accs[0]
     acc_b = accs[1]
-    acc_min = min(accs)
+    #acc_min = min(accs)
     return np.round(0.5 * (acc_a + acc_b) - acc_min,2)
 
 def read_val_accs_path_from_archive(filename, n):
@@ -64,6 +64,7 @@ def read_val_accs_path_from_archive(filename, n):
     array = []
     avg_array = []
     std_array = []
+    accs=[]
     K = 1
     to_samples = 3  # Number of samples per level
 
@@ -93,6 +94,7 @@ def read_val_accs_path_from_archive(filename, n):
 
                 to_samples -= 1
                 array.append(valid_acc)
+                accs.append(valid_acc)
                 if to_samples == 0:
                     # Average the samples in the array, append to avg_array, and calculate std deviation
                     avg_array.append(sum(array) / len(array))
@@ -101,7 +103,7 @@ def read_val_accs_path_from_archive(filename, n):
                     K += 1
                     to_samples = 3  # Reset the number of samples per level
 
-    return avg_array, std_array
+    return avg_array, std_array, accs
 
 def get_bins(dataset, radius):
 
@@ -218,7 +220,7 @@ def path_bench_qualities(paths, dataset):
 
     # Process paths and compute barriers
     for i, quality in enumerate(qualities):
-        avg_test_accs, std_test_accs = read_val_accs_path_from_archive(paths[i], 3)
+        avg_test_accs, std_test_accs, accs = read_val_accs_path_from_archive(paths[i], 3)
         acc1 = acc_base[quality+dataset]
         acc2 = acc_target[quality+dataset]
         
@@ -227,9 +229,10 @@ def path_bench_qualities(paths, dataset):
         paths_by_quality[quality] = path_accs
         std_by_quality[quality] = [0] + std_test_accs + [0]  # no std dev for acc1 and acc2
         accs_by_quality[quality] = (acc1, acc2)
-        barriers.append(compute_barrier(path_accs))
+        barriers.append(compute_barrier(path_accs, min(accs)))
         print(f"PATH ACCS for {quality}: ", path_accs)
         print(f"STD VAL ACCS for {quality}: ", std_test_accs)
+    print("BARRIERS: ", barriers)
 
     # Plot the paths for qualities
     plt.figure(figsize=(10, 5))

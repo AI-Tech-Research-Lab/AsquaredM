@@ -661,10 +661,10 @@ def path_bench(dataset,quality):
     plt.savefig('results/flatness_exp/'+dataset+'/path_accs_' + quality +'.pdf', format='pdf', bbox_inches='tight', dpi=300)
 
      
-def compute_barrier(accs):
+def compute_barrier(accs, acc_min):
     acc_a = accs[0]
     acc_b = accs[1]
-    acc_min = min(accs)
+    #acc_min = min(accs)
     return np.round(0.5 * (acc_a + acc_b) - acc_min,2)
 
 def path_bench_qualities(dataset):
@@ -683,6 +683,7 @@ def path_bench_qualities(dataset):
     accs_by_quality = {}
     std_by_quality = {}
     barriers = []
+    acc_min=10*10
 
     for quality in qualities:
         config1, config2, acc1, acc2 = get_archs(dataset, quality)
@@ -700,7 +701,8 @@ def path_bench_qualities(dataset):
         avg_test_accs = []
         std_test_accs = []
         for configs in archs_by_level:
-            avg, _, std = avg_test_acc(bench, configs)
+            avg, accs, std = avg_test_acc(bench, configs)
+            acc_min = min(min(accs),acc_min)
             avg_test_accs.append(avg)
             std_test_accs.append(std)
         
@@ -709,10 +711,11 @@ def path_bench_qualities(dataset):
         paths_by_quality[quality] = path_accs
         std_by_quality[quality] = [0] + std_test_accs + [0]  # no std dev for acc1 and acc2
         accs_by_quality[quality] = (acc1, acc2)
-        barriers.append(compute_barrier(path_accs))
+        barriers.append(compute_barrier(path_accs, acc_min))
 
         print(f"PATH ACCS for {quality}: ", path_accs)
         print(f"STD VAL ACCS for {quality}: ", std_test_accs)
+        print("Barriers: ", barriers)
 
     # Plot the paths for A, B, and C qualities
     plt.figure(figsize=(10, 5))

@@ -4,5 +4,4 @@ tensorboard
 torch
 torchvision
 torchaudio
-mathplotlib
 seaborn
