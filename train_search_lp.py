@@ -168,11 +168,7 @@ def main():
                              forward_mode=args.forward_mode)
 
     model = model.cuda()
-
     logging.info("param size = %fMB", utils.count_parameters_in_MB(model))
-    input_shape=(3, 32, 32)
-    #avg_macs = model.compute_network_cost(input_shape)
-    #logging.info("MACs: %f", avg_macs)
 
     optimizer = torch.optim.SGD(
         model.get_weights(),
@@ -273,11 +269,11 @@ def main():
         # validation
         valid_acc, valid_obj = infer(valid_queue, model, criterion)
         
-        if args.betadecay and not args.nasbench:
+        if args.betadecay:
             beta_loss = architect._beta_loss()        
 
-        if args.wandb and args.beta_decay:
-            if not args.nasbench:
+        if args.wandb:
+            if not args.betadecay:
                 wandb.log({"metrics/train_acc": train_acc, 
                         "metrics/val_acc": valid_acc,
                         "metrics/train_loss": train_obj,

@@ -54,6 +54,28 @@ def channel_shuffle(x, groups):
     x = x.view(batchsize, -1, height, width)
     return x
 
+def compute_macs_for_operation(op, input_shape, output_shape):
+    """
+    Compute the number of MACs for a given operation.
+    This example assumes Conv2D, but could be extended for other types of ops.
+    """
+    # Assuming Conv2d operation for now
+    if isinstance(op, nn.Conv2d):
+        # For Conv2D: (in_channels * out_channels * kernel_height * kernel_width * output_height * output_width)
+        in_channels = input_shape[1]
+        out_channels = output_shape[1]
+        kernel_height, kernel_width = op.kernel_size
+        output_height, output_width = output_shape[2], output_shape[3]
+
+        macs = in_channels * out_channels * kernel_height * kernel_width * output_height * output_width
+        return macs
+    elif isinstance(op, Identity):
+        # Identity operation performs no computations (0 MACs)
+        return 0
+    else:
+        # Add other operation types here (e.g., pooling, activation, etc.)
+        return 0
+
 
 # This module is used for NAS-Bench-201, represents a small search space with a complete DAG
 class SearchCell(nn.Module):
@@ -67,8 +89,8 @@ class SearchCell(nn.Module):
     self.max_nodes = max_nodes
     self.in_dim    = C_in #if forward_mode == 'default' else C_in // 4
     self.out_dim   = C_out #if forward_mode == 'default' else C_out // 4
-    in_dim = self.in_dim if forward_mode == 'default' else self.in_dim // 4
-    out_dim = self.out_dim if forward_mode == 'default' else self.out_dim // 4
+    in_dim = self.in_dim // 4 if forward_mode == 'pc' else self.in_dim
+    out_dim = self.out_dim // 4 if forward_mode == 'pc' else self.out_dim
     for i in range(1, max_nodes):
       for j in range(i):
         node_str = '{:}<-{:}'.format(i, j)
@@ -109,6 +131,8 @@ class SearchCell(nn.Module):
     elif self.forward_mode == 'default':
         #print("Using default forward")
         return self.default_forward(inputs, weights)
+    elif self.forward_mode == 'categorical':
+        return self.forward_categorical(inputs, weights)
     else:
         raise ValueError(f"Invalid forward_mode: {self.forward_mode}. Choose 'default' or 'pc'.")
 
@@ -123,6 +147,7 @@ class SearchCell(nn.Module):
         res = sum( layer(nodes[j]) * w for layer, w in zip(self.edges[node_str], weights) )
         if self.auxiliary_skip:  # Add auxiliary_op only if skip is True
           res += self.auxiliary_op(inputs) * beta_decay_scheduler.decay_rate
+          
         inter_nodes.append(res)
       nodes.append( sum(inter_nodes))
     
@@ -164,6 +189,73 @@ class SearchCell(nn.Module):
       #print("ans shape: ", ans.shape)
       #assert ans.shape[1] == dim_2, 'Invalid shape {:} vs {:}'.format(ans.shape, dim_2)
       return ans
+  
+  def forward_categorical(self, inputs, alpha):
+    nodes = [inputs]
+    for i in range(1, self.max_nodes):
+        inter_nodes = []
+        has_non_zero = False  # Flag to ensure at least one non-zero operation
+
+        while not has_non_zero:
+            inter_nodes = []
+            has_non_zero = False
+
+            for j in range(i):
+                node_str = '{:}<-{:}'.format(i, j)
+                candidates = self.edges[node_str]
+                alpha_weights = alpha[self.edge2index[node_str]]  # Get alpha for this edge
+                
+                # Sample an operation based on alpha
+                op_index = torch.multinomial(alpha_weights, 1).item()
+                selected_op = candidates[op_index]
+
+                # Check if the selected operation is zero
+                if not (hasattr(selected_op, 'is_zero') and selected_op.is_zero):
+                    has_non_zero = True
+                inter_nodes.append(selected_op(nodes[j]))
+
+        nodes.append(sum(inter_nodes))
+    
+    return nodes[-1]
+  
+  def compute_cell_cost(self, alpha, input_tensor):
+    from torchprofile import profile_macs
+    """
+    Compute the cost of the SearchCell as a weighted sum of MACs using torchprofile.
+    The alpha vector contains the operation selection probabilities.
+    """
+    total_macs = 0
+
+    # Create a dummy input tensor of shape (batch_size, channels, height, width)
+    #channels, height, width = input_shape
+    #input_tensor = torch.zeros(1, channels, height, width).cuda()  # Assuming GPU, modify for CPU if necessary
+
+    # Create a dummy forward pass function
+    def forward_pass(input_tensor):
+        total_macs = 0
+        
+        # Iterate over all edges in the search cell
+        for i in range(1, self.max_nodes):
+            for j in range(i):
+                node_str = '{:}<-{:}'.format(i, j)
+                candidates = self.edges[node_str]
+                alpha_weights = alpha[self.edge2index[node_str]]  # Get alpha for this edge
+
+                # For each operation, calculate MACs and accumulate weighted sum
+                for op, alpha_weight in zip(candidates, alpha_weights):
+                    # Use torchprofile to get MACs
+                    model = nn.Sequential(op)  # Wrap the operation in a sequential block
+                    macs = profile_macs(model, input_tensor)
+                    #macs = profiler.total_macs
+                    total_macs += alpha_weight * macs
+                    
+        return total_macs
+
+    # Call the function to get the total cost
+    total_macs = forward_pass(input_tensor)
+    #del input_tensor
+
+    return total_macs
   
   '''
   def forward_pc(self, x, weightss):
@@ -413,6 +505,146 @@ class Network(nn.Module):
     logits = self.classifier(out)
 
     return logits
+  
+  def compute_network_cost(self, input_shape):
+    from torchprofile import profile_macs
+    """
+    Compute the total cost of the entire network by summing up the cost of each SearchCell
+    and other layers like stem, lastact, global_pooling, and classifier.
+
+    :param input_tensor: The input tensor to the network (batch_size, channels, height, width)
+    :return: The total MACs for the entire network
+    """
+    # Initialize architecture parameters and apply softmax
+    alpha = F.softmax(self._arch_parameters, dim=-1)
+    total_macs = 0
+    input_tensor = torch.zeros(1, input_shape[0], input_shape[1], input_shape[2]).cuda()  # Assuming GPU, modify for CPU if necessary
+
+    # Compute the cost of the stem and update the input tensor
+    total_macs += self.compute_stem_cost(input_tensor)
+    input_tensor = self.stem(input_tensor)  # Update tensor after stem
+
+    # Iterate over all cells in the network (SearchCells and BasicBlocks)
+    for cell in self.cells:
+      if isinstance(cell, SearchCell):
+        cell_cost = cell.compute_cell_cost(alpha, input_tensor)
+        total_macs += cell_cost
+        input_tensor = cell(input_tensor,alpha)  # Update tensor after cell
+      else:
+        total_macs += profile_macs(cell, input_tensor) #self.compute_basic_cell_cost(cell, input_tensor)
+        # Update input shape after the basic block
+        input_tensor = cell(input_tensor)
+
+    # Compute the cost of the last activation (lastact) and update the input tensor
+    total_macs += self.compute_lastact_cost(input_tensor)
+    input_tensor = self.lastact(input_tensor)  # Update tensor after last activation
+
+    # Compute the cost of global pooling
+    total_macs += self.compute_global_pooling_cost(input_tensor)
+    input_tensor = self.global_pooling(input_tensor)  # Update tensor after global pooling
+
+    # Compute the cost of the classifier (fully connected layer)
+    total_macs += self.compute_classifier_cost(input_tensor)
+    del input_tensor
+
+    return total_macs
+
+  def compute_stem_cost(self, input_tensor):
+      """
+      Compute the MACs for the stem layer (Conv2d + BatchNorm2d).
+      
+      :param input_tensor: The input tensor to the stem (batch_size, channels, height, width)
+      :return: The MACs for the stem
+      """
+      total_macs = 0
+      # Compute MACs for the Conv2d layer in the stem
+      in_channels, in_height, in_width = input_tensor.shape[1], input_tensor.shape[2], input_tensor.shape[3]
+      kernel_size = self.stem[0].kernel_size[0]  # Assuming square kernel
+      out_channels = self.stem[0].out_channels
+
+      # Output dimensions (assuming no padding)
+      out_height = in_height
+      out_width = in_width
+
+      # Conv2d MACs calculation
+      conv_macs = out_height * out_width * out_channels * kernel_size * kernel_size * in_channels
+      total_macs += conv_macs
+
+      # Compute MACs for the BatchNorm2d layer
+      bn_macs = 2 * out_channels * out_height * out_width
+      total_macs += bn_macs
+
+      return total_macs
+
+
+  def compute_lastact_cost(self, input_tensor):
+      """
+      Compute the MACs for the last activation (BatchNorm2d + ReLU).
+      
+      :param input_tensor: The input tensor to the last activation (batch_size, channels, height, width)
+      :return: The MACs for the last activation
+      """
+      total_macs = 0
+      # Compute MACs for BatchNorm2d
+      output_tensor = self.lastact[0](input_tensor)
+      macs = self.compute_macs_for_batchnorm(self.lastact[0], input_tensor, output_tensor)
+      total_macs += macs
+
+      # ReLU does not involve MACs as it is just an element-wise operation, so we skip it.
+      return total_macs
+
+
+  def compute_global_pooling_cost(self, input_tensor):
+      """
+      Compute the MACs for the global pooling layer (AdaptiveAvgPool2d).
+      
+      :param input_tensor: The input tensor to the global pooling layer (batch_size, channels, height, width)
+      :return: The MACs for global pooling
+      """
+      total_macs = 0
+      # AdaptiveAvgPool2d does not involve traditional MACs, but we can approximate it.
+      output_tensor = self.global_pooling(input_tensor)
+      # For pooling, the computational cost is based on the output size and number of channels.
+      macs = self.compute_macs_for_pooling(input_tensor, output_tensor)
+      total_macs += macs
+      return total_macs
+
+
+  def compute_classifier_cost(self, input_tensor):
+      """
+      Compute the MACs for the classifier (Linear layer).
+      
+      :param input_tensor: The input tensor to the classifier (batch_size, channels)
+      :return: The MACs for the classifier
+      """
+      total_macs = 0
+      # Linear layer MACs: (input_features * output_features)
+      num_input_features = input_tensor.shape[1]
+      num_output_features = self.num_classes
+      macs = num_input_features * num_output_features  # Each input feature is multiplied by each output feature
+      total_macs += macs
+      return total_macs
+
+
+  def compute_macs_for_pooling(self, input_tensor, output_tensor):
+      """
+      Approximate the MACs for pooling operations (like AdaptiveAvgPool2d).
+      """
+      # For AdaptiveAvgPool2d, we approximate the cost by multiplying the input spatial size 
+      # with the number of input channels, as each value in the output spatial grid is a weighted 
+      # average of the input values. We assume a 1x1 kernel for averaging.
+      macs = input_tensor.shape[1] * input_tensor.shape[2] * input_tensor.shape[3]  # Multiply channels, height, width
+      return macs
+
+
+  def compute_macs_for_batchnorm(self, layer, input_tensor, output_tensor):
+      """
+      Approximate the MACs for BatchNorm2d.
+      """
+      # BatchNorm2d involves a small number of operations per channel.
+      macs = input_tensor.shape[1]  # Each input channel performs a few operations
+      return macs
+
   
 
 def distill(result):
