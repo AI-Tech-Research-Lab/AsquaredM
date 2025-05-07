@@ -92,6 +92,12 @@ class SearchCell(nn.Module):
     in_dim = self.in_dim // 4 if forward_mode == 'pc' else self.in_dim
     out_dim = self.out_dim // 4 if forward_mode == 'pc' else self.out_dim
     for i in range(1, max_nodes):
+      '''
+      if len(op_names) == 3: #NAS-Bench-201 small
+         nodes = [i-1]
+      else:
+      '''
+      #nodes = range(i)
       for j in range(i):
         node_str = '{:}<-{:}'.format(i, j)
         if j == 0:
@@ -141,6 +147,12 @@ class SearchCell(nn.Module):
     nodes = [inputs]
     for i in range(1, self.max_nodes):
       inter_nodes = []
+      '''
+      if len(self.edges) == 3: #NAS-Bench-201 small
+         nodes = [i-1]
+      else:
+      '''
+      #nodes = range(i)
       for j in range(i):
         node_str = '{:}<-{:}'.format(i, j)
         weights  = weightss[ self.edge2index[node_str] ]

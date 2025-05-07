@@ -2,7 +2,7 @@
 
 # Define variables
 dataset="cifar10"
-sam="True"
+sam="False"
 betadecay="False"
 unrolled="False"
 data_aug="True"
@@ -23,7 +23,8 @@ for rho_alpha_sam in $rho_alpha_sams; do
             --arch_learning_rate 3e-4 --arch_weight_decay 1e-3 \
             --betadecay "$betadecay" --flood_level "$flood_level" \
             --data_aug "$data_aug" --unrolled "$unrolled" --wandb "$wandb" \
-            --sam "$sam" --epsilon_sam "$epsilon_sam" --rho_alpha_sam "$rho_alpha_sam" --seed "$seed"
+            --sam "$sam" --epsilon_sam "$epsilon_sam" --rho_alpha_sam "$rho_alpha_sam" --seed "$seed" 
+
 
         echo "Experiment with data_aug=$data_aug, rho_alpha_sam=$rho_alpha_sam, seed=$seed finished."
     done

@@ -1,11 +1,13 @@
 from itertools import product
 import os
+import random
 from nasbench201.archive import NASBench201
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import seaborn as sns
 import numpy as np
 import math
+from tqdm import tqdm
 
 def find_neighbors_with_similar_performance(bench, accuracy_min, accuracy_max, radius=3, tolerance=1):
     val_dataset = bench.dataset
@@ -387,7 +389,7 @@ def plot_histograms(data_array, bins=100, path='', baselines=None, dataset='cifa
         axs[i].set_ylim(0, global_max_density)  
 
         # Add title to each subplot  
-        axs[i].set_title(f"{titles[i]} (Test accuracy: [{baselines[i][0]:.2f}%,{baselines[i][1]:.2f}%]")  
+        axs[i].set_title(f"{titles[i]} (Test accuracy: [{baselines[i][0]:.2f}%,{baselines[i][1]:.2f}%])")  
 
         # Add light grey interval for baseline  
         if baselines:  
@@ -913,7 +915,66 @@ def distributions_nasbench(bench, dataset, radius, dist_path='results/flatness_e
         radius=radius
     )
 
-import matplotlib.pyplot as plt
+def distributions_nasbench_diff(bench, dataset, radius, dist_path='results/flatness_exp'):
+    test_accs = bench.archive['test-acc'][dataset]
+    print("LEN TEST ACCS:", len(test_accs))
+
+    # Folder setup
+    folder = os.path.join(dist_path, f'nasbenchdiff_{dataset}_radius{radius}')
+    os.makedirs(folder, exist_ok=True)
+
+    # Load if precomputed
+    diff_files = [os.path.join(folder, f'neighbor_diffs_{i}.npy') for i in range(3)]
+    random_diff_file = os.path.join(folder, 'random_diffs.npy')
+
+    if all(os.path.exists(f) for f in diff_files) and os.path.exists(random_diff_file):
+        neighbor_diffs = [np.load(f, allow_pickle=True) for f in diff_files]
+        random_diffs = np.load(random_diff_file, allow_pickle=True)
+    else:
+        # Initialize 3 intervals
+        neighbor_diffs = [[] for _ in range(3)]
+
+        print("Computing neighbor diffs by interval...")
+        for id_net in tqdm(range(len(test_accs))):
+            acc = test_accs[id_net]
+            interval_idx = get_idx_interval(acc, dataset)
+            if interval_idx == -1:
+                continue
+
+            config = bench.archive['str'][id_net]
+            config_vector = bench.encode({'arch': config})
+
+            neighbors_config = neighbors_by_radius(
+                bench.nvar, list(range(bench.num_operations)), config_vector, radius
+            )
+
+            acc_neighbors = avg_test_acc(bench, neighbors_config)[1]
+            diffs = [abs(acc - n_acc) for n_acc in acc_neighbors]
+            neighbor_diffs[interval_idx].extend(diffs)
+
+        print("Computing random diffs...")
+        random_diffs = []
+        num_pairs = min(100000, len(test_accs) ** 2)
+        for _ in tqdm(range(num_pairs)):
+            i, j = random.sample(range(len(test_accs)), 2)
+            diff = abs(test_accs[i] - test_accs[j])
+            random_diffs.append(diff)
+
+        # Save results
+        for i in range(3):
+            np.save(diff_files[i], neighbor_diffs[i])
+        np.save(random_diff_file, random_diffs)
+
+    # Insert full random comparison at index 0
+    all_dists = [random_diffs] + neighbor_diffs
+
+    plot_histograms(
+        all_dists, bins=100,
+        path=os.path.join(folder, f'histo_cluster_nasbench_{dataset}_{radius}.pdf'),
+        baselines=get_acc_limits(dataset),
+        dataset=dataset,
+        radius=radius
+    )
 
 def plot_rho_nasbench(figsize=(8, 6), font_size=18):
     # Data
@@ -974,6 +1035,10 @@ def plot_rho_darts(figsize=(8, 6), font_size=18):
 
 #plot_rho_nasbench()
 #plot_rho_darts()
+dataset='cifar10'
+radius=1
+bench = NASBench201(dataset='cifar10')
+distributions_nasbench_diff(bench, dataset, radius, dist_path='results/flatness_exp')
 
 '''
 bench = NASBench201(dataset='cifar10')
@@ -1005,11 +1070,9 @@ print(bench.archive['str'][idx2])
 '''
 
 
-path_bench_qualities('cifar10')
-path_bench_qualities('cifar100')
-path_bench_qualities('ImageNet16-120')
-
-
+#path_bench_qualities('cifar10')
+#path_bench_qualities('cifar100')
+#path_bench_qualities('ImageNet16-120')
 
 '''
 path_bench('cifar100')
