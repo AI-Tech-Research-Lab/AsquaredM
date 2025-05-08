@@ -2,7 +2,7 @@ import json
 import os
 import sys
 
-sys.path.insert(0, os.path.expanduser('~/workspace/darts-SAM'))
+sys.path.insert(0, os.path.expanduser('~/workspace/AsquaredM'))
 
 from imagenet16 import ImageNet16
 import time

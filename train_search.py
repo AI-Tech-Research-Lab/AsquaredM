@@ -6,7 +6,7 @@ import sys
 
 from operations import SearchSpaceNames
 
-sys.path.append(os.path.join(os.path.expanduser('~'),'workspace/darts-SAM')) 
+sys.path.append(os.path.join(os.path.expanduser('~'),'workspace/AsquaredM')) 
 
 from imagenet16 import ImageNet16
 import time
