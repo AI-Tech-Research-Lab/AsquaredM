@@ -279,7 +279,7 @@ def main():
         if args.betadecay and not args.nasbench:
             beta_loss = architect._beta_loss()        
 
-        if args.wandb and args.beta_decay:
+        if args.wandb and args.betadecay:
             if not args.nasbench:
                 wandb.log({"metrics/train_acc": train_acc, 
                         "metrics/val_acc": valid_acc,
