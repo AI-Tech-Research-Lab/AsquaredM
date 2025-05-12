@@ -273,6 +273,33 @@ def path_bench_qualities(paths, dataset):
     with open(barriers_path, 'w') as file:
         json.dump(barriers, file)
 
+def plot_rho_darts(figsize=(8, 6), font_size=18):
+    # Data
+    rho_labels = ['1e-4', '1e-3', '1e-2', '1e-1', '1']
+    rho_values = [1e-4, 1e-3, 1e-2, 1e-1, 1]
+    test_acc = [97.03, 96.97, 96.87, 97.20, 97.10]
+    std_dev = [0.19, 0.28, 0.41, 0.15, 0.12]
+
+    # Set font size globally
+    plt.rcParams.update({'font.size': font_size})
+
+    # Plot
+    plt.figure(figsize=figsize)
+    plt.errorbar(rho_labels, test_acc, yerr=std_dev, fmt='o-', capsize=5, label="Test Acc (%)", color="blue")
+
+    # Labels and title
+    plt.xlabel(r"$\rho$ Values", fontsize=font_size)
+    plt.ylabel("Test ACC (%)", fontsize=font_size)
+    plt.title(r"Test Accuracy vs $\rho$ using CIFAR-10 on DARTS", fontsize=font_size + 2)
+    plt.xticks(fontsize=font_size)
+    plt.yticks(fontsize=font_size)
+    plt.grid(alpha=0.5)
+    plt.tight_layout()
+
+    # Save and show plot
+    plt.savefig('results/rhovstestdarts.pdf', format='pdf', bbox_inches='tight', dpi=300)
+    plt.show()
+
 # Usage
 '''
 plot_neighbors('results/darts_train_neighbors_datasetcifar100', dataset='cifar100', radius=1, baselines=[73.5, 74.7])

@@ -978,10 +978,10 @@ def distributions_nasbench_diff(bench, dataset, radius, dist_path='results/flatn
 
 def plot_rho_nasbench(figsize=(8, 6), font_size=18):
     # Data
-    rho_labels = ['1e-4', '1e-2', '1e-1']
-    rho_values = [1e-4, 1e-2, 1e-1]
-    test_acc = [59.00, 92.39, 55.30]
-    std_dev = [44.76, 0.59, 41.44]
+    rho_labels = ['1e-4', '1e-3', '1e-2', '1e-1']
+    rho_values = [1e-4, 1e-3, 1e-2, 1e-1]
+    test_acc = [59.00, 91.00, 92.39, 55.30]
+    std_dev = [44.76, 0.88, 0.59, 41.44]
 
     # Set font size globally
     plt.rcParams.update({'font.size': font_size})
@@ -1004,41 +1004,12 @@ def plot_rho_nasbench(figsize=(8, 6), font_size=18):
     plt.show()
 
 
-def plot_rho_darts(figsize=(8, 6), font_size=18):
-    # Data
-    rho_labels = ['1e-4', '1e-2', '1e-1', '1']
-    rho_values = [1e-4, 1e-2, 1e-1, 1]
-    test_acc = [97.03, 96.87, 97.20, 97.10]
-    std_dev = [0.19, 0.41, 0.15, 0.12]
-
-    # Set font size globally
-    plt.rcParams.update({'font.size': font_size})
-
-    # Plot
-    plt.figure(figsize=figsize)
-    plt.errorbar(rho_labels, test_acc, yerr=std_dev, fmt='o-', capsize=5, label="Test Acc (%)", color="blue")
-
-    # Labels and title
-    plt.xlabel(r"$\rho$ Values", fontsize=font_size)
-    plt.ylabel("Test ACC (%)", fontsize=font_size)
-    plt.title(r"Test Accuracy vs $\rho$ using CIFAR-10 on DARTS", fontsize=font_size + 2)
-    plt.xticks(fontsize=font_size)
-    plt.yticks(fontsize=font_size)
-    plt.grid(alpha=0.5)
-    plt.tight_layout()
-
-    # Save and show plot
-    plt.savefig('results/rhovstestdarts.pdf', format='pdf', bbox_inches='tight', dpi=300)
-    plt.show()
-
-
-
-#plot_rho_nasbench()
-#plot_rho_darts()
-dataset='cifar10'
-radius=1
-bench = NASBench201(dataset='cifar10')
-distributions_nasbench_diff(bench, dataset, radius, dist_path='results/flatness_exp')
+plot_rho_nasbench()
+plot_rho_darts()
+#dataset='cifar10'
+#radius=1
+#bench = NASBench201(dataset='cifar10')
+#distributions_nasbench_diff(bench, dataset, radius, dist_path='results/flatness_exp')
 
 '''
 bench = NASBench201(dataset='cifar10')
