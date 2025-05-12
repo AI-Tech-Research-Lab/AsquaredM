@@ -906,6 +906,12 @@ def distributions_nasbench(bench, dataset, radius, dist_path='results/flatness_e
     dist.insert(0, test_accs)
      
     print("Saved in path: ", os.path.join(folder, f'histo_nasbench_{dataset}_{radius}.pdf'))
+
+    for idx, t in enumerate(dist):
+        if idx == 0:
+            continue
+        kolmogorov_smirnov_test(dist[0], t, folder, idx)
+
     # Plot histograms
     plot_histograms(
         dist, bins=100,
@@ -914,6 +920,37 @@ def distributions_nasbench(bench, dataset, radius, dist_path='results/flatness_e
         dataset=dataset,
         radius=radius
     )
+
+def kolmogorov_smirnov_test(sample_a, sample_b, folder, idx):
+    from scipy import stats
+
+    stat_result = stats.ks_2samp(
+        sample_a,
+        sample_b,
+        alternative="two-sided",
+        mode="auto"
+    )
+
+    D_stat   = stat_result.statistic       # KS distance
+    p_value  = stat_result.pvalue          # (exact or asymptotic) p-value
+
+    n_a      = len(sample_a)
+    n_b      = len(sample_b)
+
+    # 3) FORMAT A SENTENCE FOR THE PAPER AND PRINT IT
+    sentence = (
+    "Kolmogorov–Smirnov two-sample test (maximum ECDF gap D, "
+    "group sizes n₁ and n₂, p-value p) shows the distributions differ "
+    f"(D = {D_stat:.3f}, n₁ = {n_a}, n₂ = {n_b}, p = {p_value:.5e}, two-sided)."
+    )
+
+    # write to file
+    with open(os.path.join(folder,'kolmogorov_smirnov_dist{}.txt'.format(idx)), 'a') as f:
+        f.write(sentence + '\n')
+        f.write("D_stat: " + str(D_stat) + '\n')
+        f.write("p_value: " + str(p_value) + '\n')
+        f.write("n_a: " + str(n_a) + '\n')
+        f.write("n_b: " + str(n_b) + '\n')
 
 def distributions_nasbench_diff(bench, dataset, radius, dist_path='results/flatness_exp'):
     test_accs = bench.archive['test-acc'][dataset]
@@ -968,13 +1005,37 @@ def distributions_nasbench_diff(bench, dataset, radius, dist_path='results/flatn
     # Insert full random comparison at index 0
     all_dists = [random_diffs] + neighbor_diffs
 
-    plot_histograms(
-        all_dists, bins=100,
-        path=os.path.join(folder, f'histo_cluster_nasbench_{dataset}_{radius}.pdf'),
-        baselines=get_acc_limits(dataset),
-        dataset=dataset,
-        radius=radius
-    )
+    import pandas as pd
+    # Combine all distributions into a single DataFrame for seaborn
+    data = []
+    labels = ['Random'] + [f'Neighbors (Interval {i})' for i in range(3)]
+    for label, dists in zip(labels, [random_diffs] + neighbor_diffs):
+        data.extend([(diff, label) for diff in dists])
+
+    df = pd.DataFrame(data, columns=['Accuracy Difference', 'Type'])
+
+    plt.figure(figsize=(10, 6))
+
+    # Explicitly plot each group to ensure legends are added
+    for label in df['Type'].unique():
+        subset = df[df['Type'] == label]
+        sns.histplot(subset['Accuracy Difference'], bins=100, kde=True, stat="density", element="step", label=label)
+
+    
+    plt.xscale('log') 
+
+    plt.title(f'Test Accuracy Difference Distributions - Dataset: {dataset}, Radius: {radius}')
+    plt.xlabel('Absolute Accuracy Difference')
+    plt.ylabel('Density')
+    plt.legend(title='Comparison Type')  # This will now work correctly
+    plt.grid(True)
+    plt.tight_layout()
+    plt_path = os.path.join(folder, f'distributions_plot_sns_fixed.png')
+    plt.savefig(plt_path)
+    plt.show()
+    
+
+
 
 def plot_rho_nasbench(figsize=(8, 6), font_size=18):
     # Data
@@ -1005,7 +1066,6 @@ def plot_rho_nasbench(figsize=(8, 6), font_size=18):
 
 
 plot_rho_nasbench()
-plot_rho_darts()
 #dataset='cifar10'
 #radius=1
 #bench = NASBench201(dataset='cifar10')
@@ -1014,6 +1074,7 @@ plot_rho_darts()
 '''
 bench = NASBench201(dataset='cifar10')
 distributions_nasbench(bench, 'cifar10', 1)
+
 distributions_nasbench(bench, 'cifar10', 2)
 distributions_nasbench(bench, 'cifar10', 3)
 
@@ -1026,7 +1087,6 @@ bench = NASBench201(dataset='ImageNet16-120')
 distributions_nasbench(bench, 'ImageNet16-120', 1)
 distributions_nasbench(bench, 'ImageNet16-120', 2)
 distributions_nasbench(bench, 'ImageNet16-120', 3)
-'''
 
 
 '''
@@ -1038,7 +1098,6 @@ print(idx1, idx2)
 print(acc1, acc2)
 print(bench.archive['str'][idx1])
 print(bench.archive['str'][idx2])
-'''
 
 
 #path_bench_qualities('cifar10')
