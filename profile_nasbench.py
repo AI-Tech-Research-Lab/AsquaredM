@@ -1005,10 +1005,21 @@ def distributions_nasbench_diff(bench, dataset, radius, dist_path='results/flatn
     # Insert full random comparison at index 0
     all_dists = [random_diffs] + neighbor_diffs
 
+    '''
+    plot_histograms(
+        all_dists, bins=100,
+        path=os.path.join(folder, f'histo_cluster_nasbench_{dataset}_{radius}.pdf'),
+        baselines=get_acc_limits(dataset),
+        dataset=dataset,
+        radius=radius
+    )
+    '''
+
     import pandas as pd
     # Combine all distributions into a single DataFrame for seaborn
     data = []
-    labels = ['Random'] + [f'Neighbors (Interval {i})' for i in range(3)]
+    name = ['A', 'B', 'C']
+    labels = ['Random'] + [f'Neighbors (Models {name[i]})' for i in range(3)]
     for label, dists in zip(labels, [random_diffs] + neighbor_diffs):
         data.extend([(diff, label) for diff in dists])
 
@@ -1021,8 +1032,10 @@ def distributions_nasbench_diff(bench, dataset, radius, dist_path='results/flatn
         subset = df[df['Type'] == label]
         sns.histplot(subset['Accuracy Difference'], bins=100, kde=True, stat="density", element="step", label=label)
 
-    
-    plt.xscale('log') 
+    #plt.xscale('log') 
+
+    # Set x-axis limit
+    plt.xlim(0, 20)
 
     plt.title(f'Test Accuracy Difference Distributions - Dataset: {dataset}, Radius: {radius}')
     plt.xlabel('Absolute Accuracy Difference')
@@ -1030,41 +1043,9 @@ def distributions_nasbench_diff(bench, dataset, radius, dist_path='results/flatn
     plt.legend(title='Comparison Type')  # This will now work correctly
     plt.grid(True)
     plt.tight_layout()
-    plt_path = os.path.join(folder, f'distributions_plot_sns_fixed.png')
+    plt_path = os.path.join(folder, f'distributions_diff_dataset_{dataset}_radius{radius}.png')
     plt.savefig(plt_path)
     plt.show()
-    
-
-
-
-def plot_rho_nasbench(figsize=(8, 6), font_size=18):
-    # Data
-    rho_labels = ['1e-4', '1e-2', '1e-1']
-    rho_values = [1e-4, 1e-2, 1e-1]
-    test_acc = [59.00, 92.39, 55.30]
-    std_dev = [44.76, 0.59, 41.44]
-
-    # Set font size globally
-    plt.rcParams.update({'font.size': font_size})
-
-    # Plot
-    plt.figure(figsize=figsize)
-    plt.errorbar(rho_labels, test_acc, yerr=std_dev, fmt='o-', capsize=5, label="Test Acc (%)", color="blue")
-
-    # Labels and title
-    plt.xlabel(r"$\rho$ Values", fontsize=font_size)
-    plt.ylabel("Test ACC (%)", fontsize=font_size)
-    plt.title(r"Test Accuracy vs $\rho$ using CIFAR-10 on NAS-Bench-201", fontsize=font_size + 2)
-    plt.xticks(fontsize=font_size)
-    plt.yticks(fontsize=font_size)
-    plt.grid(alpha=0.5)
-    plt.tight_layout()
-    plt_path = os.path.join(folder, f'distributions_plot_sns_fixed.png')
-    plt.savefig(plt_path)
-    plt.show()
-    
-
-
 
 def plot_rho_nasbench(figsize=(8, 6), font_size=18):
     # Data
@@ -1101,6 +1082,14 @@ dataset='cifar10'
 radius=1
 bench = NASBench201(dataset='cifar10')
 distributions_nasbench_diff(bench, dataset, radius, dist_path='results/flatness_exp')
+
+
+dataset='ImageNet16-120'
+radius=1
+bench = NASBench201(dataset='ImageNet16-120')
+distributions_nasbench_diff(bench, dataset, radius, dist_path='results/flatness_exp')
+distributions_nasbench_diff(bench, dataset, 2, dist_path='results/flatness_exp')
+distributions_nasbench_diff(bench, dataset, 3, dist_path='results/flatness_exp')
 
 '''
 bench = NASBench201(dataset='cifar10')
