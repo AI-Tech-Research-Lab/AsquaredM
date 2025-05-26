@@ -1014,7 +1014,6 @@ def distributions_nasbench_diff(bench, dataset, radius, dist_path='results/flatn
         radius=radius
     )
     '''
-
     import pandas as pd
     # Combine all distributions into a single DataFrame for seaborn
     data = []
@@ -1025,24 +1024,35 @@ def distributions_nasbench_diff(bench, dataset, radius, dist_path='results/flatn
 
     df = pd.DataFrame(data, columns=['Accuracy Difference', 'Type'])
 
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(11, 6))
 
     # Explicitly plot each group to ensure legends are added
     for label in df['Type'].unique():
         subset = df[df['Type'] == label]
-        sns.histplot(subset['Accuracy Difference'], bins=100, kde=True, stat="density", element="step", label=label)
-
-    #plt.xscale('log') 
+        sns.histplot(
+            subset['Accuracy Difference'],
+            bins=100,
+            kde=True,
+            stat="density",
+            element="step",
+            label=label
+        )
 
     # Set x-axis limit
     plt.xlim(0, 20)
 
-    plt.title(f'Test Accuracy Difference Distributions - Dataset: {dataset}, Radius: {radius}')
-    plt.xlabel('Absolute Accuracy Difference')
-    plt.ylabel('Density')
-    plt.legend(title='Comparison Type')  # This will now work correctly
+    fs = 18
+
+    # Increase font sizes
+    plt.title(f'Test Accuracy Difference Distributions - Dataset: {dataset}, Radius: {radius}', fontsize=fs+4)
+    plt.xlabel('Absolute Accuracy Difference', fontsize=fs+2)
+    plt.ylabel('Density', fontsize=fs+2)
+    plt.legend(title='Comparison Type', fontsize=fs, title_fontsize=fs+1)
+    plt.xticks(fontsize=fs)
+    plt.yticks(fontsize=fs)
     plt.grid(True)
     plt.tight_layout()
+
     plt_path = os.path.join(folder, f'distributions_diff_dataset_{dataset}_radius{radius}.png')
     plt.savefig(plt_path)
     plt.show()
@@ -1082,14 +1092,24 @@ dataset='cifar10'
 radius=1
 bench = NASBench201(dataset='cifar10')
 distributions_nasbench_diff(bench, dataset, radius, dist_path='results/flatness_exp')
+distributions_nasbench_diff(bench, dataset, 2, dist_path='results/flatness_exp')
+distributions_nasbench_diff(bench, dataset, 3, dist_path='results/flatness_exp')
 
+dataset='cifar100'
+radius=1
+bench = NASBench201(dataset='cifar100')
+distributions_nasbench_diff(bench, dataset, radius, dist_path='results/flatness_exp')
+distributions_nasbench_diff(bench, dataset, 2, dist_path='results/flatness_exp')
+distributions_nasbench_diff(bench, dataset, 3, dist_path='results/flatness_exp')
 
+'''
 dataset='ImageNet16-120'
 radius=1
 bench = NASBench201(dataset='ImageNet16-120')
 distributions_nasbench_diff(bench, dataset, radius, dist_path='results/flatness_exp')
 distributions_nasbench_diff(bench, dataset, 2, dist_path='results/flatness_exp')
 distributions_nasbench_diff(bench, dataset, 3, dist_path='results/flatness_exp')
+'''
 
 '''
 bench = NASBench201(dataset='cifar10')
@@ -1111,6 +1131,7 @@ distributions_nasbench(bench, 'ImageNet16-120', 3)
 
 '''
 
+'''
 dataset='ImageNet16-120' #
 bench=NASBench201(dataset=dataset)
 idx1, idx2, acc1, acc2 = find_neighbors_with_similar_performance(bench, 27, 28.5, radius=3, tolerance=0.1)
@@ -1118,6 +1139,7 @@ print(idx1, idx2)
 print(acc1, acc2)
 print(bench.archive['str'][idx1])
 print(bench.archive['str'][idx2])
+'''
 
 
 #path_bench_qualities('cifar10')

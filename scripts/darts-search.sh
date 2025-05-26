@@ -4,10 +4,10 @@
 dataset=cifar10
 rho=1e-3
 epsilon=1e-2
-sam=True
+sam=False
 wandb=True
 betadecay=False
-unrolled=False
+unrolled=True
 epochs=50
 k_sam=1
 base_save_dir="results/darts_search"

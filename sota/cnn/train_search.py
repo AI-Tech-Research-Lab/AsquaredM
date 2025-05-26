@@ -2,7 +2,7 @@ import json
 import os
 import sys
 
-sys.path.insert(0, os.path.expanduser('~/workspace/AsquaredM'))
+sys.path.insert(0, os.path.expanduser('~/workspace/darts-SAM'))
 
 from imagenet16 import ImageNet16
 import time
@@ -212,6 +212,14 @@ def main():
     best_genotype=None
 
     patience=10
+
+    # load darts weights
+    
+    #torch.load(os.path.join(args.model_path, 'weights.pt'), map_location='cpu')
+    model.load_state_dict(torch.load(os.path.join(args.save, 'weights.pt'), map_location='cpu'))
+    print("loaded weights from darts")
+
+    valid_acc, valid_obj = infer(valid_queue, model, criterion)
 
     for epoch in range(args.epochs):
 

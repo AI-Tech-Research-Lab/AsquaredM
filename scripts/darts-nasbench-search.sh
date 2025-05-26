@@ -2,9 +2,9 @@
 
 # Define variables
 dataset="cifar10"
-sam="True"
+sam="False"
 betadecay="False"
-unrolled="False"
+unrolled="True"
 data_aug="False"
 rho_alpha_sams="1e-3"
 seeds="1"

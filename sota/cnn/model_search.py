@@ -88,9 +88,18 @@ class MixedOp(nn.Module):
       self._ops.append(op)
 
   def forward(self, x, weights):
+    
     res = sum(w * op(x) for w, op in zip(weights, self._ops))
     if self.auxiliary_skip:
       res += self.auxiliary_op(x) * beta_decay_scheduler.decay_rate
+    '''
+    #print("Probabilistic sampling")
+    # Sample an index according to the probability distribution
+    op_index = torch.multinomial(weights, 1).item()
+
+    # Apply the selected operation
+    res = self._ops[op_index](x)
+    '''
     
     return res
 
