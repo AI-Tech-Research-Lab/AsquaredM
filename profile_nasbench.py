@@ -1024,7 +1024,7 @@ def distributions_nasbench_diff(bench, dataset, radius, dist_path='results/flatn
 
     df = pd.DataFrame(data, columns=['Accuracy Difference', 'Type'])
 
-    plt.figure(figsize=(11, 6))
+    plt.figure(figsize=(14, 6))
 
     # Explicitly plot each group to ensure legends are added
     for label in df['Type'].unique():
@@ -1047,7 +1047,7 @@ def distributions_nasbench_diff(bench, dataset, radius, dist_path='results/flatn
     plt.title(f'Test Accuracy Difference Distributions - Dataset: {dataset}, Radius: {radius}', fontsize=fs+4)
     plt.xlabel('Absolute Accuracy Difference', fontsize=fs+2)
     plt.ylabel('Density', fontsize=fs+2)
-    plt.legend(title='Comparison Type', fontsize=fs, title_fontsize=fs+1)
+    plt.legend(title='Comparison Type', fontsize=fs-2, title_fontsize=fs)
     plt.xticks(fontsize=fs)
     plt.yticks(fontsize=fs)
     plt.grid(True)
@@ -1088,6 +1088,7 @@ def plot_rho_nasbench(figsize=(8, 6), font_size=18):
 
 #plot_rho_nasbench()
 #plot_rho_darts()
+'''
 dataset='cifar10'
 radius=1
 bench = NASBench201(dataset='cifar10')
@@ -1100,16 +1101,20 @@ radius=1
 bench = NASBench201(dataset='cifar100')
 distributions_nasbench_diff(bench, dataset, radius, dist_path='results/flatness_exp')
 distributions_nasbench_diff(bench, dataset, 2, dist_path='results/flatness_exp')
+'''
+
+dataset='cifar100'
+bench = NASBench201(dataset='cifar100')
 distributions_nasbench_diff(bench, dataset, 3, dist_path='results/flatness_exp')
 
-'''
+
 dataset='ImageNet16-120'
 radius=1
 bench = NASBench201(dataset='ImageNet16-120')
 distributions_nasbench_diff(bench, dataset, radius, dist_path='results/flatness_exp')
 distributions_nasbench_diff(bench, dataset, 2, dist_path='results/flatness_exp')
 distributions_nasbench_diff(bench, dataset, 3, dist_path='results/flatness_exp')
-'''
+
 
 '''
 bench = NASBench201(dataset='cifar10')
