@@ -182,7 +182,7 @@ def main():
     elif args.dataset == 'imagenet16':
         train_transform, valid_transform = utils._data_transforms_imagenet16(args)
         train_data = ImageNet16(root=args.data, train=True, transform=train_transform, use_num_of_class_only=n_classes)
-        valid_data = ImageNet16(root=args.data, train=True, transform=valid_transform, use_num_of_class_only=n_classes)
+        valid_data = ImageNet16(root=args.data, train=False, transform=valid_transform, use_num_of_class_only=n_classes)
 
     num_train = len(train_data)
     indices = list(range(num_train))

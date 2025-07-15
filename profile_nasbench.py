@@ -1088,7 +1088,7 @@ def plot_rho_nasbench(figsize=(8, 6), font_size=18):
 
 #plot_rho_nasbench()
 #plot_rho_darts()
-'''
+
 dataset='cifar10'
 radius=1
 bench = NASBench201(dataset='cifar10')
@@ -1114,7 +1114,7 @@ bench = NASBench201(dataset='ImageNet16-120')
 distributions_nasbench_diff(bench, dataset, radius, dist_path='results/flatness_exp')
 distributions_nasbench_diff(bench, dataset, 2, dist_path='results/flatness_exp')
 distributions_nasbench_diff(bench, dataset, 3, dist_path='results/flatness_exp')
-
+'''
 
 '''
 bench = NASBench201(dataset='cifar10')
