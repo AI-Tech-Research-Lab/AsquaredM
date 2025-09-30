@@ -1,7 +1,7 @@
 Guidelines to replicate the results.
 First of all, pip install -r requirements.txt to install the libraries used.
 
-## FlatDARTS algorithm
+## A2M algorithm
 
 The search is performed on CIFAR-10. On NAS-Bench-201, the evaluation on all datasets is shown after the search since accuracies are precomputed. On DARTS, the found genotype must be added to sota/cnn/genotypes.py and then you can run the train by launching scripts/darts-train.sh selecting the architectures and the seeds.
 
