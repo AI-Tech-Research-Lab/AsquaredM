@@ -10,18 +10,18 @@ To run the search the following scripts are used.
 The evaluated accuracies of NAS-Bench-201 are reported in nasbench201_info.pt (that we provide)
 
 Into the scripts folder
-- DARTS: darts-nasbench-search.sh and darts-search.sh (--sam True for FlatDARTS)
-- SDARTS: sdarts-nasbench-search.sh and sdarts-search.sh (--sam True for FlatDARTS)
-- DARTS-: dartsminus-nasbench-search.sh and dartsminus-search.sh (--sam True for FlatDARTS)
-- BETADARTS: betadarts-nasbench-search.sh and betadarts-search.sh (--sam True for FlatDARTS)
-- PCDARTS: pcdarts-nasbench-search.sh and pc-darts-search.sh (--sam True for FlatDARTS)
+- DARTS: darts-nasbench-search.sh and darts-search.sh (--sam True for A2M)
+- SDARTS: sdarts-nasbench-search.sh and sdarts-search.sh (--sam True for A2M)
+- DARTS-: dartsminus-nasbench-search.sh and dartsminus-search.sh (--sam True for A2M)
+- BETADARTS: betadarts-nasbench-search.sh and betadarts-search.sh (--sam True for A2M)
+- PCDARTS: pcdarts-nasbench-search.sh and pc-darts-search.sh (--sam True for A2M)
 
 Launch them from the main directory
 
 To be compliant with Lambda-DARTS and DARTSPT code, where the code of the original NAS-Bench-201 repo (https://github.com/D-X-Y/AutoDL-Projects) is used, you need to download the NAS-Bench-201-v1_0-e61699.pth and put it into these paths: Lambda-DARTS/NAS-Bench201 and dartspt/data (create the data folder).
 
 Into the Lambda-DARTS/scripts:
-- LAMBDADARTS: run_search_NASBENCH * and run_search_DARTS.sh (use the flag --sam for FlatDARTS)
+- LAMBDADARTS: run_search_NASBENCH * and run_search_DARTS.sh (use the flag --sam for A2M)
 Launch the nasbench script from Lambda-DARTS/NAS-Bench201 while the darts script from Lambda-DARTS
 
 Into the DARTSPT/exp_scripts: 
