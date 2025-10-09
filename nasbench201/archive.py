@@ -3,6 +3,8 @@ import json
 import os
 from typing import List, Text
 import numpy as np 
+os.environ.pop("MPLBACKEND", None)  # remove the bad value
+os.environ["MPLBACKEND"] = "Agg"
     
 class NASBench201(): #NASBench201 dataset
 
