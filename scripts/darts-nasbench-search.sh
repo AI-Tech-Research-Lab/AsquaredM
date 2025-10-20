@@ -11,7 +11,7 @@ seeds="1"
 epsilon_sam="1e-2"
 flood_level="0.0"
 wandb="False"
-epochs=5
+epochs=50
 
 # Iterate over configurations
 for rho_alpha_sam in $rho_alpha_sams; do

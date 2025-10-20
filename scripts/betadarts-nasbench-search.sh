@@ -15,7 +15,7 @@ seeds="1"
 epsilon_sam=0.1
 flood_level=0.0
 wandb=False
-epochs=5
+epochs=50
 
 # Loop over space-separated values
 for rho_alpha_sam in $rho_alpha_sams; do

@@ -261,7 +261,7 @@ def main():
             genotype=genotype.to_genotype()
         logging.info('genotype = %s', genotype)
 
-        print(model.show_alphas())
+        logging.info('alphas = %s', model.show_alphas())
 
         
         # training
