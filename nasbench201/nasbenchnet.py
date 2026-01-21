@@ -93,11 +93,24 @@ class NASBenchNet(nn.Module): #NASNetNetwork model built stacking 3 stages of fi
                         nn.Conv2d(3, C, kernel_size=3, padding=1, bias=False),
                         nn.BatchNorm2d(C))
         C_curr = C
+
+        early_exit=True
         for i in range(self._stages):
             self.norm_cells.append(self._make_stage(C_curr, self._cells))
             if i<self._stages-1:
                 self.red_cells.append(ResNetBasicblock(C_curr, C_curr*2, stride=2))
                 C_curr *= 2
+                #add an early exit after stage 1
+                if early_exit:
+                    print("Adding early exit after stage {}".format(i+1))
+                    self.exit = nn.Sequential(
+                        nn.BatchNorm2d(C_curr),
+                        nn.ReLU(inplace=True),
+                        nn.AdaptiveAvgPool2d(1),
+                        nn.Flatten(),
+                        nn.Linear(C_curr, num_classes)
+                    )
+                    early_exit=False
         
         self.lastact = nn.Sequential(nn.BatchNorm2d(C_curr), nn.ReLU(inplace=True))
         self.global_pooling = nn.AdaptiveAvgPool2d(1)
@@ -111,12 +124,16 @@ class NASBenchNet(nn.Module): #NASNetNetwork model built stacking 3 stages of fi
 
     def forward(self, input):
         x = self.stem(input)
+        early_exit=True
         for i in range(self._stages):
             for j in range(self._cells):
                 x = self.norm_cells[i][j](x) #cell j of stage i
             if i<self._stages-1:
                 x = self.red_cells[i](x)
+                if early_exit:
+                    exit_logits = self.exit(x)
+                    early_exit=False
         x = self.lastact(x)
         x = self.global_pooling(x)
         logits = self.classifier(x.view(x.size(0),-1))
-        return logits
+        return logits, exit_logits 

@@ -99,6 +99,7 @@ if __name__ == "__main__":
     parser.add_argument('--penalty', default=1e10, type=float, help="penalty for constraint violation")
     parser.add_argument('--auxiliary', action='store_true', default=False, help='add auxiliary head')
     parser.add_argument('--auxiliary_weight', default=0.4, type=float, help="weight for auxiliary loss")
+    parser.add_argument('--nasbench', action='store_true', default=False, help='use nasbench201 model')
 
 
     args = parser.parse_args()
@@ -133,23 +134,26 @@ if __name__ == "__main__":
         model_path = args.model_path
     logging.info("Model: %s", args.model)
 
-    '''
-    #cell_encode = load_array_from_file(os.path.join(args.output_path,'best_genotype.txt'))
-    bench = NASBench201('cifar100')
-    cell_encode = bench.encode({'arch': '|none~0|+|none~0|nor_conv_3x3~1|+|none~0|none~1|nor_conv_1x1~2|'})
-    #print("Cell encode: ", cell_encode)
-    #cell_encode = [3, 3, 3, 1, 3, 2]
-    model = NASBenchNet(cell_encode=cell_encode, C=16, num_classes=args.n_classes, stages=3, cells=5, steps=4)
-    res=32
-    '''
+    if args.nasbench:
+    
+        #cell_encode = load_array_from_file(os.path.join(args.output_path,'best_genotype.txt'))
+        bench = NASBench201('cifar10')
+        encoding = '|nor_conv_1x1~0|+|none~0|nor_conv_1x1~1|+|nor_conv_3x3~0|nor_conv_3x3~1|nor_conv_3x3~2|'
+        cell_encode = bench.encode({'arch': encoding})
+        #print("Cell encode: ", cell_encode)
+        #cell_encode = [3, 3, 3, 1, 3, 2]
+        model = NASBenchNet(cell_encode=cell_encode, C=16, num_classes=args.n_classes, stages=3, cells=5, steps=4)
+        res=32
+    
+    else:
+        #genotype = DARTS_V2
+        #read from json file
+        with open(os.path.join(args.output_path,'genotype.json'), 'r') as config:
+            genotype_dict = json.load(config)
+            genotype = dict_to_genotype(genotype_dict)
 
-    #genotype = DARTS_V2
-    #read from json file
-    with open(os.path.join(args.output_path,'genotype.json'), 'r') as config:
-        genotype_dict = json.load(config)
-        genotype = dict_to_genotype(genotype_dict)
+        model = NetworkCIFAR(C=36, num_classes=args.n_classes, layers=20, genotype=genotype, auxiliary=True)
 
-    model = NetworkCIFAR(C=36, num_classes=10, layers=20, genotype=genotype, auxiliary=True)
     n_params = count_parameters_in_MB(model)
     logging.info("MODEL SIZE: {:.2f} MB".format(n_params))
 
@@ -161,6 +165,8 @@ if __name__ == "__main__":
     train_set, val_set, test_set, _, _ = get_dataset(name=args.dataset, val_split=args.val_split, augmentation=True, cutout=args.cutout, balanced_val=args.balanced_val)
     train_loader, val_loader, test_loader = get_data_loaders(train_set, val_set, test_set, batch_size=args.batch_size, threads=args.n_workers, eval_test=True)
 
+    print("Length train set: ", len(train_set))
+    print("Length val set: ", len(test_set))
     if val_loader is None:
         val_loader = test_loader
 
