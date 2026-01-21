@@ -17,6 +17,10 @@ from train_utils import get_dataset, get_optimizer, get_loss, get_lr_scheduler, 
                         Log, train, get_net_info, count_parameters_in_MB
 from perturb import get_net_info_runtime
 from nasbench201.nasbenchnet import NASBenchNet
+import nasbench201.genotypes as genotypes
+import torchvision.datasets as dset
+import optimizers.darts.utils as utils
+from imagenet16 import ImageNet16
 
 def dict_to_genotype(genotype_dict):
     # Extract mandatory fields
@@ -100,6 +104,7 @@ if __name__ == "__main__":
     parser.add_argument('--auxiliary', action='store_true', default=False, help='add auxiliary head')
     parser.add_argument('--auxiliary_weight', default=0.4, type=float, help="weight for auxiliary loss")
     parser.add_argument('--nasbench', action='store_true', default=False, help='use nasbench201 model')
+    parser.add_argument('--arch', type=str, default='QUEST1', help='genotype encoding')
 
 
     args = parser.parse_args()
@@ -134,15 +139,23 @@ if __name__ == "__main__":
         model_path = args.model_path
     logging.info("Model: %s", args.model)
 
+    if args.dataset == 'cifar100':
+        n_classes = 100
+    elif args.dataset == 'cifar10':
+        n_classes = 10
+    elif args.dataset == 'ImageNet16': #imagenet16-120
+        n_classes = 120
+
     if args.nasbench:
     
-        #cell_encode = load_array_from_file(os.path.join(args.output_path,'best_genotype.txt'))
+        
+        encoding = eval('genotypes.{}'.format(args.arch))
         bench = NASBench201('cifar10')
-        encoding = '|nor_conv_1x1~0|+|none~0|nor_conv_1x1~1|+|nor_conv_3x3~0|nor_conv_3x3~1|nor_conv_3x3~2|'
+        #encoding = '|nor_conv_1x1~0|+|none~0|nor_conv_1x1~1|+|nor_conv_3x3~0|nor_conv_3x3~1|nor_conv_3x3~2|'
         cell_encode = bench.encode({'arch': encoding})
         #print("Cell encode: ", cell_encode)
         #cell_encode = [3, 3, 3, 1, 3, 2]
-        model = NASBenchNet(cell_encode=cell_encode, C=16, num_classes=args.n_classes, stages=3, cells=5, steps=4)
+        model = NASBenchNet(cell_encode=cell_encode, C=16, num_classes=n_classes, stages=3, cells=5, steps=4)
         res=32
     
     else:
@@ -152,23 +165,41 @@ if __name__ == "__main__":
             genotype_dict = json.load(config)
             genotype = dict_to_genotype(genotype_dict)
 
-        model = NetworkCIFAR(C=36, num_classes=args.n_classes, layers=20, genotype=genotype, auxiliary=True)
+        model = NetworkCIFAR(C=36, num_classes=n_classes, layers=20, genotype=genotype, auxiliary=True)
 
-    n_params = count_parameters_in_MB(model)
-    logging.info("MODEL SIZE: {:.2f} MB".format(n_params))
+    #n_params = count_parameters_in_MB(model)
+    #logging.info("MODEL SIZE: {:.2f} MB".format(n_params))
 
-    res=32
+    #res=32
 
     logging.info("Train config")
     logging.info(args)
 
-    train_set, val_set, test_set, _, _ = get_dataset(name=args.dataset, val_split=args.val_split, augmentation=True, cutout=args.cutout, balanced_val=args.balanced_val)
-    train_loader, val_loader, test_loader = get_data_loaders(train_set, val_set, test_set, batch_size=args.batch_size, threads=args.n_workers, eval_test=True)
+    #train_set, val_set, test_set, _, _ = get_dataset(name=args.dataset, val_split=args.val_split, augmentation=True, cutout=args.cutout, balanced_val=args.balanced_val)
+    #train_loader, val_loader, test_loader = get_data_loaders(train_set, val_set, test_set, batch_size=args.batch_size, threads=args.n_workers, eval_test=True)
 
-    print("Length train set: ", len(train_set))
-    print("Length val set: ", len(test_set))
-    if val_loader is None:
-        val_loader = test_loader
+    if args.dataset == 'cifar10':
+        train_transform, valid_transform = utils._data_transforms_cifar10(args)
+        train_data = dset.CIFAR10(root=args.data, train=True, download=True, transform=train_transform)
+        valid_data = dset.CIFAR10(root=args.data, train=False, download=True, transform=valid_transform)
+    elif args.dataset == 'cifar100':
+        train_transform, valid_transform = utils._data_transforms_cifar100(args)
+        train_data = dset.CIFAR100(root=args.data, train=True, download=True, transform=train_transform)
+        valid_data = dset.CIFAR100(root=args.data, train=False, download=True, transform=valid_transform)
+    elif args.dataset == 'svhn':
+        train_transform, valid_transform = utils._data_transforms_svhn(args)
+        train_data = dset.SVHN(root=args.data, split='train', download=True, transform=train_transform)
+        valid_data = dset.SVHN(root=args.data, split='test', download=True, transform=valid_transform)
+    elif args.dataset == 'ImageNet16':
+        train_transform, valid_transform = utils._data_transforms_imagenet16(args)
+        train_data = ImageNet16(root=args.data, train=True, transform=train_transform, use_num_of_class_only=n_classes)
+        valid_data = ImageNet16(root=args.data, train=False, transform=valid_transform, use_num_of_class_only=n_classes)
+
+    train_loader = torch.utils.data.DataLoader(
+        train_data, batch_size=args.batch_size, shuffle=True, pin_memory=True, num_workers=args.n_workers)
+
+    val_loader = torch.utils.data.DataLoader(
+        valid_data, batch_size=args.batch_size, shuffle=False, pin_memory=True, num_workers=args.n_workers)
 
     log = Log(log_each=10)
 

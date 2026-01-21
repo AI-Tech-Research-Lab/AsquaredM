@@ -316,6 +316,7 @@ def train_loop(train_loader, val_loader, num_epochs, model, device, optimizer, c
     best_loss = float('inf')
     best_model = None
     best_top1 = 0
+    print('auxiliary weight: ', args.auxiliary_weight)
 
     if isinstance(train_loader.dataset, Subset): #if val split 
             train_set=train_loader.dataset.dataset
@@ -341,8 +342,9 @@ def train_loop(train_loader, val_loader, num_epochs, model, device, optimizer, c
             best_top1= val_acc
             best_model = copy.deepcopy({'state_dict': model.state_dict(), 'optimizer': optimizer.state_dict()})
 
-        if ckpt_path:
-            save_checkpoint(model, optimizer, ckpt_path)
+            if ckpt_path:
+                print('Saving checkpoint to', ckpt_path, 'at epoch', epoch)
+                save_checkpoint(model, optimizer, ckpt_path)
 
     logging.info('Training complete. Loading best model for inference.')
     model.load_state_dict(best_model['state_dict'])

@@ -3,6 +3,9 @@ from copy import deepcopy
 
 Genotype = namedtuple('Genotype', 'normal normal_concat')
 BENCH_PRIMITIVES = ['none', 'skip_connect', 'nor_conv_1x1', 'nor_conv_3x3', 'avg_pool_3x3']
+QUEST1 = '|nor_conv_1x1~0|+|none~0|nor_conv_1x1~1|+|nor_conv_3x3~0|nor_conv_3x3~1|nor_conv_3x3~2|'
+QUEST2 = '|nor_conv_1x1~0|+|none~0|nor_conv_1x1~1|+|none~0|nor_conv_1x1~1|nor_conv_1x1~2|'
+QUEST3 = '|nor_conv_3x3~0|+|nor_conv_3x3~0|nor_conv_3x3~1|+|nor_conv_3x3~0|none~1|nor_conv_3x3~2|'
 
 def get_combination(space, num):
   combs = []
