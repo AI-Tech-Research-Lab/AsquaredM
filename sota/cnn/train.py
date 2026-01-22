@@ -3,7 +3,8 @@ import os
 import sys
 
 home_dir = os.path.expanduser('~')
-sys.path.insert(0, os.path.join(home_dir, 'workspace', 'darts-SAM'))
+sys.path.insert(0, os.path.join(home_dir, 'AsquaredM'))
+#print("Python is searching in:", os.path.join(os.path.expanduser('~'), 'workspace', 'AsquaredM'))
 from imagenet16 import ImageNet16
 
 import time

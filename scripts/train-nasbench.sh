@@ -1,4 +1,4 @@
-datasets="cifar10"
+datasets="ImageNet16"
 device=0
 optim=SGD
 epochs=200
